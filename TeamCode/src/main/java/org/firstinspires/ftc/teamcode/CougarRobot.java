@@ -1,9 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 //This class will act as the blueprint behind the robot, and will be used in both Auto and TeleOp
 public class CougarRobot {
@@ -27,11 +31,11 @@ public class CougarRobot {
     public DcMotor shooterMotor;
     public CRServo shooterServo;
 
-    //Handage Motors - Will come later on
+    //Hand Servos/Motors - Will come later on
     public CRServo handServo;
     public DcMotor armMotor;
 
-
+    public IMU imu;
     HardwareMap hwMap;
 
 
@@ -50,6 +54,13 @@ public class CougarRobot {
         backLeft = hwMap.get(DcMotor.class, "backLeft");
         backRight = hwMap.get(DcMotor.class, "backRight");
 
+        hwMap.get(IMU.class, "imu");
+        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
+        // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
+        imu.initialize(parameters);
+
         intakeMotor = hwMap.get(DcMotor.class, "Intake-Motor");
         conveyorMotor = hwMap.get(DcMotor.class,"Conveyor-Motor");
         shooterMotor = hwMap.get(DcMotor.class,"Shooter-Motor");
@@ -62,8 +73,8 @@ public class CougarRobot {
          * **/
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         /**
          * No need for the intake, conveyor and shooter motors to track rotations so we run it without encoders
@@ -156,10 +167,39 @@ public class CougarRobot {
         backRight.setPower(bottomRightPower);
     }
 
+    public void moveRobotFC(double leftStickY, double leftStickX, double rightStickX){
+        double y = leftStickY;
+        double x = leftStickX;
+        double rx = rightStickX;
+
+        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+
+            // Rotate the movement direction counter to the bots rotation
+        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
+        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
+
+        rotX = rotX * 1.4;  // Counteract imperfect strafing
+
+            // Denominator is the largest motor power (absolute value) or 1
+            // This ensures all the powers maintain the same ratio,
+            // but only if at least one is out of the range [-1, 1]
+
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+        double frontLeftPower = (rotY + rotX + rx) / denominator;
+        double backLeftPower = (rotY - rotX + rx) / denominator;
+        double frontRightPower = (rotY - rotX - rx) / denominator;
+        double backRightPower = (rotY + rotX - rx) / denominator;
+
+        frontLeft.setPower(frontLeftPower);
+        backLeft.setPower(backLeftPower);
+        frontRight.setPower(frontRightPower);
+        backRight.setPower(backRightPower);
+    }
     /**
      * This method takes in 1 input : the A button
      * Once the A button is pressed, we set the intake and conveyor motors to max power
      * **/
+    /*
     public void transportRings(int speed){
         intakeMotor.setPower(speed);
         conveyorMotor.setPower(speed);
@@ -168,7 +208,7 @@ public class CougarRobot {
     /**
      * This method takes in 1 input: the X button
      * Once the X button is pressed, we set the shooter motor to max power and the shooter servo to max power
-     * **/
+     * **
     public void shootRings(int speed){
         shooterMotor.setPower(speed*0.85);
         shooterServo.setPower(-speed);
@@ -177,7 +217,7 @@ public class CougarRobot {
     /**
      * This method takes in 2 inputs : left and right trigger
      * Whichever trigger power is greater is the one that will move forwards/backwards
-     * **/
+     * **
     public void moveArm(double speed){
         armMotor.setPower(speed);
     }
@@ -185,12 +225,12 @@ public class CougarRobot {
     /**
      * This method takes in 1 input: right bumper
      * If the right bumper is pressed then the servo hand will loosen else it will tighten
-     * **/
+     * **
     public void changeHandPosition(int position){
         handServo.setPower(position);
     }
-
-    /**
+    */
+    /**\
      * These are the strictly autonomous methods which are controlled by the timer and wheel/motor selection
      * There is no gamepad influence on this
      * **/
