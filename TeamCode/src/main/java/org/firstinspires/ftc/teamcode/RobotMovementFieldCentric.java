@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-@TeleOp (name="Field Centric")
+@TeleOp (name="RobotMovementFieldCentric")
 public class RobotMovementFieldCentric extends LinearOpMode {
 
     @Override
