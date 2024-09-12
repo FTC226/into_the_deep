@@ -45,6 +45,9 @@ public class JadonRobotTest extends OpMode {
         // Test Joysticks
         // testJoysticks();
 
+        // Test Wheels
+        // testWheels();
+
         // Test IMU
         // robotCentric();
         // readIMU();
@@ -65,6 +68,15 @@ public class JadonRobotTest extends OpMode {
         telemetry.addData("Left stick Y: ", gamepad1.left_stick_y);
         telemetry.addData("Left stick X: ", gamepad1.left_stick_x);
         telemetry.update();
+    }
+
+    public void testWheels() {
+        leftStickY = -gamepad1.left_stick_y;
+
+        frontLeft.setPower(0.5);
+        frontRight.setPower(0.5);
+        backLeft.setPower(0.5);
+        backRight.setPower(0.5);
     }
 
     public void robotCentric() {
