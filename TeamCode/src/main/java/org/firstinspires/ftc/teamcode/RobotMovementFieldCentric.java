@@ -9,8 +9,9 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp (name="Field Centric")
-public class FieldCentric extends LinearOpMode {
+public class RobotMovementFieldCentric extends LinearOpMode {
 
+    public double botHeading;
     @Override
     public void runOpMode() {
         // Declare our motors
@@ -20,8 +21,12 @@ public class FieldCentric extends LinearOpMode {
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRight");
         DcMotor backRightMotor = hardwareMap.dcMotor.get("backRight");
 
-        // reverse wheels if needed
 
+        // reverse wheels if needed
+        frontLeftMotor.setDirection(DcMotor.Direction.FORWARD);
+        backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
+        frontRightMotor.setDirection(DcMotor.Direction.REVERSE);
+        backRightMotor.setDirection(DcMotor.Direction.FORWARD);
 
         // Retrieve the IMU from the hardware map
         IMU imu = hardwareMap.get(IMU.class, "imu");
@@ -47,14 +52,12 @@ public class FieldCentric extends LinearOpMode {
             if (gamepad1.x) {
                 imu.resetYaw();
             }
-
-            double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-
+            botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
             // Rotate the movement direction counter to the bots rotation
-            double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
-            double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
+            double rotX = x * Math.cos(botHeading) - y * Math.sin(botHeading);
+            double rotY = x * Math.sin(botHeading) + y * Math.cos(botHeading);
 
-            rotX = rotX * 1.1;  // Counteract imperfect strafing
+            rotX = rotX * 1.4;  // Counteract imperfect strafing
 
             // Denominator is the largest motor power (absolute value) or 1
             // This ensures all the powers maintain the same ratio,
@@ -74,6 +77,8 @@ public class FieldCentric extends LinearOpMode {
             telemetry.addData("Bot heading: ", botHeading);
             telemetry.addData("Front Left Power: ", frontLeftPower);
             telemetry.update();
+
+
         }
     }
 }
