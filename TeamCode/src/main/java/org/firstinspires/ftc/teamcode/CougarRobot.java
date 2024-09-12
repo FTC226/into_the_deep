@@ -25,6 +25,8 @@ public class CougarRobot {
     public DcMotor backLeft;
     public DcMotor backRight;
 
+    public double botHeading;
+
     //Appendage Motors - Will come later on
     public DcMotor intakeMotor;
     public DcMotor conveyorMotor;
@@ -77,6 +79,7 @@ public class CougarRobot {
         backLeft.setPower(0);
         frontRight.setPower(0);
         backRight.setPower(0);
+        botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
     }
 
         public void moveRobot ( double leftStickY, double leftStickX, double rightStickX){
@@ -105,14 +108,12 @@ public class CougarRobot {
             backRight.setPower(bottomRightPower);
         }
 
-        public void moveRobotFC ( double leftStickY, double leftStickX, double rightStickX){
-            double y = leftStickY;
-            double x = leftStickX;
-            double rx = rightStickX;
+        public void updateHeading(){
+            botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        }
 
-            double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-
-            // Rotate the movement direction counter to the bots rotation
+        public void moveRobotFC ( double y, double x, double rx){
+             // Rotate the movement direction counter to the bots rotation
             double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
             double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
 
@@ -132,6 +133,10 @@ public class CougarRobot {
             backLeft.setPower(backLeftPower);
             frontRight.setPower(frontRightPower);
             backRight.setPower(backRightPower);
+
+            if (rx != 0) {
+                updateHeading();
+            }
         }
         /**
          * This method takes in 1 input : the A button
