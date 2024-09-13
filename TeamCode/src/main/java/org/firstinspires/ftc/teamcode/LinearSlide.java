@@ -8,20 +8,18 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp(name = "LinearSlideTest")
 public class LinearSlide extends OpMode {
+
     public DcMotor linSlide;
     public ElapsedTime runtime;
 
     public void init(){
         linSlide = hardwareMap.get(DcMotor.class, "frontLeft");
+
         linSlide.setDirection(DcMotor.Direction.REVERSE);
         linSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         runtime = new ElapsedTime();
         runtime.reset();
-        // linSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-/*
-        linSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        linSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        linSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);*/
     }
 
     public void loop(){
@@ -41,10 +39,7 @@ public class LinearSlide extends OpMode {
             linSlide.setPower(-0.5);
             //linSlide.setTargetPosition((int) currentPos);
         } else{
-            currentPos = linSlide.getCurrentPosition();
             linSlide.setPower(0.05);
-            //linSlide.setTargetPosition((int) currentPos);
         }
-
     }
 }

@@ -36,8 +36,13 @@ public class JadonRobotTest extends OpMode {
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
+                RevHubOrientationOnRobot.UsbFacingDirection.LEFT));
         imu.initialize(parameters);
+
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
+        frontRight.setDirection(DcMotor.Direction.FORWARD);
+        backRight.setDirection(DcMotor.Direction.FORWARD);
     }
 
     @Override
@@ -53,41 +58,20 @@ public class JadonRobotTest extends OpMode {
         // readIMU();
 
         // Test Field-Centric
-        // fieldCentric();
+        fieldCentric();
+        readIMU();
     }
 
     public void readIMU() {
         robotOrientation = imu.getRobotYawPitchRollAngles();
         robotYaw = robotOrientation.getYaw(AngleUnit.DEGREES);
 
+        if (gamepad1.x) {
+            imu.resetYaw();
+        }
+
         telemetry.addData("Robot Yaw: ", robotYaw);
         telemetry.update();
-    }
-
-    public void testJoysticks() {
-        telemetry.addData("Left stick Y: ", gamepad1.left_stick_y);
-        telemetry.addData("Left stick X: ", gamepad1.left_stick_x);
-        telemetry.update();
-    }
-
-    public void testWheels() {
-        leftStickY = -gamepad1.left_stick_y;
-
-        frontLeft.setPower(0.5);
-        frontRight.setPower(0.5);
-        backLeft.setPower(0.5);
-        backRight.setPower(0.5);
-    }
-
-    public void robotCentric() {
-        leftStickY = -gamepad1.left_stick_y;
-        leftStickX = gamepad1.left_stick_x * 1.1;
-        rightStickX = gamepad1.right_stick_x;
-
-        frontLeft.setPower(leftStickY + leftStickX + rightStickX);
-        frontRight.setPower(leftStickY - leftStickX - rightStickX);
-        backLeft.setPower(leftStickY - leftStickX + rightStickX);
-        backRight.setPower(leftStickY + leftStickX - rightStickX);
     }
 
     public void fieldCentric() {
@@ -101,17 +85,82 @@ public class JadonRobotTest extends OpMode {
         double rotX = leftStickX * Math.cos(-robotYaw) - leftStickY * Math.sin(-robotYaw);
         double rotY = leftStickX * Math.sin(-robotYaw) + leftStickY * Math.cos(-robotYaw);
 
-        rotX *= 1.1;
+        // double rotY = gamepad1.left_stick_y * Math.cos(robotYaw) + gamepad1.left_stick_x * Math.sin(robotYaw);
+        // double rotX = -gamepad1.left_stick_y * Math.sin(robotYaw) + gamepad1.left_stick_x * Math.cos(robotYaw);
+        // double rightStickX = gamepad1.right_stick_x;
+
+        rotX *= 1.3;
 
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rightStickX), 1);
         double frontLeftPower = (rotY + rotX + rightStickX) / denominator;
-        double backLeftPower = (rotY - rotX + rightStickX) / denominator;
         double frontRightPower = (rotY - rotX - rightStickX) / denominator;
+        double backLeftPower = (rotY - rotX + rightStickX) / denominator;
         double backRightPower = (rotY + rotX - rightStickX) / denominator;
 
         frontLeft.setPower(frontLeftPower);
         frontRight.setPower(frontRightPower);
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
+    }
+
+    public void testJoysticks() {
+        telemetry.addData("Left stick Y: ", gamepad1.left_stick_y);
+        telemetry.addData("Left stick X: ", gamepad1.left_stick_x);
+        telemetry.addData("Right stick X:", gamepad1.right_stick_x);
+        telemetry.update();
+    }
+
+    public void testWheels() {
+        leftStickY = -gamepad1.left_stick_y;
+        leftStickX = gamepad1.left_stick_x;
+        rightStickX = gamepad1.right_stick_x;
+
+        if (leftStickY > 0.1) {
+            frontLeft.setPower(0.5);
+            frontRight.setPower(0.5);
+            backLeft.setPower(0.5);
+            backRight.setPower(0.5);
+        } else if (leftStickY < -0.1) {
+            frontLeft.setPower(-0.5);
+            frontRight.setPower(-0.5);
+            backLeft.setPower(-0.5);
+            backRight.setPower(-0.5);
+        } else if (leftStickX > 0.1) {
+            frontLeft.setPower(0.5);
+            frontRight.setPower(-0.5);
+            backLeft.setPower(-0.5);
+            backRight.setPower(0.5);
+        } else if (leftStickX < -0.1) {
+            frontLeft.setPower(-0.5);
+            frontRight.setPower(0.5);
+            backLeft.setPower(0.5);
+            backRight.setPower(-0.5);
+        } else if (rightStickX > 0.1) {
+            frontLeft.setPower(0.5);
+            frontRight.setPower(-0.5);
+            backLeft.setPower(0.5);
+            backRight.setPower(-0.5);
+        } else if (rightStickX < -0.1) {
+            frontLeft.setPower(-0.5);
+            frontRight.setPower(0.5);
+            backLeft.setPower(-0.5);
+            backRight.setPower(0.5);
+        } else {
+            frontLeft.setPower(0);
+            frontRight.setPower(0);
+            backLeft.setPower(0);
+            backRight.setPower(0);
+        }
+    }
+
+    public void robotCentric() {
+        leftStickY = -gamepad1.left_stick_y;
+        leftStickX = gamepad1.left_stick_x * 1.1;
+        rightStickX = gamepad1.right_stick_x;
+
+        frontLeft.setPower(leftStickY + leftStickX + rightStickX);
+        frontRight.setPower(leftStickY - leftStickX - rightStickX);
+        backLeft.setPower(leftStickY - leftStickX + rightStickX);
+        backRight.setPower(leftStickY + leftStickX - rightStickX);
     }
 }
