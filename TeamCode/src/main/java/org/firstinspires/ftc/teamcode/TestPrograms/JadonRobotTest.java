@@ -1,7 +1,7 @@
 // https://ftc-docs.firstinspires.org/en/latest/programming_resources/imu/imu.html
 // https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.TestPrograms;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.IMU;
