@@ -1,45 +1,34 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
-@TeleOp(name = "LinearSlideTest")
-public class LinearSlide extends OpMode {
+public class LinearSlide {
+    DcMotor motor;
+    HardwareMap hwMap;
+    public static final double upperLimit = 2900;
 
-    public DcMotor linSlide;
-    public ElapsedTime runtime;
+    public void init(HardwareMap awMap, String name){
+        this.hwMap = awMap;
 
-    public void init(){
-        linSlide = hardwareMap.get(DcMotor.class, "frontLeft");
-
-        linSlide.setDirection(DcMotor.Direction.REVERSE);
-        linSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        runtime = new ElapsedTime();
-        runtime.reset();
+        motor = hwMap.get(DcMotor.class, name);
+        motor.setDirection(DcMotor.Direction.REVERSE);
+        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
-    public void loop(){
-        double currentPos = 0.0;
-        telemetry.addData("Runtime",runtime.seconds());
-        telemetry.addData("Position", linSlide.getCurrentPosition());
-        telemetry.update();
-        double power = Math.abs(gamepad2.left_stick_y);
-        if(gamepad2.left_stick_y<-0.1 && linSlide.getCurrentPosition()<3000){//go up on joystick/linear slide
-            //currentPos += -gamepad1.left_stick_y*10;
+    public double getPosition(){
+        return(motor.getCurrentPosition());
+    }
 
-            linSlide.setPower(power);
-            //linSlide.setTargetPosition((int) currentPos);
+    public void move(double power){
+        if(power>0.1 && getPosition()<upperLimit){ //go up on joystick/linear slide
+            motor.setPower(power);
 
-        } else if(gamepad2.left_stick_y>0.1 && linSlide.getCurrentPosition()>5){ //go down on joystick/linear slide
-            //currentPos += -gamepad1.left_stick_y*10;
-            linSlide.setPower(-0.5);
-            //linSlide.setTargetPosition((int) currentPos);
+        } else if(power<-0.1 && getPosition()>5){ //go down on joystick/linear slide
+            motor.setPower(-0.5);
+
         } else{
-            linSlide.setPower(0.05);
+            motor.setPower(0.05);
         }
     }
 }
