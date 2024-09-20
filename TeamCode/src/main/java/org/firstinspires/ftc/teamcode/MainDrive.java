@@ -32,6 +32,7 @@ public class MainDrive extends OpMode {
 
         boolean resetYaw = gamepad1.x;
 
+        // Field Centric Movement
         Robot.fieldCentric(leftStickX, leftStickY, rightStickX, resetYaw);
         telemetry.addData("Yaw: ", Robot.readIMU());
         telemetry.update();
