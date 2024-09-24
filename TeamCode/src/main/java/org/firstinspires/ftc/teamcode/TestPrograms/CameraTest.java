@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Rect;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -14,6 +16,9 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @TeleOp(name = "CameraTest")
 public class CameraTest extends OpMode {
@@ -58,13 +63,16 @@ public class CameraTest extends OpMode {
     public void loop(){
         telemetry.addData("Status", "Streaming camera to telemetry");
 
-        try{
+        // Try to display the detected color from the pipeline
+        try {
             telemetry.addData("Color", pipeline.returnColor());
-        } catch (NullPointerException e){
-            telemetry.addData("Color", "None");//ensures there is no exception during run time in the program
+            telemetry.addData("Distance ", pipeline.getDistance());
+        } catch (NullPointerException e) {
+            telemetry.addData("Color", "None"); // Ensures no exception during runtime
+            telemetry.addData("Distance", "None");
         }
 
-        //telemetry.addData("Color Detected", colorDetected);
+        // Update telemetry with all relevant information
         telemetry.update();
     }
 
@@ -80,9 +88,11 @@ public class CameraTest extends OpMode {
         Scalar lowerBlue = new Scalar(110, 100, 100);   // Lower bound for blue
         Scalar upperBlue = new Scalar(130, 255, 255);   // Upper bound for blue
         public String colorDetected;
+        public double distance;
 
-        @Override
-        public Mat processFrame(Mat input) {
+        //@Override
+        /*
+        public Mat processFrame(Mat input) {//Color Detection
             // Convert the input frame from BGR to HSV
             Mat hsvMat = new Mat();
             Imgproc.cvtColor(input, hsvMat, Imgproc.COLOR_RGB2HSV);
@@ -114,20 +124,93 @@ public class CameraTest extends OpMode {
             }
 
             // Send color data to telemetry
-            /*
-            telemetry.addData("Red", redCount);
-            telemetry.addData("Blue", blueCount);
-            telemetry.addData("Yellow", yellowCount);*/
+
 
             telemetry.addData("Color Detected", colorDetected);
             telemetry.update();
 
             // Return the input frame (you could also return a processed frame if desired)
             return input;
+        }*/
+
+        public Mat processFrame(Mat input) {//Object Detection
+            // Convert the input frame from BGR to HSV
+            Mat hsvMat = new Mat();
+            Imgproc.cvtColor(input, hsvMat, Imgproc.COLOR_RGB2HSV);
+
+            // Create masks for red, yellow, and blue
+            Mat redMask = new Mat();
+            Mat yellowMask = new Mat();
+            Mat blueMask = new Mat();
+
+            Core.inRange(hsvMat, lowerRed, upperRed, redMask);
+            Core.inRange(hsvMat, lowerYellow, upperYellow, yellowMask);
+            Core.inRange(hsvMat, lowerBlue, upperBlue, blueMask);
+
+            // Process each color mask independently
+            Rect redRect = processColorMask(redMask, new Scalar(255, 0, 0), input); // Red bounding box
+            Rect yellowRect = processColorMask(yellowMask, new Scalar(0, 255, 255), input); // Yellow bounding box
+            Rect blueRect = processColorMask(blueMask, new Scalar(0, 0, 255), input); // Blue bounding box
+
+            // Detect color and calculate distance for the largest detected object
+            if (redRect != null) {
+                colorDetected = "Red";
+                drawBoundingBox(input, redRect, new Scalar(255, 0, 0));
+                distance = calculateDistance(redRect.height); // Draw red bounding box
+            }
+
+            if (yellowRect != null) {
+                colorDetected = "Yellow";
+                drawBoundingBox(input, yellowRect, new Scalar(0, 255, 255)); // Draw yellow bounding box
+                distance = calculateDistance(yellowRect.height);
+            }
+
+            if (blueRect != null) {
+                colorDetected = "Blue";
+                drawBoundingBox(input, blueRect, new Scalar(0, 0, 255)); // Draw blue bounding box
+                distance = calculateDistance(blueRect.height);
+            }
+
+            // Return the input frame with bounding boxes drawn on it
+            return input;
+        }
+
+
+        private Rect processColorMask(Mat mask, Scalar color, Mat input) {
+            List<MatOfPoint> contours = new ArrayList<>();
+            Mat hierarchy = new Mat();
+            Imgproc.findContours(mask, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+
+            if (!contours.isEmpty()) {
+                MatOfPoint largestContour = contours.get(0);
+                for (MatOfPoint contour : contours) {
+                    if (Imgproc.contourArea(contour) > Imgproc.contourArea(largestContour)) {
+                        largestContour = contour;
+                    }
+                }
+
+                // Get bounding rectangle of the largest contour
+                Rect boundingRect = Imgproc.boundingRect(largestContour);
+                Imgproc.rectangle(input, boundingRect, color, 2); // Draw the bounding box on the input frame
+                return boundingRect;
+            }
+
+            return null; // No contour found
+        }
+
+        private void drawBoundingBox(Mat input, Rect rect, Scalar color) {
+            Imgproc.rectangle(input, rect, color, 2);
+        }
+
+        private double calculateDistance(double objectHeightInPixels) {
+            double KNOWN_OBJECT_HEIGHT = 89;
+            double FOCAL_LENGTH = 4;
+            return (KNOWN_OBJECT_HEIGHT * FOCAL_LENGTH) / objectHeightInPixels;
         }
 
         public String returnColor(){
             return colorDetected;
         }
+        public double getDistance(){  return distance; }
     }
 }
