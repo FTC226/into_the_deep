@@ -10,6 +10,7 @@ public class ColorSensorTest extends OpMode {
 
     // Declare Color Sensor
     private ColorSensor colorSensor;
+    private boolean useLED = false;
 
     @Override
     public void init() {
@@ -29,8 +30,20 @@ public class ColorSensorTest extends OpMode {
         telemetry.addData("Green", green);
         telemetry.addData("Blue", blue);
 
+        // Using the LED
+        changeLED();
+
         // Color Detection Logic
 
         telemetry.update();
+    }
+
+    public void changeLED() {
+        if (gamepad1.b) {
+            useLED = !useLED;
+            colorSensor.enableLed(useLED);
+        }
+
+        telemetry.addData("Using LED: ", useLED);
     }
 }
