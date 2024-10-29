@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name = "Claw Mover Tester")
 public class clawMovement extends OpMode {
-    public CRServo left, right;
+    public CRServo left, right, claw;
     public ElapsedTime runtime;
     public double armPower;
     public double wristPower;
@@ -45,27 +45,32 @@ public class clawMovement extends OpMode {
         runtime.reset();
 
         armPower = -gamepad2.left_stick_y;
-        wristPower = gamepad2.right_stick_x;
+        wristPower = gamepad2.left_stick_x;
 
-        if(armPower > 0.8){
-            left.setPower(armPower);
-            right.setPower(-armPower);
-        }
-
-        if(armPower < -0.8){
+        if(armPower > 0.5 && stop < 500){
             left.setPower(-armPower);
-            right.setPower(armPower);
-        }
-
-        if(wristPower > 0.8 && stop < 1000000000000){
-            left.setPower(armPower);
             right.setPower(armPower);
             stop++;
         }
-        if(wristPower < -0.8 && stop > -1000000000){
+
+        else if(armPower < -0.5 && stop > 0){
+
+            left.setPower(-armPower);
+            right.setPower(armPower);
+            stop--;
+        }
+
+        else if(wristPower > 0.5){
+            left.setPower(armPower);
+            right.setPower(armPower);
+
+        }
+        else if(wristPower < -0.5){
             left.setPower(-armPower);
             right.setPower(-armPower);
-            stop--;
+        } else{
+            left.setPower(0);
+            right.setPower(0);
         }
 
     }
