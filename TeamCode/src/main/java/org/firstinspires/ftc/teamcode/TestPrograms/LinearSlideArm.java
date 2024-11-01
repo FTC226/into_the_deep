@@ -9,6 +9,13 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 public class LinearSlideArm extends OpMode {
 
     public DcMotor arm;
+    DcMotor linearSlideRight;
+    DcMotor linearSlideLeft;
+    public int targetPos = 0;
+    double kpLeft = 1; //needs tuning
+    double kpRight = 1; //needs tuning
+
+    public static int upperLimit = 3000;
 
     @Override
     public void init() {
@@ -16,7 +23,22 @@ public class LinearSlideArm extends OpMode {
         arm = hardwareMap.get(DcMotor.class, "arm");
 
         // Set the motor direction if necessary (e.g., DcMotor.Direction.REVERSE)
-        arm.setDirection(DcMotor.Direction.FORWARD);
+        linearSlideLeft = hardwareMap.get(DcMotor.class,"intakeSlideLeft");
+        linearSlideRight = hardwareMap.get(DcMotor.class,"intakeSlideRight");
+
+        linearSlideLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        linearSlideRight.setDirection(DcMotorSimple.Direction.FORWARD); // Reverse if needed
+
+
+        linearSlideRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        linearSlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+
+        linearSlideLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        linearSlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+
+
     }
 
     @Override
@@ -41,5 +63,17 @@ public class LinearSlideArm extends OpMode {
         else {
             arm.setPower(0.0);
         }
+
+        if(gamepad1.y){
+            linearSlideLeft.setPower(0.5);
+            linearSlideRight.setPower(0.5);
+        }  else {
+            linearSlideLeft.setPower(0);
+            linearSlideRight.setPower(0);
+        }
+
+
+
     }
+
 }

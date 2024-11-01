@@ -52,6 +52,8 @@ public class adaptiveClaw extends LinearOpMode {
 
     SampleDetection pipeline = new SampleDetection();
 
+    double cameraAngle = pipeline.returnAngle();
+
     public void runOpMode() {
 
         initOpenCV();
@@ -189,5 +191,8 @@ public class adaptiveClaw extends LinearOpMode {
         public double returnAngle(){
             return angle;
         }
+    }
+    public double getAngle() {
+        return cameraAngle;
     }
 }
