@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.TestPrograms;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+@TeleOp (name = "LINEARSLIDETEST")
 public class LinearSlideTesting2 extends OpMode {
 
     public int targetPos = 0;
@@ -16,8 +18,8 @@ public class LinearSlideTesting2 extends OpMode {
     DcMotor linearSlideLeft;
 
     public void init(){
-        linearSlideLeft = hardwareMap.get(DcMotor.class,"intakeSlideLeft");
-        linearSlideRight = hardwareMap.get(DcMotor.class,"intakeSlideRight");
+        linearSlideLeft = hardwareMap.get(DcMotor.class,"leftSlide");
+        linearSlideRight = hardwareMap.get(DcMotor.class,"rightSlide");
 
         linearSlideLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         linearSlideRight.setDirection(DcMotorSimple.Direction.FORWARD);

@@ -46,9 +46,11 @@ public class FieldCentric {
     public void fieldCentric(double leftStickX, double leftStickY, double rightStickX, boolean resetYaw) {
 
         // IMU Input
-        robotOrientation = imu.getRobotYawPitchRollAngles();
-        robotYaw = robotOrientation.getYaw(AngleUnit.RADIANS);
-
+        try{
+            robotYaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        } catch (NullPointerException e){
+            robotYaw = 0.0;
+        }
         // Rotation Calculations
         double rotX = leftStickX * Math.cos(-robotYaw) - leftStickY * Math.sin(-robotYaw);
         double rotY = leftStickX * Math.sin(-robotYaw) + leftStickY * Math.cos(-robotYaw);
