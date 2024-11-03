@@ -25,6 +25,7 @@ public class LinearAndArm extends OpMode {
     public double ePrevious = 0;
     public double eIntegral = 0;
 
+    public static int target = 0;
 
 
     public static double p = 0.03, i = 0.3, d = 0.0002;
@@ -34,7 +35,7 @@ public class LinearAndArm extends OpMode {
     public static double kp = 0.05, ki = 0.0, kd = 0.0;
     public static double kf = 0.1;
 
-    public static int target = 0;
+    public static int targetArm = 0;
 
     private final double ticks_in_degree = 700 / 180.0;
 
@@ -92,6 +93,10 @@ public class LinearAndArm extends OpMode {
         packet.put("p", p);
         packet.put("i", i);
         packet.put("d", d);
+        packet.put("kp", kp);
+        packet.put("ki", ki);
+        packet.put("kd", kd);
+        packet.put("kf", kf);
         packet.put("Left Motor:", Math.abs(leftEncoder));
         packet.put("Right Motor:", Math.abs(rightEncoder));
         packet.put("Left-Right Motor:", Math.abs(leftEncoder) - Math.abs(rightEncoder));
@@ -109,13 +114,13 @@ public class LinearAndArm extends OpMode {
         double powerArm = pid + ff;
 
         if(gamepad2.a){
-            target = 100;
+            targetArm = 100;
         } else if(gamepad2.b){
-//            target = 1850;
+            targetArm = 1850;
         } else if(gamepad2.x){
-            target = 1000;
+            targetArm = 1000;
         } else if(gamepad2.y){
-            target = 0;
+            targetArm = 0;
         }
         arm.setPower(powerArm);
 
