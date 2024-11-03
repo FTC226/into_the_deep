@@ -21,10 +21,11 @@ public class LinearSlideArm extends OpMode {
     public void init() {
         // Initialize the motor from the hardware map
         arm = hardwareMap.get(DcMotor.class, "arm");
+        arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Set the motor direction if necessary (e.g., DcMotor.Direction.REVERSE)
-        linearSlideLeft = hardwareMap.get(DcMotor.class,"intakeSlideLeft");
-        linearSlideRight = hardwareMap.get(DcMotor.class,"intakeSlideRight");
+        linearSlideLeft = hardwareMap.get(DcMotor.class,"leftSlide");
+        linearSlideRight = hardwareMap.get(DcMotor.class,"rightSlide");
 
         linearSlideLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         linearSlideRight.setDirection(DcMotorSimple.Direction.FORWARD); // Reverse if needed
