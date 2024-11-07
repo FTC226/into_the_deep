@@ -5,6 +5,8 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.Servo;
+
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -13,14 +15,49 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
+
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.opencv.core.*;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvPipeline;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.annotation.SuppressLint;
+
+
+
 @TeleOp(name = "Claw Mover Tester")
 public class clawMovement extends OpMode {
 
     adaptiveClaw camera = new adaptiveClaw();
 
+    Point center;
     double angle;
+    double lat;
+    double lon;
 
-    public CRServo left, right, claw;
+    public CRServo left, right;
+
+    public Servo claw;
     public ElapsedTime runtime;
     public double armPower;
     public double wristPower;
@@ -28,6 +65,8 @@ public class clawMovement extends OpMode {
     private OpenCvCamera controlHubCam;  // Use OpenCvCamera class from FTC SDK
     private static final int CAMERA_WIDTH = 640; // width  of wanted camera resolution
     private static final int CAMERA_HEIGHT = 360; // height of wanted camera resolution
+
+    public double power;
 
     SampleDetection pipeline = new SampleDetection();
 
@@ -48,7 +87,7 @@ public class clawMovement extends OpMode {
 
         left = hardwareMap.get(CRServo.class, "leftServo");
         right = hardwareMap.get(CRServo.class, "rightServo");
-        claw = hardwareMap.get(CRServo.class, "clawServo");
+        claw = hardwareMap.get(Servo.class, "clawServo");
 
         FtcDashboard dashboard = FtcDashboard.getInstance();
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
@@ -81,6 +120,8 @@ public class clawMovement extends OpMode {
 
     public void loop(){
         angle = pipeline.returnAngle();
+        center = pipeline.returnCenter();
+
         runtime.reset();
 
         armPower = -gamepad2.left_stick_y;
@@ -134,7 +175,47 @@ public class clawMovement extends OpMode {
             }
         }
 
+        if(gamepad2.b){
+            if(angle<80){
+                left.setPower(0.15);
+                right.setPower(0.15);
+            } else if(angle <88) {
+                left.setPower(0.1);
+                right.setPower(0.1);
+            } else if (angle>100){
+                left.setPower(-0.15);
+                right.setPower(-0.15);
+            } else if(angle>92){
+                left.setPower(-0.1);
+                right.setPower(-0.1);
+            }
+            else{
+                left.setPower(0.0);
+                right.setPower(0.0);
+            }
+
+
+        }
+
+        if(gamepad2.x){
+            power = (90-angle)/90;
+            if (Math.abs(power)<(0.06));
+
+            left.setPower(power);
+            right.setPower(power);
+        }
+
+        if(gamepad2.y){
+            claw.setPosition(1.0);
+        }
+        else{
+            claw.setPosition(0.0);
+        }
+
         telemetry.addData("Angle: ", angle);
+        telemetry.addData("Latitude: ", lat);
+        telemetry.addData("Longitude: ", lon);
+        telemetry.addData("Center: ", center);
         telemetry.update();
     }
 }

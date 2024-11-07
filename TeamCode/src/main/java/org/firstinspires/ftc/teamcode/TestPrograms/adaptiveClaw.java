@@ -94,6 +94,7 @@ public class adaptiveClaw extends LinearOpMode {
 
     class SampleDetection extends OpenCvPipeline {
         double angle;
+        RotatedRect rect;
         // Lower/Upper Color Bounds
         private final Scalar lowerRed1 = new Scalar(0, 150, 50);   // Red lower bound (hue wrap-around)
         private final Scalar upperRed1 = new Scalar(10, 255, 255); // Red upper bound
@@ -164,7 +165,7 @@ public class adaptiveClaw extends LinearOpMode {
 
                 if (largestContour != null) {
                     // Find the minimum area bounding rectangle for the largest contour
-                    RotatedRect rect = Imgproc.minAreaRect(new MatOfPoint2f(largestContour.toArray()));
+                    rect = Imgproc.minAreaRect(new MatOfPoint2f(largestContour.toArray()));
 
                     // Draw the rectangle
                     Point[] rectPoints = new Point[4];
@@ -188,11 +189,21 @@ public class adaptiveClaw extends LinearOpMode {
                 }
             }
         }
+
         public double returnAngle(){
             return angle;
         }
+
+        public Point getCenter(){
+            return rect.center;
+        }
+
     }
     public double getAngle() {
         return cameraAngle;
     }
+
+
+
+
 }

@@ -108,8 +108,8 @@ public class LinearAndArm extends OpMode {
 
         controller.setPID(kp, ki, kd);
         int armPos = arm.getCurrentPosition();
-        double pid = controller.calculate(armPos, target);
-        double ff = Math.cos(Math.toRadians(target / ticks_in_degree)) * kf;
+        double pid = controller.calculate(armPos, targetArm);
+        double ff = Math.cos(Math.toRadians(targetArm / ticks_in_degree)) * kf;
 
         double powerArm = pid + ff;
 
@@ -125,7 +125,7 @@ public class LinearAndArm extends OpMode {
         arm.setPower(powerArm);
 
         telemetry.addData("pos", armPos);
-        telemetry.addData("target", target);
+        telemetry.addData("targetArm", targetArm);
         telemetry.update();
 
 
@@ -134,7 +134,7 @@ public class LinearAndArm extends OpMode {
 
     public double pidController(int target, double p, double i, double d) {
         long currentTime = micros();
-        double deltaT = ((double)(currentTime - previousTime)) / 1.0e6;
+        double deltaT = ((double)(currentTime +- previousTime)) / 1.0e6;
 
         int e = rightSlide.getCurrentPosition() - target;
         double eDerivative = (e - ePrevious) / deltaT;
