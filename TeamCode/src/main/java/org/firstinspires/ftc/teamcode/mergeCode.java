@@ -256,6 +256,12 @@ public class mergeCode extends OpMode {
 
         leftSlide.setPower(jS);
         rightSlide.setPower(jS);
+/*
+        if (gamepad2.left_trigger>0.2){
+            leftSlide.setPower(-1.0);
+            rightSlide.setPower(-1.0);
+            //targetArm = 0;
+        }*/
 //        moveMotor(power);
 
 
@@ -397,10 +403,10 @@ public class mergeCode extends OpMode {
         }
 
         if(gamepad2.y){
-            claw.setPosition(1.0);
+            claw.setPosition(0.0);
         }
         else{
-            claw.setPosition(0.0);
+            claw.setPosition(0.2);
         }
 
         telemetry.addData("Angle: ", angle);
