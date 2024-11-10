@@ -155,45 +155,10 @@ public class clawMovement extends OpMode {
         }
 
         if (gamepad2.a) {
-            if (angle < 50.0 || angle > 130.0) {
-                left.setPower(0.3);
-                right.setPower(0.3);
-            } else if (angle < 80.0 || angle > 100.0){
-                left.setPower(0.2);
-                right.setPower(0.2);
 
-            } else if (angle < 85.0 || angle > 95.0){
-                left.setPower(0.15);
-                right.setPower(0.15);
-
-            } else if (angle < 88.0 || angle > 92.0){
-                left.setPower(0.1);
-                right.setPower(0.1);
-            } else {
-                left.setPower(0.0);
-                right.setPower(0.0);
-            }
         }
 
         if(gamepad2.b){
-            if(angle<80){
-                left.setPower(0.15);
-                right.setPower(0.15);
-            } else if(angle <88) {
-                left.setPower(0.1);
-                right.setPower(0.1);
-            } else if (angle>100){
-                left.setPower(-0.15);
-                right.setPower(-0.15);
-            } else if(angle>92){
-                left.setPower(-0.1);
-                right.setPower(-0.1);
-            }
-            else{
-                left.setPower(0.0);
-                right.setPower(0.0);
-            }
-
 
         }
 

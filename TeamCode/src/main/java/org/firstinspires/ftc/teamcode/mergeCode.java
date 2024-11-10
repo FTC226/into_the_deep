@@ -197,52 +197,6 @@ public class mergeCode extends OpMode {
         leftStickX = gamepad1.left_stick_x;
         rightStickX = gamepad1.right_stick_x;
 
-        robotOrientation = imu.getRobotYawPitchRollAngles();
-        robotYaw = robotOrientation.getYaw(AngleUnit.RADIANS);
-
-        double rotX = leftStickX * Math.cos(-robotYaw) - leftStickY * Math.sin(-robotYaw);
-        double rotY = leftStickX * Math.sin(-robotYaw) + leftStickY * Math.cos(-robotYaw);
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rightStickX), 1);
-
-        //  || Math.abs(imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate) > 1
-        if (Math.abs(rightStickX) > 0.1) {
-            targetYaw = robotYaw;
-            lastError = 0;
-        }
-
-        if (gamepad1.x) {
-            imu.resetYaw();
-            targetYaw = 0;
-            integralSum = 0;
-            lastError = 0;
-        }
-
-        // PID Calculations
-        double error = targetYaw - robotYaw;
-        error = (error + Math.PI) % (2 * Math.PI) - Math.PI;
-
-        // Compute PID Terms
-        double derivative = (error - lastError) / timer.seconds();
-        integralSum += error * timer.seconds();
-        double correction = (Kp * error) + (Ki * integralSum) + (Kd * derivative);
-
-        double rotationPower = Math.abs(rightStickX) > 0.1 ? rightStickX : -correction;
-
-        frontLeft.setPower((rotY + rotX + rotationPower) / denominator);
-        frontRight.setPower((rotY - rotX - rotationPower) / denominator);
-        backLeft.setPower((rotY - rotX + rotationPower) / denominator);
-        backRight.setPower((rotY + rotX - rotationPower) / denominator);
-
-        lastError = error;
-        timer.reset();
-
-        // FTC Dashboard
-        packet.put("Target: ", Math.toDegrees(targetYaw));
-        packet.put("Actual: ", Math.toDegrees(robotYaw));
-        packet.put("Error: ", Math.toDegrees(error));
-        packet.put("Yaw Acceleration", Math.abs(imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate));
-
-
 
 
         dashboard.sendTelemetryPacket(packet);
@@ -254,8 +208,14 @@ public class mergeCode extends OpMode {
 
         double power = pidController(leftEncoder, p,i,d);
 
-        leftSlide.setPower(jS);
-        rightSlide.setPower(jS);
+        if(targetArm > 700){
+            leftSlide.setPower(jS);
+            rightSlide.setPower(jS);
+        } else if(leftEncoder < 10000 && rightEncoder < 10000){
+            leftSlide.setPower(jS);
+            rightSlide.setPower(jS);
+        }
+
 /*
         if (gamepad2.left_trigger>0.2){
             leftSlide.setPower(-1.0);
@@ -397,6 +357,14 @@ public class mergeCode extends OpMode {
 
             left.setPower(power);
             right.setPower(power);
+
+            double x = center.x;
+            double y = center.y;
+
+            leftStickX = -(x-320)/Math.sqrt((x*x)+(y*y));
+            leftStickY = (y-180)/Math.sqrt((x*x)+(y*y));
+            rightStickX = 0.0;
+
         } else{
             left.setPower(0.0);
             right.setPower(0.0);
@@ -409,10 +377,63 @@ public class mergeCode extends OpMode {
             claw.setPosition(0.2);
         }
 
+
+
+
+        robotOrientation = imu.getRobotYawPitchRollAngles();
+        robotYaw = robotOrientation.getYaw(AngleUnit.RADIANS);
+
+        double rotX = leftStickX * Math.cos(-robotYaw) - leftStickY * Math.sin(-robotYaw);
+        double rotY = leftStickX * Math.sin(-robotYaw) + leftStickY * Math.cos(-robotYaw);
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rightStickX), 1);
+
+        //  || Math.abs(imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate) > 1
+        if (Math.abs(rightStickX) > 0.1) {
+            targetYaw = robotYaw;
+            lastError = 0;
+        }
+
+        if (gamepad1.x) {
+            imu.resetYaw();
+            targetYaw = 0;
+            integralSum = 0;
+            lastError = 0;
+        }
+
+        // PID Calculations
+        double error = targetYaw - robotYaw;
+        error = (error + Math.PI) % (2 * Math.PI) - Math.PI;
+
+        // Compute PID Terms
+        double derivative = (error - lastError) / timer.seconds();
+        integralSum += error * timer.seconds();
+        double correction = (Kp * error) + (Ki * integralSum) + (Kd * derivative);
+
+        double rotationPower = Math.abs(rightStickX) > 0.1 ? rightStickX : -correction;
+
+        frontLeft.setPower((rotY + rotX + rotationPower) / denominator);
+        frontRight.setPower((rotY - rotX - rotationPower) / denominator);
+        backLeft.setPower((rotY - rotX + rotationPower) / denominator);
+        backRight.setPower((rotY + rotX - rotationPower) / denominator);
+
+        lastError = error;
+        timer.reset();
+
+        // FTC Dashboard
+        packet.put("Target: ", Math.toDegrees(targetYaw));
+        packet.put("Actual: ", Math.toDegrees(robotYaw));
+        packet.put("Error: ", Math.toDegrees(error));
+        packet.put("Yaw Acceleration", Math.abs(imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate));
+
+
+
         telemetry.addData("Angle: ", angle);
         telemetry.addData("Latitude: ", lat);
         telemetry.addData("Longitude: ", lon);
         telemetry.addData("Center: ", center);
+        telemetry.addData("Xpower", leftStickX);
+
+        telemetry.addData("Ypower", leftStickY);
         telemetry.update();
 
         dashboard.sendTelemetryPacket(packet);
