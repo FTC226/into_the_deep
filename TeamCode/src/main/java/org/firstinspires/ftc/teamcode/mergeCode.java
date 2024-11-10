@@ -103,6 +103,7 @@ public class mergeCode extends OpMode {
     public ElapsedTime runtime;
     public double armPower;
     public double wristPower;
+    public boolean extended = false;
 
     private OpenCvCamera controlHubCam;  // Use OpenCvCamera class from FTC SDK
     private static final int CAMERA_WIDTH = 640; // width  of wanted camera resolution
@@ -211,9 +212,15 @@ public class mergeCode extends OpMode {
         if(targetArm > 700){
             leftSlide.setPower(jS);
             rightSlide.setPower(jS);
+            if(leftEncoder > 10000 && rightEncoder > 10000){
+                extended = true;
+            } else{
+                extended = false;
+            }
         } else if(leftEncoder < 10000 && rightEncoder < 10000){
             leftSlide.setPower(jS);
             rightSlide.setPower(jS);
+
         }
 
 /*
@@ -274,11 +281,11 @@ public class mergeCode extends OpMode {
         arm.setPower(powerArm);
 
          */
-        if(gamepad2.dpad_left || gamepad2.dpad_right){
+        if((gamepad2.dpad_left || gamepad2.dpad_right) && !extended){
             targetArm = 600;
         } else if(gamepad2.dpad_up){
             targetArm = 1800;
-        } else if(gamepad2.dpad_down){
+        } else if(gamepad2.dpad_down && !extended){
             targetArm = 150;
         } else if(gamepad2.left_bumper){
             targetArm = 2000;
@@ -345,36 +352,35 @@ public class mergeCode extends OpMode {
 
         }*/
 
-        if(gamepad2.a){
+        if(gamepad2.a){ // move claw down
             left.setPower(-1.0);
             right.setPower(1.0);
-        } else if(gamepad2.b){
+        } else if(gamepad2.b){ // move claw up
             left.setPower(1.0);
             right.setPower(-1.0);
-        } else if(gamepad2.x){
+        } else if(gamepad2.x){ //centralizing the sample
+            double x = center.x;
+            double y = center.y;
+
+            leftStickX = -(x-320)/Math.sqrt((x*x)+(y*y));
+            leftStickY = (y-100)/Math.sqrt((x*x)+(y*y));
+            rightStickX = 0.0;
+       } else if(gamepad2.right_bumper){ // setting angle of the claw
             power = (90-angle)/90;
             if (Math.abs(power)<(0.06));
 
             left.setPower(power);
             right.setPower(power);
-
-            double x = center.x;
-            double y = center.y;
-
-            leftStickX = -(x-320)/Math.sqrt((x*x)+(y*y));
-            leftStickY = (y-180)/Math.sqrt((x*x)+(y*y));
-            rightStickX = 0.0;
-
-        } else{
+        } else{ // do nothing
             left.setPower(0.0);
             right.setPower(0.0);
         }
 
-        if(gamepad2.y){
+        if(gamepad2.y){ //open claw
             claw.setPosition(0.0);
         }
-        else{
-            claw.setPosition(0.2);
+        else{//default - closing claw
+            claw.setPosition(1.0);
         }
 
 
