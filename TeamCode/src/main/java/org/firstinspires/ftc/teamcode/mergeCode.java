@@ -79,6 +79,8 @@ public class mergeCode extends OpMode {
     public static double kf = 0.1;
 
     public static int targetArm = 0;
+    public static double armPower = 0;
+    public static int slidePosition = 0;
 
     private final double ticks_in_degree = 700 / 180.0;
 
@@ -101,7 +103,7 @@ public class mergeCode extends OpMode {
 
     public Servo claw;
     public ElapsedTime runtime;
-    public double armPower;
+    //public double armPower;
     public double wristPower;
     public boolean extended = false;
 
@@ -110,6 +112,7 @@ public class mergeCode extends OpMode {
     private static final int CAMERA_HEIGHT = 360; // height of wanted camera resolution
 
     public double power;
+    public boolean armValue = true;
 
     SampleDetection pipeline = new SampleDetection();
 
@@ -194,7 +197,8 @@ public class mergeCode extends OpMode {
 
     @Override
     public void loop() {
-        leftStickY = -gamepad1.left_stick_y;
+        leftStickY = -gamepad1.left_stick_y;+3
+
         leftStickX = gamepad1.left_stick_x;
         rightStickX = gamepad1.right_stick_x;
 
@@ -202,26 +206,22 @@ public class mergeCode extends OpMode {
 
         dashboard.sendTelemetryPacket(packet);
 
+        /*
         double jS = -gamepad2.left_stick_y;
 
         int leftEncoder = leftSlide.getCurrentPosition();
         int rightEncoder = rightSlide.getCurrentPosition();
+
 
         double power = pidController(leftEncoder, p,i,d);
 
         if(targetArm > 700){
             leftSlide.setPower(jS);
             rightSlide.setPower(jS);
-            if(leftEncoder > 10000 && rightEncoder > 10000){
-                extended = true;
-            } else{
-                extended = false;
-            }
         } else if(leftEncoder < 10000 && rightEncoder < 10000){
             leftSlide.setPower(jS);
             rightSlide.setPower(jS);
-
-        }
+        }*/
 
 /*
         if (gamepad2.left_trigger>0.2){
@@ -239,7 +239,7 @@ public class mergeCode extends OpMode {
 //        } else {
 //        }
 
-
+        /*
         packet.put("p", p);
         packet.put("i", i);
         packet.put("d", d);
@@ -251,7 +251,7 @@ public class mergeCode extends OpMode {
         packet.put("Right Motor:", Math.abs(rightEncoder));
         packet.put("Left-Right Motor:", Math.abs(leftEncoder) - Math.abs(rightEncoder));
         packet.put("Power", power);
-        packet.put("Target", target);
+        packet.put("Target", target);*/
 
 
 
@@ -281,19 +281,82 @@ public class mergeCode extends OpMode {
         arm.setPower(powerArm);
 
          */
-        if((gamepad2.dpad_left || gamepad2.dpad_right) && !extended){
-            targetArm = 600;
-        } else if(gamepad2.dpad_up){
-            targetArm = 1800;
-        } else if(gamepad2.dpad_down && !extended){
-            targetArm = 150;
-        } else if(gamepad2.left_bumper){
-            targetArm = 2000;
-        }
-        arm.setTargetPosition(targetArm);
+        if(gamepad2.dpad_left || gamepad2.dpad_right){
+            targetArm = 200;
+            armPower = 0.5;
+            slidePosition = 0;
 
+            leftSlide.setTargetPosition(0);
+            rightSlide.setTargetPosition(0);
+            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            leftSlide.setPower(-1.0);
+            rightSlide.setPower(-1.0);
+
+            while(leftSlide.isBusy() || rightSlide.isBusy()){
+
+            }
+        } else if(gamepad2.dpad_up){
+            targetArm = 800;
+            armPower = 1.0;
+            slidePosition = 2200;
+
+            leftSlide.setTargetPosition(0);
+            rightSlide.setTargetPosition(0);
+            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            leftSlide.setPower(-1.0);
+            rightSlide.setPower(-1.0);
+
+            while(leftSlide.isBusy() || rightSlide.isBusy()){
+
+            }
+        } else if(gamepad2.dpad_down){
+            targetArm = 0;
+            armPower = -0.5;
+            slidePosition = 0;
+
+            leftSlide.setTargetPosition(0);
+            rightSlide.setTargetPosition(0);
+            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            leftSlide.setPower(-1.0);
+            rightSlide.setPower(-1.0);
+
+            while(leftSlide.isBusy() || rightSlide.isBusy()){
+
+            }
+        } else if(gamepad2.left_bumper){
+            targetArm = 900;
+            armPower = 0.5;
+            slidePosition = 0;
+
+            leftSlide.setTargetPosition(0);
+            rightSlide.setTargetPosition(0);
+            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            leftSlide.setPower(-1.0);
+            rightSlide.setPower(-1.0);
+
+            while(leftSlide.isBusy() || rightSlide.isBusy()){
+
+            }
+        }
+
+        arm.setTargetPosition(targetArm);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm.setPower(0.5);
+        arm.setPower(armPower);
+
+        while(arm.isBusy()){
+
+        }
+
+        leftSlide.setTargetPosition(slidePosition);
+        rightSlide.setTargetPosition(slidePosition);
+        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftSlide.setPower(1.0);
+        rightSlide.setPower(1.0);
 
         telemetry.addData("pos", armPos);
         telemetry.addData("targetArm", targetArm);
@@ -352,35 +415,36 @@ public class mergeCode extends OpMode {
 
         }*/
 
-        if(gamepad2.a){ // move claw down
+        if(gamepad2.a){
             left.setPower(-1.0);
             right.setPower(1.0);
-        } else if(gamepad2.b){ // move claw up
+        } else if(gamepad2.b){
             left.setPower(1.0);
             right.setPower(-1.0);
-        } else if(gamepad2.x){ //centralizing the sample
-            double x = center.x;
-            double y = center.y;
-
-            leftStickX = -(x-320)/Math.sqrt((x*x)+(y*y));
-            leftStickY = (y-100)/Math.sqrt((x*x)+(y*y));
-            rightStickX = 0.0;
-       } else if(gamepad2.right_bumper){ // setting angle of the claw
+        } else if(gamepad2.x){
             power = (90-angle)/90;
             if (Math.abs(power)<(0.06));
 
             left.setPower(power);
             right.setPower(power);
-        } else{ // do nothing
+
+            double x = center.x;
+            double y = center.y;
+
+            leftStickX = -(x-320)/Math.sqrt((x*x)+(y*y));
+            leftStickY = (y-180)/Math.sqrt((x*x)+(y*y));
+            rightStickX = 0.0;
+
+        } else{
             left.setPower(0.0);
             right.setPower(0.0);
         }
 
-        if(gamepad2.y){ //open claw
+        if(gamepad2.y){
             claw.setPosition(0.0);
         }
-        else{//default - closing claw
-            claw.setPosition(1.0);
+        else{
+            claw.setPosition(0.2);
         }
 
 
@@ -445,7 +509,26 @@ public class mergeCode extends OpMode {
         dashboard.sendTelemetryPacket(packet);
     }
 
+    public void holdSlidePosition(int targetPosition) {
+        // Continuously apply power to hold the slides at the target position
+        leftSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        while (!gamepad2.dpad_down && !gamepad2.dpad_up) {  // Keep holding position until another button is pressed
+            // Re-apply small corrective power if the slides are not at the target position
+            if (leftSlide.getCurrentPosition() < targetPosition) {
+                leftSlide.setPower(0.1);  // Adjust power as needed
+            } else {
+                leftSlide.setPower(0);
+            }
+
+            if (rightSlide.getCurrentPosition() < targetPosition) {
+                rightSlide.setPower(0.1);  // Adjust power as needed
+            } else {
+                rightSlide.setPower(0);
+            }
+        }
+    }
 
     public double pidController(int target, double p, double i, double d) {
         long currentTime = micros();
