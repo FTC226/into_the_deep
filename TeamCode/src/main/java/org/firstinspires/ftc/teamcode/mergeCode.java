@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -16,7 +15,6 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.TestPrograms.SampleDetection;
-import org.firstinspires.ftc.teamcode.TestPrograms.adaptiveClaw;
 import org.opencv.core.Point;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -72,8 +70,6 @@ public class mergeCode extends OpMode {
     // PID for Linear Slide
     public static double p = 0.03, i = 0.3, d = 0.0002;
 
-    private PIDController controller;
-
     //PID for arm
     public static double kp = 0.05, ki = 0.0, kd = 0.0;
     public static double kf = 0.1;
@@ -81,7 +77,9 @@ public class mergeCode extends OpMode {
     public static int targetArm = 0;
     public static double armPower = 0;
     public static int slidePosition = 0;
-
+    public static double servoPosition = 0;
+    public static double clawPosition = 0;
+    public static boolean slidesExtended = false;
     private final double ticks_in_degree = 700 / 180.0;
 
 
@@ -90,7 +88,7 @@ public class mergeCode extends OpMode {
 
 
 
-    adaptiveClaw camera = new adaptiveClaw();
+    //adaptiveClaw camera = new adaptiveClaw();
 
     Point center;
     double angle;
@@ -105,16 +103,16 @@ public class mergeCode extends OpMode {
     public ElapsedTime runtime;
     //public double armPower;
     public double wristPower;
-    public boolean extended = false;
 
     private OpenCvCamera controlHubCam;  // Use OpenCvCamera class from FTC SDK
     private static final int CAMERA_WIDTH = 640; // width  of wanted camera resolution
     private static final int CAMERA_HEIGHT = 360; // height of wanted camera resolution
 
     public double power;
-    public boolean armValue = true;
+
 
     SampleDetection pipeline = new SampleDetection();
+
 
     @Override
     public void init() {
@@ -163,7 +161,7 @@ public class mergeCode extends OpMode {
         rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        controller = new PIDController(kp, ki, kd);
+        //controller = new PIDController(kp, ki, kd);
         telemetry =  new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
 
@@ -192,19 +190,20 @@ public class mergeCode extends OpMode {
 
         runtime = new ElapsedTime();
 
+        targetArm = 0;
+        armPower = 0;
+        slidePosition = 0;
+        servoPosition = 0;
+        clawPosition = 0;
+
         runtime.reset();
     }
 
     @Override
     public void loop() {
-        leftStickY = -gamepad1.left_stick_y;+3
-
+        leftStickY = -gamepad1.left_stick_y;
         leftStickX = gamepad1.left_stick_x;
         rightStickX = gamepad1.right_stick_x;
-
-
-
-        dashboard.sendTelemetryPacket(packet);
 
         /*
         double jS = -gamepad2.left_stick_y;
@@ -282,66 +281,74 @@ public class mergeCode extends OpMode {
 
          */
         if(gamepad2.dpad_left || gamepad2.dpad_right){
-            targetArm = 200;
-            armPower = 0.5;
-            slidePosition = 0;
+            //linear slide and arm code
 
             leftSlide.setTargetPosition(0);
             rightSlide.setTargetPosition(0);
             leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSlide.setPower(-1.0);
-            rightSlide.setPower(-1.0);
+            leftSlide.setPower(1.0);
+            rightSlide.setPower(1.0);
 
-            while(leftSlide.isBusy() || rightSlide.isBusy()){
+            while(Math.abs(leftSlide.getCurrentPosition()-leftSlide.getTargetPosition())>20
+                    && Math.abs(rightSlide.getCurrentPosition()-rightSlide.getTargetPosition())>20){
 
             }
+            targetArm = 250;
+            armPower = 0.3;
+            slidePosition = 0;
+            servoPosition = 1.0;
+
+
         } else if(gamepad2.dpad_up){
-            targetArm = 800;
-            armPower = 1.0;
-            slidePosition = 2200;
+            //linear slide and arm code
+            targetArm = 1600;
+            armPower = 0.3;
+            slidePosition = 2100;
+            servoPosition = -1.0;
+            clawPosition = 1.0;
 
-            leftSlide.setTargetPosition(0);
-            rightSlide.setTargetPosition(0);
-            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSlide.setPower(-1.0);
-            rightSlide.setPower(-1.0);
-
-            while(leftSlide.isBusy() || rightSlide.isBusy()){
-
-            }
         } else if(gamepad2.dpad_down){
+
+
             targetArm = 0;
-            armPower = -0.5;
-            slidePosition = 0;
-
-            leftSlide.setTargetPosition(0);
-            rightSlide.setTargetPosition(0);
-            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSlide.setPower(-1.0);
-            rightSlide.setPower(-1.0);
-
-            while(leftSlide.isBusy() || rightSlide.isBusy()){
-
-            }
-        } else if(gamepad2.left_bumper){
-            targetArm = 900;
             armPower = 0.5;
             slidePosition = 0;
+            servoPosition = 1.0;
+            clawPosition = 0.0;
 
+
+
+        } else if(gamepad2.left_bumper){
+            targetArm = 1700;
+            armPower = 0.5;
+            slidePosition = 0;
+        }
+
+        if(servoPosition==1.0){//claw moves for half a second in desired direction
+            runtime.reset();
+            while(runtime.milliseconds()<1500){
+                left.setPower(servoPosition);
+                right.setPower(-servoPosition);
+            }
+            servoPosition = 0;
+        } else {
+            left.setPower(0.0);
+            right.setPower(0.0);
+        }
+        if(targetArm == 0){ //sets the slides down before moving the arm
             leftSlide.setTargetPosition(0);
             rightSlide.setTargetPosition(0);
             leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSlide.setPower(-1.0);
-            rightSlide.setPower(-1.0);
+            leftSlide.setPower(1.0);
+            rightSlide.setPower(1.0);
 
-            while(leftSlide.isBusy() || rightSlide.isBusy()){
+            while(leftSlide.getCurrentPosition()>5){
 
             }
         }
+
 
         arm.setTargetPosition(targetArm);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -349,6 +356,11 @@ public class mergeCode extends OpMode {
 
         while(arm.isBusy()){
 
+            try {
+                Thread.sleep(1000);  // 1000 milliseconds = 1 second
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         leftSlide.setTargetPosition(slidePosition);
@@ -358,18 +370,31 @@ public class mergeCode extends OpMode {
         leftSlide.setPower(1.0);
         rightSlide.setPower(1.0);
 
+        while(leftSlide.isBusy() || rightSlide.isBusy()){
+
+        }
+        claw.setPosition(clawPosition);
+
+        if(servoPosition!=0){//claw moves for half a second in desired direction
+            runtime.reset();
+            while(runtime.milliseconds()<1500){
+                left.setPower(servoPosition);
+                right.setPower(-servoPosition);
+            }
+            servoPosition = 0;
+        } else {
+            left.setPower(0.0);
+            right.setPower(0.0);
+        }
+
+
+
         telemetry.addData("pos", armPos);
-        telemetry.addData("targetArm", targetArm);
-        telemetry.update();
+        telemetry.addData("targetArm", arm.getCurrentPosition());
 
 
 
 
-
-        angle = pipeline.returnAngle();
-        center = pipeline.returnCenter();
-
-        runtime.reset();
 
         /*
         if (gamepad2.a) {
@@ -414,7 +439,7 @@ public class mergeCode extends OpMode {
 
 
         }*/
-
+/*
         if(gamepad2.a){
             left.setPower(-1.0);
             right.setPower(1.0);
@@ -445,68 +470,100 @@ public class mergeCode extends OpMode {
         }
         else{
             claw.setPosition(0.2);
+        }*/
+
+
+
+        if(gamepad2.x){ // moving to centralize the claw
+            angle = pipeline.returnAngle();
+            center = pipeline.returnCenter();
+
+            double x = center.x;
+            double y = center.y;
+            if(Math.abs(x-320)>20 && Math.abs(y-180)>20){//setting the center
+                moveRobotCentric(-(x-320)/Math.sqrt((x*x)+(y*y)), (y-180)/Math.sqrt((x*x)+(y*y)), 0);
+            } else if(Math.abs(angle-90)>3){
+                power = (90-angle)/90;
+                left.setPower(power);
+                right.setPower(power); //setting the angle
+            } else {
+                claw.setPosition(1.0); //open the claw
+            }
+
+
+        } else { // move normally using gamepad1
+            robotOrientation = imu.getRobotYawPitchRollAngles();
+            robotYaw = robotOrientation.getYaw(AngleUnit.RADIANS);
+
+            double rotX = leftStickX * Math.cos(-robotYaw) - leftStickY * Math.sin(-robotYaw);
+            double rotY = leftStickX * Math.sin(-robotYaw) + leftStickY * Math.cos(-robotYaw);
+            double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rightStickX), 1);
+
+            //  || Math.abs(imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate) > 1
+            if (Math.abs(rightStickX) > 0.1) {
+                targetYaw = robotYaw;
+                lastError = 0;
+            }
+
+            if (gamepad1.x) {
+                imu.resetYaw();
+                targetYaw = 0;
+                integralSum = 0;
+                lastError = 0;
+            }
+
+            // PID Calculations
+            double error = targetYaw - robotYaw;
+            error = (error + Math.PI) % (2 * Math.PI) - Math.PI;
+
+            // Compute PID Terms
+            double derivative = (error - lastError) / timer.seconds();
+            integralSum += error * timer.seconds();
+            double correction = (Kp * error) + (Ki * integralSum) + (Kd * derivative);
+
+            double rotationPower = Math.abs(rightStickX) > 0.1 ? rightStickX : -correction;
+
+            frontLeft.setPower((rotY + rotX + rotationPower) / denominator);
+            frontRight.setPower((rotY - rotX - rotationPower) / denominator);
+            backLeft.setPower((rotY - rotX + rotationPower) / denominator);
+            backRight.setPower((rotY + rotX - rotationPower) / denominator);
+
+            lastError = error;
+            timer.reset();
+
+            packet.put("Target: ", Math.toDegrees(targetYaw));
+            packet.put("Actual: ", Math.toDegrees(robotYaw));
+            packet.put("Error: ", Math.toDegrees(error));
+            packet.put("Yaw Acceleration", Math.abs(imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate));
+
+
+            telemetry.addData("Angle: ", angle);
+            telemetry.addData("Latitude: ", lat);
+            telemetry.addData("Longitude: ", lon);
+            telemetry.addData("Center: ", center);
+            telemetry.addData("Xpower", leftStickX);
+
+            telemetry.addData("Ypower", leftStickY);
         }
 
 
-
-
-        robotOrientation = imu.getRobotYawPitchRollAngles();
-        robotYaw = robotOrientation.getYaw(AngleUnit.RADIANS);
-
-        double rotX = leftStickX * Math.cos(-robotYaw) - leftStickY * Math.sin(-robotYaw);
-        double rotY = leftStickX * Math.sin(-robotYaw) + leftStickY * Math.cos(-robotYaw);
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rightStickX), 1);
-
-        //  || Math.abs(imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate) > 1
-        if (Math.abs(rightStickX) > 0.1) {
-            targetYaw = robotYaw;
-            lastError = 0;
-        }
-
-        if (gamepad1.x) {
-            imu.resetYaw();
-            targetYaw = 0;
-            integralSum = 0;
-            lastError = 0;
-        }
-
-        // PID Calculations
-        double error = targetYaw - robotYaw;
-        error = (error + Math.PI) % (2 * Math.PI) - Math.PI;
-
-        // Compute PID Terms
-        double derivative = (error - lastError) / timer.seconds();
-        integralSum += error * timer.seconds();
-        double correction = (Kp * error) + (Ki * integralSum) + (Kd * derivative);
-
-        double rotationPower = Math.abs(rightStickX) > 0.1 ? rightStickX : -correction;
-
-        frontLeft.setPower((rotY + rotX + rotationPower) / denominator);
-        frontRight.setPower((rotY - rotX - rotationPower) / denominator);
-        backLeft.setPower((rotY - rotX + rotationPower) / denominator);
-        backRight.setPower((rotY + rotX - rotationPower) / denominator);
-
-        lastError = error;
-        timer.reset();
 
         // FTC Dashboard
-        packet.put("Target: ", Math.toDegrees(targetYaw));
-        packet.put("Actual: ", Math.toDegrees(robotYaw));
-        packet.put("Error: ", Math.toDegrees(error));
-        packet.put("Yaw Acceleration", Math.abs(imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate));
-
-
-
-        telemetry.addData("Angle: ", angle);
-        telemetry.addData("Latitude: ", lat);
-        telemetry.addData("Longitude: ", lon);
-        telemetry.addData("Center: ", center);
-        telemetry.addData("Xpower", leftStickX);
-
-        telemetry.addData("Ypower", leftStickY);
         telemetry.update();
-
         dashboard.sendTelemetryPacket(packet);
+    }
+
+    public void moveRobotCentric(double x, double y, double rx){
+        double d = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+        double frontLeftPower = (y + x + rx) / d;
+        double backLeftPower = (y - x + rx) / d;
+        double frontRightPower = (y - x - rx) / d;
+        double backRightPower = (y + x - rx) / d;
+
+        frontLeft.setPower(frontLeftPower);
+        backLeft.setPower(backLeftPower);
+        frontRight.setPower(frontRightPower);
+        backRight.setPower(backRightPower);
     }
 
     public void holdSlidePosition(int targetPosition) {
