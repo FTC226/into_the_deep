@@ -1,16 +1,20 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
-
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-public class FieldCentric {
+public class FieldCentricModified {
     public DcMotor frontLeft, frontRight, backLeft, backRight;
 
+    public double frontLeftScalar; //set values based on Encoder Test
+    public double frontRightScalar; //set values based on Encoder Test
+    public double backLeftScalar; //set values based on Encoder Test
+    public double backRightScalar; //set values based on Encoder Test
     // IMU
     public IMU imu;
     public YawPitchRollAngles robotOrientation;
@@ -61,10 +65,10 @@ public class FieldCentric {
         double backLeftPower = (rotY - rotX + rightStickX) / denominator;
         double backRightPower = (rotY + rotX - rightStickX) / denominator;
 
-        frontLeft.setPower(frontLeftPower);
-        frontRight.setPower(frontRightPower);
-        backLeft.setPower(backLeftPower);
-        backRight.setPower(backRightPower);
+        frontLeft.setPower(frontLeftScalar * frontLeftPower);
+        frontRight.setPower(frontRightScalar * frontRightPower);
+        backLeft.setPower(backLeftScalar * backLeftPower);
+        backRight.setPower(backRightScalar * backRightPower);
 
         // Reset IMU
         if (resetYaw) { imu.resetYaw(); }
