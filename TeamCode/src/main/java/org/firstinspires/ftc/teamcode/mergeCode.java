@@ -231,87 +231,64 @@ public class mergeCode extends OpMode {
             moveWrist(0.0, 0.0);
             currentSlidePosition = moveSlides(0);
             currentArmPosition = moveArm(400);
+            currentSlidePosition = moveSlides(20);
             //currentSlidePosition = moveSlides(500);
 
 
 
         } else if(gamepad2.dpad_up){//linear slide and arm code
-            /*
-            targetArm = 900;
-            armPower = 0.7;
-            slidePosition = 2200;
-            servoPosition = 1.0;
-            clawPosition = 0.0;
-
-            leftSlide.setTargetPosition(0);
-            rightSlide.setTargetPosition(0);
-            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSlide.setPower(-1.0);
-            rightSlide.setPower(-1.0);*/
-            currentSlidePosition = moveSlides(0);
+            currentSlidePosition = moveSlides(5);
             currentArmPosition = moveArm(1700);
 
+            while(runtime.seconds()<0.3){}
+
+            /*
             try {
                 Thread.sleep(750); // Delay for 500 milliseconds (0.5 seconds)
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
+            }*/
 
             currentSlidePosition = moveSlides(2200);
             runtime.reset();
 
 
         } else if(gamepad2.dpad_down){
-            /*
-            targetArm = 0;
-            armPower = 0.5;
-            slidePosition = 0;
-            servoPosition = -1.0;
-            clawPosition = 0.0;
+            claw.setPosition(0);
 
-            leftSlide.setTargetPosition(0);
-            rightSlide.setTargetPosition(0);
-            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSlide.setPower(-1.0);
-            rightSlide.setPower(-1.0);*/
-            runtime.reset();
-            while(runtime.milliseconds()<500){
-                moveWrist(1.0, -1.0);
+            if(currentSlidePosition>400 && currentArmPosition>500){
+                currentSlidePosition = moveSlides(5);
             }
-            moveWrist(0.0, 0.0);
-            currentSlidePosition = moveSlides(0);
+
             currentArmPosition = moveArm(0);
-            currentSlidePosition = moveSlides(20);
 
-        } else if(gamepad2.left_bumper){
-            targetArm = 1000;
-            armPower = 0.5;
-            slidePosition = 0;
+            claw.setPosition(1);
 
-            leftSlide.setTargetPosition(0);
-            rightSlide.setTargetPosition(0);
-            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSlide.setPower(-1.0);
-            rightSlide.setPower(-1.0);
+            runtime.reset();
+            while(runtime.seconds()<0.5){}
+
+            currentArmPosition = moveArm(400);
+            currentSlidePosition = moveSlides(0);
+
         } else if(gamepad2.a){
             moveSlides(0);
-            moveArm(2100);
-            moveSlides(1000);
-            moveArm(1900);
+            moveArm(2000);
+            moveSlides(1500);
+            moveArm(1850);
 
-            leftSlide.setTargetPosition(0);
-            rightSlide.setTargetPosition(0);
-            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSlide.setPower(1.0);
-            rightSlide.setPower(1.0);
+            while(runtime.seconds()<0.5){}
 
-            arm.setTargetPosition(0);
-            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            arm.setPower(1.0);
+            leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            leftSlide.setPower(-1.0);
+            rightSlide.setPower(-1.0);
+
+
+
+            runtime.reset();
+            currentArmPosition = moveArm(2400);
+            currentArmPosition = moveArm(0);
+
         }
 
         /*
@@ -329,19 +306,24 @@ public class mergeCode extends OpMode {
             }
         }*/
 
-        if(Math.abs(gamepad2.left_stick_y) > 0.1){
+        if(Math.abs(gamepad2.left_stick_y)>0.1){ //up and down on the claw
             moveWrist(gamepad2.left_stick_y, -gamepad2.left_stick_y);
-        } else if(Math.abs(gamepad2.left_stick_x)>0.1) {
-            moveWrist(gamepad2.left_stick_x, gamepad2.left_stick_x);
-        } else {
+        } else if(Math.abs(gamepad2.left_stick_x)>0.1) { // right and left on the claw
+            moveWrist(0.9*gamepad2.left_stick_x, 0.9*gamepad2.left_stick_x);
+        } else { // do nothing
             moveWrist(0.0,0.0);
         }
 
         if(currentArmPosition == 400){
-            moveSlides(1400, -gamepad2.right_stick_y);
+            currentSlidePosition = moveSlides(1400, -gamepad2.right_stick_y);
         }
 
-        claw.setPosition(1- gamepad2.right_trigger);
+        if (gamepad2.right_trigger>0.2) {
+            claw.setPosition(0);
+        } else {
+            claw.setPosition(1);
+        }
+        //claw.setPosition(1- gamepad2.right_trigger);
 
         telemetry.addData("Arm Position", currentArmPosition);
         telemetry.addData("Slides Position", currentSlidePosition);
@@ -497,7 +479,7 @@ public class mergeCode extends OpMode {
 
         return position;
     }
-    public void moveSlides(int position, double speed){
+    public int moveSlides(int position, double speed){
         if(speed < 0){
             leftSlide.setTargetPosition(0);
             rightSlide.setTargetPosition(0);
@@ -505,7 +487,7 @@ public class mergeCode extends OpMode {
             rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             leftSlide.setPower(Math.abs(speed));
             rightSlide.setPower(Math.abs(speed));
-        } else if(speed>0){
+        } else if(speed>=0){
             leftSlide.setTargetPosition(position);
             rightSlide.setTargetPosition(position);
             leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -513,7 +495,7 @@ public class mergeCode extends OpMode {
             leftSlide.setPower(Math.abs(speed));
             rightSlide.setPower(Math.abs(speed));
         }
-        currentSlidePosition = leftSlide.getCurrentPosition();
+        return leftSlide.getCurrentPosition();
 
     }
 
@@ -525,12 +507,16 @@ public class mergeCode extends OpMode {
     public int moveArm(int position){
         arm.setTargetPosition(position);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm.setPower(0.3);
+        arm.setPower(0.5);
 
         while(arm.isBusy()){
-            leftStickX = 0;
-            leftStickY = 0;
-            rightStickX = 0;
+            leftStickY = -gamepad1.left_stick_y;
+            leftStickX = gamepad1.left_stick_x;
+            rightStickX = gamepad1.right_stick_x;
+
+
+
+
         }
         return position;
     }
