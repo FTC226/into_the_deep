@@ -3,6 +3,9 @@ package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -12,8 +15,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 /** Configuration Notes: CenterStage
@@ -30,7 +32,22 @@ public class MainDrive extends LinearOpMode {
     Claw claw;
     Slides slides;
     Arm arm;
-    SequentialAction runningCommand;
+    Action clawCommand, armCommand, slideCommand;
+    SequentialAction runningAction;
+    ElapsedTime runtime = new ElapsedTime();
+
+    public class Wait implements Action {
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            runtime.reset();
+            while(runtime.seconds()<1){}
+            return false;
+        }
+    }
+
+    public Action Wait() {
+        return new Wait();
+    }
+
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -52,17 +69,30 @@ public class MainDrive extends LinearOpMode {
         TrajectoryActionBuilder wait = drive.actionBuilder(new Pose2d(0, 0, 0))
                 .waitSeconds(1.0);
 
-
         waitForStart();
         while (opModeIsActive()) {
 
-            runningCommand = new SequentialAction(claw.open(),claw.close());
-            Actions.runBlocking(runningCommand);
+            clawCommand = (gamepad2.a) ? claw.open() : claw.close();
+            armCommand = (gamepad2.b) ? arm.moveUp() : arm.hold();
+            slideCommand = (gamepad2.x) ? slides.moveUp() : slides.hold();
+
+            runningAction = (gamepad2.y) ?
+                    new SequentialAction(arm.moveUp(), Wait(), Wait(), Wait(), Wait(), slides.moveUp()) :
+                    new SequentialAction(arm.hold(),slides.hold());
+            Actions.runBlocking(slideCommand);
+
 
 
         }
 
 /*
+
+if(gamepad2.b)
+                armCommand = arm.moveUp();
+            else
+                armCommand = arm.hold();
+
+
     if(gamepad2.a){
                 runningCommand = new SequentialAction(claw.open());
             } else{
