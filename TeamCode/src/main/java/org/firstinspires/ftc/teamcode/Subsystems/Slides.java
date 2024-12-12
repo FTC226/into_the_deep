@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Subsystems;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
@@ -39,8 +39,7 @@ public class Slides {
             rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             leftSlide.setPower(1.0);
             rightSlide.setPower(1.0);
-            return false;
-        }
+            return Math.abs(leftSlide.getTargetPosition()-leftSlide.getCurrentPosition())>10;        }
     }
 
     public Action moveUp(){
@@ -76,7 +75,7 @@ public class Slides {
             rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             leftSlide.setPower(1.0);
             rightSlide.setPower(1.0);
-            return false;
+            return Math.abs(leftSlide.getTargetPosition()-leftSlide.getCurrentPosition())<10;
         }
     }
 

@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.TestPrograms;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.teamcode.FieldCentric;
 import org.firstinspires.ftc.teamcode.FieldCentricModified;
 
 public class straightFCTest extends OpMode {

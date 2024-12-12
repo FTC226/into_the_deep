@@ -1,6 +1,4 @@
-package org.firstinspires.ftc.teamcode;
-
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+package org.firstinspires.ftc.teamcode.Subsystems;
 
 import androidx.annotation.NonNull;
 
@@ -31,7 +29,7 @@ public class Arm {
             arm.setTargetPosition(1700);
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             arm.setPower(0.5);
-            return false;
+            return Math.abs(arm.getTargetPosition()-arm.getCurrentPosition())>10;
         }
 
     }
@@ -62,7 +60,7 @@ public class Arm {
             arm.setTargetPosition(0);
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             arm.setPower(0.5);
-            return false;
+            return Math.abs(arm.getTargetPosition()-arm.getCurrentPosition())>10;
         }
     }
 
