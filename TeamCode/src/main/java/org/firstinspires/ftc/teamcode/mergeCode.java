@@ -1,5 +1,4 @@
 package org.firstinspires.ftc.teamcode;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -15,7 +14,6 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.teamcode.TestPrograms.SampleDetection;
 import org.opencv.core.Point;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -57,6 +55,8 @@ public class mergeCode extends OpMode {
     ElapsedTime timer = new ElapsedTime();
 
     // FTC Dashboard
+
+
     FtcDashboard dashboard = FtcDashboard.getInstance();
     TelemetryPacket packet = new TelemetryPacket();
 
@@ -86,8 +86,9 @@ public class mergeCode extends OpMode {
     public static boolean slidesExtended = false;
     private final double ticks_in_degree = 700 / 180.0;
 
-    public static int currentArmPosition;
-    public static int currentSlidePosition;
+    public static int currentArmPosition =0;
+    public static int currentSlidePosition=0;
+    public static int intendedSlidePosition=0;
 
 
 
@@ -180,6 +181,8 @@ public class mergeCode extends OpMode {
                 "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
 
         // Use OpenCvCameraFactory class from FTC SDK to create camera instance
+
+
         controlHubCam = OpenCvCameraFactory.getInstance().createWebcam(
                 hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
@@ -198,6 +201,11 @@ public class mergeCode extends OpMode {
         runtime = new ElapsedTime();
 
         runtime.reset();
+
+        imu.resetYaw();
+        targetYaw = 0;
+        integralSum = 0;
+        lastError = 0;
     }
 
     @Override
@@ -222,70 +230,69 @@ public class mergeCode extends OpMode {
             rightSlide.setPower(-1.0);*/
             runtime.reset();
             while(runtime.milliseconds()<500){
-                moveWrist(-1.0);
+                moveWrist(1.0, -1.0);
             }
-            moveWrist(0.0);
+            moveWrist(0.0, 0.0);
             currentSlidePosition = moveSlides(0);
-            currentArmPosition = moveArm(200);
+            currentArmPosition = moveArm(400);
+            currentSlidePosition = moveSlides(20);
             //currentSlidePosition = moveSlides(500);
 
 
 
-
-
         } else if(gamepad2.dpad_up){//linear slide and arm code
-            /*
-            targetArm = 900;
-            armPower = 0.7;
-            slidePosition = 2200;
-            servoPosition = 1.0;
-            clawPosition = 0.0;
+            currentSlidePosition = moveSlides(5);
+            currentArmPosition = moveArm(1700);
 
-            leftSlide.setTargetPosition(0);
-            rightSlide.setTargetPosition(0);
-            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSlide.setPower(-1.0);
-            rightSlide.setPower(-1.0);*/
-            currentSlidePosition = moveSlides(0);
-            currentArmPosition = moveArm(900);
+            while(runtime.seconds()<0.3){}
+
+            /*
+            try {
+                Thread.sleep(750); // Delay for 500 milliseconds (0.5 seconds)
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }*/
+
             currentSlidePosition = moveSlides(2200);
             runtime.reset();
 
 
         } else if(gamepad2.dpad_down){
-            /*
-            targetArm = 0;
-            armPower = 0.5;
-            slidePosition = 0;
-            servoPosition = -1.0;
-            clawPosition = 0.0;
+            claw.setPosition(0);
 
-            leftSlide.setTargetPosition(0);
-            rightSlide.setTargetPosition(0);
-            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSlide.setPower(-1.0);
-            rightSlide.setPower(-1.0);*/
-            runtime.reset();
-            while(runtime.milliseconds()<500){
-                moveWrist(1.0);
+            if(currentSlidePosition>400 && currentArmPosition>500){
+                currentSlidePosition = moveSlides(5);
             }
-            moveWrist(0.0);
-            currentSlidePosition = moveSlides(0);
+
             currentArmPosition = moveArm(0);
 
-        } else if(gamepad2.left_bumper){
-            targetArm = 1000;
-            armPower = 0.5;
-            slidePosition = 0;
+            claw.setPosition(1);
 
-            leftSlide.setTargetPosition(0);
-            rightSlide.setTargetPosition(0);
-            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            runtime.reset();
+            while(runtime.seconds()<0.5){}
+
+            currentArmPosition = moveArm(400);
+            currentSlidePosition = moveSlides(0);
+
+        } else if(gamepad2.a){
+            moveSlides(0);
+            moveArm(2000);
+            moveSlides(1500);
+            moveArm(1850);
+
+            while(runtime.seconds()<0.5){}
+
+            leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             leftSlide.setPower(-1.0);
             rightSlide.setPower(-1.0);
+
+
+
+            runtime.reset();
+            currentArmPosition = moveArm(2400);
+            currentArmPosition = moveArm(0);
+
         }
 
         /*
@@ -303,19 +310,30 @@ public class mergeCode extends OpMode {
             }
         }*/
 
-        if(Math.abs(gamepad2.right_stick_y)>0.1 && currentArmPosition == 200){
-            moveSlides(1400, gamepad2.right_stick_y);
-        } else if(Math.abs(gamepad2.left_stick_y)>0.1){
-            moveWrist(-gamepad2.left_stick_y);
+        if(Math.abs(gamepad2.left_stick_y)>0.1){ //up and down on the claw
+            moveWrist(gamepad2.left_stick_y, -gamepad2.left_stick_y);
+        } else if(Math.abs(gamepad2.left_stick_x)>0.1) { // right and left on the claw
+            moveWrist(0.9*gamepad2.left_stick_x, 0.9*gamepad2.left_stick_x);
+        } else { // do nothing
+            moveWrist(0.0,0.0);
         }
 
-        claw.setPosition(gamepad2.right_trigger);
+        if(currentArmPosition == 400){
+            currentSlidePosition = moveSlides(1400, -gamepad2.right_stick_y);
+        }
+
+        if (gamepad2.right_trigger>0.2) {
+            claw.setPosition(0);
+        } else {
+            claw.setPosition(1);
+        }
+        //claw.setPosition(1- gamepad2.right_trigger);
 
         telemetry.addData("Arm Position", currentArmPosition);
         telemetry.addData("Slides Position", currentSlidePosition);
 
-        
-        /*
+
+
         if(gamepad2.x){ // moving to centralize the claw
             angle = pipeline.returnAngle();
             center = pipeline.returnCenter();
@@ -323,7 +341,7 @@ public class mergeCode extends OpMode {
             double x = center.x;
             double y = center.y;
             if(Math.abs(x-320)>20 && Math.abs(y-180)>20){//setting the center
-                moveRobotCentric(-(x-320)/Math.sqrt((x*x)+(y*y)), (y-180)/Math.sqrt((x*x)+(y*y)), 0);
+                moveRobotCentric(-(x-320)/Math.sqrt((x*x)+(y*y)), -(y-180)/Math.sqrt((x*x)+(y*y)), 0);
             } else if(Math.abs(angle-90)>3){
                 power = (90-angle)/90;
                 left.setPower(power);
@@ -387,10 +405,13 @@ public class mergeCode extends OpMode {
 
             telemetry.addData("Ypower", leftStickY);
         }
-        */
 
+
+        /*
         robotOrientation = imu.getRobotYawPitchRollAngles();
+
         robotYaw = robotOrientation.getYaw(AngleUnit.RADIANS);
+        robotYaw = (robotYaw + Math.PI) % (2 * Math.PI) - Math.PI;
 
         double rotX = leftStickX * Math.cos(-robotYaw) - leftStickY * Math.sin(-robotYaw);
         double rotY = leftStickX * Math.sin(-robotYaw) + leftStickY * Math.cos(-robotYaw);
@@ -412,6 +433,10 @@ public class mergeCode extends OpMode {
         // PID Calculations
         double error = targetYaw - robotYaw;
         error = (error + Math.PI) % (2 * Math.PI) - Math.PI;
+
+        if (Math.abs(error) < Math.toRadians(2)) { // 2Â° tolerance
+            error = 0;
+        }
 
         // Compute PID Terms
         double derivative = (error - lastError) / timer.seconds();
@@ -439,6 +464,7 @@ public class mergeCode extends OpMode {
         // FTC Dashboard
         telemetry.update();
         //dashboard.sendTelemetryPacket(packet);
+         */
     }
 
     public int moveSlides(int position){
@@ -449,46 +475,56 @@ public class mergeCode extends OpMode {
         leftSlide.setPower(1.0);
         rightSlide.setPower(1.0);
 
-        while(leftSlide.isBusy() || rightSlide.isBusy()){}
+        while(leftSlide.isBusy() || rightSlide.isBusy()){
+            leftStickX = 0;
+            leftStickY = 0;
+            rightStickX = 0;
+        }
 
         return position;
     }
-    public void moveSlides(int position, double speed){
-        if(speed<0){
+    public int moveSlides(int position, double speed){
+        if(speed < 0){
             leftSlide.setTargetPosition(0);
             rightSlide.setTargetPosition(0);
             leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSlide.setPower(speed);
-            rightSlide.setPower(speed);
+            leftSlide.setPower(Math.abs(speed));
+            rightSlide.setPower(Math.abs(speed));
         } else if(speed>=0){
             leftSlide.setTargetPosition(position);
             rightSlide.setTargetPosition(position);
             leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSlide.setPower(speed);
-            rightSlide.setPower(speed);
+            leftSlide.setPower(Math.abs(speed));
+            rightSlide.setPower(Math.abs(speed));
         }
-        currentSlidePosition = leftSlide.getCurrentPosition();
+        return leftSlide.getCurrentPosition();
 
     }
 
-    public void moveWrist(double speed){
-        left.setPower(speed);
-        right.setPower(-speed);
+    public void moveWrist(double speed1, double speed2){
+        left.setPower(speed1);
+        right.setPower(speed2);
     }
 
     public int moveArm(int position){
-
         arm.setTargetPosition(position);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        arm.setPower(0.5);
+
+        while(arm.isBusy()){
+            leftStickY = -gamepad1.left_stick_y;
+            leftStickX = gamepad1.left_stick_x;
+            rightStickX = gamepad1.right_stick_x;
 
 
-        arm.setPower(((position-arm.getCurrentPosition())/(position-currentArmPosition))*(leftSlide.getCurrentPosition()/2200) + 0.3);
 
-        while(arm.isBusy()){}
+
+        }
         return position;
     }
+
     public void moveRobotCentric(double x, double y, double rx){
         double d = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
         double frontLeftPower = (y + x + rx) / d;
