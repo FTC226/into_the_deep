@@ -1,19 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.ParallelAction;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -29,11 +22,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @TeleOp (name = "Main Drive")
 public class MainDrive extends LinearOpMode {
 
-    Claw claw;
-    Slides slides;
-    Arm arm;
+    Robot robot;
     Action clawCommand, armCommand, slideCommand;
-    SequentialAction runningAction;
+    Action RunningCommand;
     ElapsedTime runtime = new ElapsedTime();
 
     public class Wait implements Action {
@@ -51,35 +42,19 @@ public class MainDrive extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        claw = new Claw(hardwareMap);
-        arm = new Arm(hardwareMap);
-        slides = new Slides(hardwareMap);
-
-        double leftPos = 0, rightPos = 0;
-        int slidePosition = 5;
-        double slidePower;
-
-        int armPosition = 0;
-        double armPower;
-
-        //slides = new Slides(hardwareMap);
-        //arm = new Arm(hardwareMap);
-        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0)); //temporary until Drive (Isabel) is developed
-
-        TrajectoryActionBuilder wait = drive.actionBuilder(new Pose2d(0, 0, 0))
-                .waitSeconds(1.0);
+        robot = new Robot(hardwareMap, telemetry);
 
         waitForStart();
         while (opModeIsActive()) {
-
-            clawCommand = (gamepad2.a) ? claw.open() : claw.close();
-            armCommand = (gamepad2.b) ? arm.moveUp() : arm.hold();
-            slideCommand = (gamepad2.x) ? slides.moveUp() : slides.hold();
-
-            runningAction = (gamepad2.y) ?
-                    new SequentialAction(arm.moveUp(), Wait(), Wait(), Wait(), Wait(), slides.moveUp()) :
-                    new SequentialAction(arm.hold(),slides.hold());
-            Actions.runBlocking(slideCommand);
+            /*
+            if(gamepad2.a) //move up sample
+                RunningCommand = robot.placeSample();
+            else if(gamepad2.b) //move down to drive
+                RunningCommand = robot.resetPosition();
+            else
+                RunningCommand = robot.
+*/
+            Actions.runBlocking(robot.placeSample());
 
 
 
@@ -87,6 +62,13 @@ public class MainDrive extends LinearOpMode {
 
 /*
 
+clawCommand = (gamepad2.a) ? claw.open() : claw.close();
+            armCommand = (gamepad2.b) ? arm.moveUp() : arm.hold();
+            slideCommand = (gamepad2.x) ? slides.moveUp() : slides.hold();
+
+            runningAction = (gamepad2.y) ?
+                    new SequentialAction(arm.moveUp(), Wait(), Wait(), Wait(), Wait(), slides.moveUp()) :
+                    new SequentialAction(arm.hold(),slides.hold());
 if(gamepad2.b)
                 armCommand = arm.moveUp();
             else

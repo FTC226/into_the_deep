@@ -1,6 +1,4 @@
-package org.firstinspires.ftc.teamcode;
-
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+package org.firstinspires.ftc.teamcode.Subsystems;
 
 import androidx.annotation.NonNull;
 
@@ -11,27 +9,32 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class Arm {
     public DcMotorEx arm;
     public int targetPosition;
+    Telemetry Telem;
 
 
-    public Arm(HardwareMap hw){
+    public Arm(HardwareMap hw, Telemetry tm){
         arm = hw.get(DcMotorEx.class, "arm");
         arm.setDirection(DcMotorSimple.Direction.REVERSE);
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Telem = tm;
     }
 
     public class MoveUp implements Action {
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket){
-            targetPosition = 1700;
-            arm.setTargetPosition(1700);
+            targetPosition = 1500;
+            arm.setTargetPosition(1500);
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            arm.setPower(0.5);
-            return false;
+            arm.setPower(0.3);
+            Telem.addData("Arm", arm.getCurrentPosition());
+            return Math.abs(arm.getTargetPosition()-arm.getCurrentPosition())>10;
         }
 
     }
@@ -62,7 +65,7 @@ public class Arm {
             arm.setTargetPosition(0);
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             arm.setPower(0.5);
-            return false;
+            return Math.abs(arm.getTargetPosition()-arm.getCurrentPosition())>10;
         }
     }
 

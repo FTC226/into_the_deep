@@ -112,14 +112,9 @@ public class mergeCode extends OpMode {
     //public double armPower;
     public double wristPower;
 
-    private OpenCvCamera controlHubCam;  // Use OpenCvCamera class from FTC SDK
-    private static final int CAMERA_WIDTH = 640; // width  of wanted camera resolution
-    private static final int CAMERA_HEIGHT = 360; // height of wanted camera resolution
 
     public double power;
 
-
-    SampleDetection pipeline = new SampleDetection();
 
 
     @Override
@@ -177,26 +172,10 @@ public class mergeCode extends OpMode {
 
 
 
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-                "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-
-        // Use OpenCvCameraFactory class from FTC SDK to create camera instance
-
-
-        controlHubCam = OpenCvCameraFactory.getInstance().createWebcam(
-                hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-
-        controlHubCam.setPipeline(pipeline);
-
-        controlHubCam.openCameraDevice();
-        controlHubCam.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
-
-
         left = hardwareMap.get(CRServo.class, "leftServo");
         right = hardwareMap.get(CRServo.class, "rightServo");
         claw = hardwareMap.get(Servo.class, "clawServo");
 
-        FtcDashboard.getInstance().startCameraStream(controlHubCam, 30);
 
         runtime = new ElapsedTime();
 
@@ -335,6 +314,7 @@ public class mergeCode extends OpMode {
 
 
         if(gamepad2.x){ // moving to centralize the claw
+            /*
             angle = pipeline.returnAngle();
             center = pipeline.returnCenter();
 
@@ -348,7 +328,7 @@ public class mergeCode extends OpMode {
                 right.setPower(power); //setting the angle
             } else {
                 claw.setPosition(1.0); //open the claw
-            }
+            }*/
 
 
         } else { // move normally using gamepad1
