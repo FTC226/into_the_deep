@@ -12,6 +12,7 @@ import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -110,84 +111,51 @@ public class RightSideAutonomous extends LinearOpMode {
 
         ArmSlidesClaw armslidesclaw = new ArmSlidesClaw(hardwareMap);
 
-        TrajectoryActionBuilder placeSpecimenPath = drive.actionBuilder(initialPose)
-                .setTangent(Math.toRadians(280))
-                .lineToY(-31)
-                .waitSeconds(1) //Placing Specimen
+        TrajectoryActionBuilder placeFirstSpecimen = drive.actionBuilder(initialPose)
+                .setReversed(true)
+                .splineToLinearHeading(new Pose2d(-3.00, -31.50, Math.toRadians(270.00)), Math.toRadians(90.00))
                 ;
 
-
-        TrajectoryActionBuilder firstSamplePath = placeSpecimenPath.endTrajectory().fresh()
-                .setTangent(Math.toRadians(300))
-                .lineToYLinearHeading(-40, Math.toRadians(270))
-                .setTangent(Math.toRadians(0))
-                .lineToXLinearHeading(35, Math.toRadians(0))
-                .setTangent(Math.toRadians(90))
-                .lineToYLinearHeading(-15,Math.toRadians(0))
-                .setTangent(Math.toRadians(0))
-                .lineToXLinearHeading(45,Math.toRadians(0))
+        TrajectoryActionBuilder pushPath = placeFirstSpecimen.endTrajectory().fresh()
+                .setReversed(false)
+                .splineTo(new Vector2d(24, -38.5), Math.toRadians(0.00))
+                .splineToLinearHeading(new Pose2d(45, -15, Math.toRadians(0.00)), Math.toRadians(0.00))
+                .strafeToConstantHeading(new Vector2d(45, -52))
+                .strafeToConstantHeading(new Vector2d(45, -15))
+                .splineToLinearHeading(new Pose2d(55, -15, Math.toRadians(0.00)), Math.toRadians(270.00))
+                .strafeToConstantHeading(new Vector2d(55, -52))
+                .splineToLinearHeading(new Pose2d(30.00, -60.00, Math.toRadians(0.00)), Math.toRadians(0.00))
+                .waitSeconds(0.001)
+                .splineToLinearHeading(new Pose2d(45.00, -60.00, Math.toRadians(0.00)), Math.toRadians(0.00))
                 ;
+        TrajectoryActionBuilder placeSecondSpecimen = pushPath.endTrajectory().fresh()
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(-1.00, -31.50, Math.toRadians(270.00)), Math.toRadians(90.00))
 
-        TrajectoryActionBuilder pushFirstSample = firstSamplePath.endTrajectory().fresh()
-                .setTangent(Math.toRadians(270))
-                .lineToYLinearHeading(-52, Math.toRadians(0))
                 ;
-
-        TrajectoryActionBuilder goBackToFirstSample = pushFirstSample.endTrajectory().fresh()
-                .setTangent(Math.toRadians(270))
-                .lineToYLinearHeading(-15, Math.toRadians(0))
+        TrajectoryActionBuilder pickUpThirdSpecimen = placeSecondSpecimen.endTrajectory().fresh()
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(30.00, -60.00, Math.toRadians(0.00)), Math.toRadians(0.00))
+                .waitSeconds(0.001)
+                .splineToLinearHeading(new Pose2d(45.00, -60.00, Math.toRadians(0.00)), Math.toRadians(0.00))
                 ;
-
-        TrajectoryActionBuilder secondSamplePath = goBackToFirstSample.endTrajectory().fresh()
-                .setTangent(Math.toRadians(0))
-                .lineToXLinearHeading(55,Math.toRadians(0))
-                .setTangent(Math.toRadians(270))
-                .lineToYLinearHeading(-52, Math.toRadians(0));
-
-
-        TrajectoryActionBuilder pickUpSpecimenSecond = secondSamplePath.endTrajectory().fresh()
-                .setTangent(Math.toRadians(180))
-                .lineToXLinearHeading(45, Math.toRadians(0))
-                .setTangent(Math.toRadians(205))
-                .lineToXLinearHeading(30, Math.toRadians(0))
-                .setTangent(Math.toRadians(0))
-                .lineToXLinearHeading(45,Math.toRadians(0))
-                ;
-
-        TrajectoryActionBuilder placeSpecimenSecond = pickUpSpecimenSecond.endTrajectory().fresh()
-                .setTangent(Math.toRadians(148))
-                .lineToYLinearHeading(-32, Math.toRadians(270))
-                .waitSeconds(1) //Placing Specimen
+        TrajectoryActionBuilder placeThirdSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(1.00, -31.50, Math.toRadians(270.00)), Math.toRadians(90.00))
 
                 ;
 
-
-        TrajectoryActionBuilder pickUpSpecimenThird = placeSpecimenSecond.endTrajectory().fresh()
-                .setTangent(Math.toRadians(320))
-                .lineToYLinearHeading(-58.5, Math.toRadians(0))
-                .setTangent(Math.toRadians(0))
-                .lineToXLinearHeading(44, Math.toRadians(0))
+        TrajectoryActionBuilder pickUpForthSpecimen = placeThirdSpecimen.endTrajectory().fresh()
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(30.00, -60.00, Math.toRadians(0.00)), Math.toRadians(0.00))
+                .waitSeconds(0.001)
+                .splineToLinearHeading(new Pose2d(45.00, -60.00, Math.toRadians(0.00)), Math.toRadians(0.00))
                 ;
 
-        TrajectoryActionBuilder placeSpecimenThird = pickUpSpecimenThird.endTrajectory().fresh()
-                .setTangent(Math.toRadians(149))
-                .lineToYLinearHeading(-32, Math.toRadians(270))
-                .waitSeconds(1) //Placing Specimen
+        TrajectoryActionBuilder placeForthSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(2.50, -31.50, Math.toRadians(270.00)), Math.toRadians(90.00))
 
-                ;
-
-
-        TrajectoryActionBuilder pickUpSpecimenFourth = placeSpecimenThird.endTrajectory().fresh()
-                .setTangent(Math.toRadians(320))
-                .lineToYLinearHeading(-58.5, Math.toRadians(0))
-                .setTangent(Math.toRadians(0))
-                .lineToXLinearHeading(44, Math.toRadians(0))
-                ;
-
-        TrajectoryActionBuilder placeSpecimenFourth = pickUpSpecimenFourth.endTrajectory().fresh()
-                .setTangent(Math.toRadians(150))
-                .lineToYLinearHeading(-32, Math.toRadians(270))
-                .waitSeconds(1) //Placing Specimen
                 ;
 
         waitForStart();
@@ -196,17 +164,13 @@ public class RightSideAutonomous extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        placeSpecimenPath.build(),
-                        firstSamplePath.build(),
-                        pushFirstSample.build(),
-                        goBackToFirstSample.build(),
-                        secondSamplePath.build(),
-                        pickUpSpecimenSecond.build(),
-                        placeSpecimenSecond.build()
-//                        pickUpSpecimenThird.build(),
-//                        placeSpecimenThird.build(),
-//                        pickUpSpecimenFourth.build(),
-//                        placeSpecimenFourth.build()
+                        placeFirstSpecimen.build(),
+                        pushPath.build(),
+                        placeSecondSpecimen.build(),
+                        pickUpThirdSpecimen.build(),
+                        placeThirdSpecimen.build(),
+                        pickUpForthSpecimen.build(),
+                        placeForthSpecimen.build()
                 )
         );
 
