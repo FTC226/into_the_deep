@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Subsystems.Arm;
@@ -19,51 +20,83 @@ public class Robot {
     public Arm arm;
     public Claw claw;
     public Slides slides;
+    public Drive drive;
     Telemetry Telem;
+    private ElapsedTime timer = new ElapsedTime();
+
 
     public Robot(HardwareMap hwMap, Telemetry tm){
         arm = new Arm(hwMap, tm);
         claw = new Claw(hwMap);
         slides = new Slides(hwMap, tm);
+        drive = new Drive(hwMap, tm);
         Telem = tm;
     }
 
 
     public class PlaceSample implements Action {
+        private boolean timerStarted = false;
+
         @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket){
-            claw.moveDown();
-            slides.moveDown();
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            claw.moveUp();
+            claw.close();
 
             arm.moveUp();
-            //waitMillis(200);//adjust as needed
 
-            slides.moveUp();
-            //waitMillis(1500);//adjust as needed
+            if (Math.abs(arm.arm.getTargetPosition()-arm.arm.getCurrentPosition())<5) {
+                slides.moveUp();
+                //telemetry.addData("moving slides", null);
+            }
 
-            claw.moveUp();
-            //waitMillis(200);//adjust as needed
+            if (Math.abs(slides.leftSlide.getTargetPosition()-slides.leftSlide.getCurrentPosition())<5) {
+                claw.moveDown();
+                timer.reset();
+                timerStarted = true;
+            }
 
-            claw.open();
-            //waitMillis(200);//adjust as needed
+            if (timerStarted && timer.seconds() > 3) {
+                claw.open();
+            }
 
-            claw.close();
-            //waitMillis(200);//adjust as needed
-
-            return false;
+            return timerStarted || timer.seconds()<5;
         }
     }
-    public SequentialAction placeSample(){
+    public Action placeSample(){
         //return new PlaceSample();
 
-        return new SequentialAction(arm.moveUp(),//waitMillis(200);//adjust as needed
-                                    slides.moveUp(), //waitMillis(1500);//adjust as needed
-                                    claw.moveUp(), //waitMillis(200);//adjust as needed
-                                    claw.open(), //waitMillis(200);//adjust as needed
-                                    claw.close()
+        return new SequentialAction(
+                claw.moveDown(),
+                arm.moveUp(),//waitMillis(200);//adjust as needed
+                slides.moveUp() //waitMillis(1500);//adjust as needed
+                //waitMillis(200);//adjust as needed
+                //waitMillis(200);//adjust as needed
+
         );
     }
 
+    public Action moveSub(){
+        return new SequentialAction(
+                arm.moveDown(),
+                slides.moveSub()
+        );
+    }
+
+    public Action score(){
+        return new SequentialAction(
+                claw.moveUp(),
+                claw.open(),
+                claw.moveDown()
+
+        );
+    }
+
+    public Action holdPosition(){
+        return new SequentialAction(
+                arm.hold(),
+                slides.hold()
+        );
+    }
 
     public class ResetPosition implements Action {
         @Override
@@ -81,7 +114,14 @@ public class Robot {
         }
     }
     public Action resetPosition(){
-        return new ResetPosition();
+        return new SequentialAction(
+                slides.moveDown(),
+                arm.moveDown(),//waitMillis(200);//adjust as needed
+                claw.moveDown() //waitMillis(1500);//adjust as needed
+                //waitMillis(200);//adjust as needed
+                //waitMillis(200);//adjust as needed
+
+        );
     }
 
     public void waitMillis(int time){
@@ -91,7 +131,9 @@ public class Robot {
             throw new RuntimeException(e);
         }
     }
-
+    public void drive(double x, double y, double rx, boolean resetIMU){
+        drive.driveFC(x,y,rx,resetIMU);
+    }
     /*
     public boolean checkMovement(){
         boolean slideMovement = slides.leftSlide.getVelocity()>5 && slides.rightSlide.getVelocity()>5;

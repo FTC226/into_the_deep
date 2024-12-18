@@ -24,7 +24,7 @@ public class Claw {
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
             claw1.setPosition(0.0);
-            return false;
+            return claw1.getPosition()>0.05;
         }
     }
 
@@ -36,7 +36,7 @@ public class Claw {
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
             claw1.setPosition(1.0);
-            return false;
+            return claw1.getPosition()<0.95;
         }
     }
 
@@ -47,11 +47,11 @@ public class Claw {
     public class MoveDown implements Action{
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket){
-            leftPos += 0.5;
-            rightPos += 0.05;
+            leftPos = 1.0;
+            rightPos = 1.0;
             left.setPosition(leftPos);
             right.setPosition(rightPos);
-            return false;
+            return left.getPosition()<0.95 || right.getPosition()<0.95;
         }
     }
 
@@ -62,11 +62,11 @@ public class Claw {
     public class MoveUp implements Action{
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket){
-            leftPos -= 0.05;
-            rightPos -= 0.05;
+            leftPos =0.0;
+            rightPos =0.0;
             left.setPosition(leftPos);
             right.setPosition(rightPos);
-            return false;
+            return left.getPosition()>0.05 || right.getPosition()>0.05;
         }
     }
 

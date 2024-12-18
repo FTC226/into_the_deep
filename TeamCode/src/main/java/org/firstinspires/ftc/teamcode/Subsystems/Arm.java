@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -15,6 +16,7 @@ public class Arm {
     public DcMotorEx arm;
     public int targetPosition;
     Telemetry Telem;
+    private ElapsedTime timer = new ElapsedTime();
 
 
     public Arm(HardwareMap hw, Telemetry tm){
@@ -27,14 +29,21 @@ public class Arm {
     }
 
     public class MoveUp implements Action {
+        private boolean timerStarted = false;
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket){
-            targetPosition = 1500;
-            arm.setTargetPosition(1500);
+            targetPosition = 1550;
+            arm.setTargetPosition(1550);
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             arm.setPower(0.3);
             Telem.addData("Arm", arm.getCurrentPosition());
-            return Math.abs(arm.getTargetPosition()-arm.getCurrentPosition())>10;
+            Telem.update();
+            if(Math.abs(arm.getTargetPosition()-arm.getCurrentPosition())<5){
+                timer.reset();
+                timerStarted = true;
+            }
+
+            return Math.abs(arm.getTargetPosition()-arm.getCurrentPosition())>10 || !timerStarted || timer.seconds()<0.5;
         }
 
     }
@@ -65,6 +74,8 @@ public class Arm {
             arm.setTargetPosition(0);
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             arm.setPower(0.5);
+            Telem.addData("Arm", arm.getCurrentPosition());
+            Telem.update();
             return Math.abs(arm.getTargetPosition()-arm.getCurrentPosition())>10;
         }
     }
