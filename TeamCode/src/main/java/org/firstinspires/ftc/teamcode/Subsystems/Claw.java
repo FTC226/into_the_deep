@@ -6,26 +6,53 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Claw {
     public Servo claw1, left, right;
-    double leftPos, rightPos;
+    double leftPos, rightPos, clawPos;
+    public ElapsedTime timer = new ElapsedTime();
+
+
 
 
     public Claw(HardwareMap hw){
         left = hw.get(Servo.class, "leftServo");
         right = hw.get(Servo.class, "rightServo");
         claw1 = hw.get(Servo.class, "clawServo");
+        leftPos =0.086;
+        rightPos =-0.554;
+        clawPos= 1.0;
 
 
     }
 
     public class OpenClaw implements Action {
+        private boolean clawTimer;
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
             claw1.setPosition(0.0);
-            return claw1.getPosition()>0.05;
+            if (!clawTimer) {
+                clawTimer = true;
+                timer.reset();
+            }
+
+            clawPos = 1.0;
+            return !clawTimer || !(timer.seconds() > 1);
         }
+    }
+
+    public class OpenClawPerm implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            claw1.setPosition(0.0);
+            clawPos = 0.0;
+            return false;
+        }
+    }
+
+    public Action openPerm(){
+        return new OpenClawPerm();
     }
 
     public Action open(){
@@ -36,7 +63,8 @@ public class Claw {
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
             claw1.setPosition(1.0);
-            return claw1.getPosition()<0.95;
+            clawPos = 1.0;
+            return false;
         }
     }
 
@@ -47,11 +75,12 @@ public class Claw {
     public class MoveDown implements Action{
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket){
-            leftPos = 1.0;
+            leftPos = 0.266;
             rightPos = 1.0;
+
             left.setPosition(leftPos);
             right.setPosition(rightPos);
-            return left.getPosition()<0.95 || right.getPosition()<0.95;
+            return false;
         }
     }
 
@@ -59,20 +88,65 @@ public class Claw {
         return new MoveDown();
     }
 
-    public class MoveUp implements Action{
-        @Override
+    public class Hold implements Action{
         public boolean run(@NonNull TelemetryPacket telemetryPacket){
-            leftPos =0.0;
-            rightPos =0.0;
             left.setPosition(leftPos);
             right.setPosition(rightPos);
-            return left.getPosition()>0.05 || right.getPosition()>0.05;
+            claw1.setPosition(clawPos);
+            return false;
+        }
+
+    }
+
+    public Action hold(){
+        return new Hold();
+    }
+
+    public class MoveUp implements Action{
+        private boolean timerStarted = false;
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket){
+            leftPos =0.25;
+            rightPos =0.364;
+            left.setPosition(leftPos);
+            right.setPosition(rightPos);
+
+            if (!timerStarted) {
+                timerStarted = true;
+                timer.reset();
+            }
+
+            return !timerStarted || !(timer.seconds() > 1);
         }
     }
 
     public Action moveUp(){
         return new MoveUp();
     }
+
+    public class MoveMiddle implements Action{
+        private boolean timerStarted = false;
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket){
+            leftPos =-0.086;
+            rightPos =-0.554;
+            left.setPosition(leftPos);
+            right.setPosition(rightPos);
+
+            if (!timerStarted) {
+                timerStarted = true;
+                timer.reset();
+            }
+
+            return !timerStarted || !(timer.seconds() > 1);
+        }
+    }
+
+    public Action moveMiddle(){
+        return new MoveMiddle();
+    }
+
+
 
     public void bigClose(){
         claw1.setPosition(0.0);
