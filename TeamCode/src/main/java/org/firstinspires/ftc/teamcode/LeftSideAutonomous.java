@@ -96,62 +96,38 @@ public class LeftSideAutonomous extends LinearOpMode {
         }
 
         public class PlaceSample implements Action {
-            private int targetArm = 1700;
-            private int targetSlides = 900;
-
-            private boolean armMoveDown = false;
-            private boolean slideTimerStart = false;
-            private boolean clawTimerStart = false;
-            private boolean waitClawRelease = false;
-            private boolean waitWristDown = false;
-            private boolean slidesMoveDown = false;
+            private boolean wristPlaceSample = false;
+            private boolean resetWrist = false;
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                // Move arm
+                moveArm(1600, 1);
 
-                if (!armMoveDown) {
-                    moveArm(targetArm, 1);
+                // Once arm reached target, move slides
+                if (armReachedTarget(1600, 10)) {
+                    moveSlides(2100, 1);
                 }
 
-                if (armReachedTarget(targetArm, 10) && !slideTimerStart) {
-                    slideTimerStart = true;
+                // Once slide reached target, move wrist
+                if (slidesReachedTarget(2100, 5) && !wristPlaceSample) {
+                    wristPlaceSample = true;
                     timer.reset();
-                }
-
-                if (slideTimerStart && timer.seconds() > 1.5) {
-                    moveSlides(targetSlides, 0.6);
-                }
-
-                if (slidesReachedTarget(targetSlides, 10) && !clawTimerStart) {
-                    clawTimerStart = true;
-                    timer.reset();
-
                     wristPlaceSample();
                 }
 
-                if (clawTimerStart && timer.seconds() > 1 && !waitClawRelease) {
+                // Once wrist is moving and timer has reached seconds, open claw
+                if (wristPlaceSample && timer.seconds() > 1 && !resetWrist) {
+                    resetWrist = true;
+                    timer.reset();
                     claw.setPosition(0);
-                    waitClawRelease = true;
-                    timer.reset();
                 }
 
-                if (waitClawRelease && timer.seconds() > 0.5 && !waitWristDown) {
+                // Once claw is opened and timer reached target, reset wrist
+                if (resetWrist && timer.seconds() > 1) {
                     wristDown();
-                    waitWristDown = true;
-                    timer.reset();
-                }
-
-                if (waitWristDown && timer.seconds() > 1 && !slidesMoveDown) {
                     return false;
                 }
-
-                telemetry.addData("Arm ", arm.getCurrentPosition());
-                telemetry.addData("Arm target ", arm.getTargetPosition());
-                telemetry.addData("Left slide ", leftSlide.getCurrentPosition());
-                telemetry.addData("Right slide ", rightSlide.getCurrentPosition());
-                telemetry.addData("Left slide target ", leftSlide.getTargetPosition());
-                telemetry.addData("Right slide target ", rightSlide.getTargetPosition());
-                telemetry.update();
 
                 return true;
             }
@@ -161,131 +137,76 @@ public class LeftSideAutonomous extends LinearOpMode {
         }
 
         public class GrabSample implements Action {
-            private int targetSlides = 1100;
-            private boolean clawTimerStarted = false;
-            private boolean retractSlides = false;
-            private boolean slidesExtended = false;
+            private boolean closeClaw = false;
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                if (!slidesExtended) {
-                    moveSlides(targetSlides, 1);
-                    claw.setPosition(0);
-                }
+                moveSlides(980, 1);
 
-                wristDown();
-
-                if (slidesReachedTarget(targetSlides, 10) && !clawTimerStarted) {
-                    clawTimerStarted = true;
-                    retractSlides = true;
-                    slidesExtended = true;
+                if (slidesReachedTarget(980, 5) && !closeClaw) {
+                    closeClaw = true;
                     claw.setPosition(1);
                     timer.reset();
                 }
 
-                if (clawTimerStarted && timer.seconds() > 0.5) {
-                    moveSlides(0, 1);
-                }
-
-                return !retractSlides || !slidesReachedTarget(0, 10);
+                return !closeClaw || !(timer.seconds() > 1);
             }
         }
-        public Action grabSample() {
-            return new GrabSample();
-        }
+        public Action grabSample() { return new GrabSample();}
 
-        public class ResetEncoders implements Action {
+        public class ResetArm implements Action {
+            private boolean resetArm = false;
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-                return false;
-            }
-        }
-        public Action resetEncoders() {
-            return new ResetEncoders();
-        }
 
-        public class ResetArmSlides implements Action {
-            private boolean resetTimer = false;
-            private boolean runSlides = false;
-            private boolean slidesDown = false;
-            private boolean runArm = false;
-
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                arm.setTargetPosition(0);
-                leftSlide.setTargetPosition(0);
-                rightSlide.setTargetPosition(0);
-
-                if (!resetTimer) {
+                if (!resetArm) {
+                    arm.setTargetPosition(0);
+                    resetArm = true;
                     timer.reset();
-                    resetTimer = true;
-                    runSlides = true;
+
+                    arm.setPower(-1);
                 }
 
-                if (runSlides && timer.seconds() < 2) {
+                if (resetArm && timer.seconds() > 1) {
+                    arm.setPower(0);
+                    arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    return false;
+                }
+
+                return true;
+            }
+        }
+        public Action resetArm() { return new ResetArm(); }
+
+        public class ResetSlides implements Action {
+            private boolean resetSlides = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if (!resetSlides) {
+                    leftSlide.setTargetPosition(0);
+                    rightSlide.setTargetPosition(0);
+                    resetSlides = true;
+                    timer.reset();
+
                     leftSlide.setPower(-1);
                     rightSlide.setPower(-1);
                 }
 
-                if (timer.seconds() > 2 && runSlides) {
+                if (resetSlides && timer.seconds() > 1) {
                     leftSlide.setPower(0);
                     rightSlide.setPower(0);
-                    runSlides = false;
-                    slidesDown = true;
+                    leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    return false;
                 }
 
-                if (slidesDown && !runArm) {
-                    timer.reset();
-                    runArm = true;
-                }
-
-                if (runArm && timer.seconds() < 2) {
-                    arm.setPower(-1);
-                }
-
-                telemetry.addData("Arm current ", arm.getCurrentPosition());
-                telemetry.addData("Arm target ", arm.getTargetPosition());
-                telemetry.addData("Left slide current ", leftSlide.getCurrentPosition());
-                telemetry.addData("left slide target ", leftSlide.getTargetPosition());
-                telemetry.update();
-
-                return !(timer.seconds() > 2) || !runArm;
+                return true;
             }
         }
-        public Action resetArmSlides() {
-            return new ResetArmSlides();
-        }
-
-        public class CloseClaw implements Action {
-
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                claw.setPosition(1);
-
-                return false;
-            }
-        }
-        public Action closeClaw() {
-            return new CloseClaw();
-        }
-
-        public class OpenClaw implements Action {
-
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                claw.setPosition(0);
-
-                return false;
-            }
-        }
-        public Action openClaw() {
-            return new OpenClaw();
-        }
+        public Action resetSlides() { return new ResetSlides(); }
     }
 
     @Override
@@ -295,27 +216,27 @@ public class LeftSideAutonomous extends LinearOpMode {
 
         ArmSlidesClaw armslidesclaw = new ArmSlidesClaw(hardwareMap);
 
-        TrajectoryActionBuilder placeSample = drive.actionBuilder(initialPose)
+        TrajectoryActionBuilder placeSample = drive.actionBuilder(new Pose2d(-37, -62, Math.toRadians(0)))
                 .setTangent(Math.toRadians(90))
-                .lineToY(-55)
+                .lineToY(-51)
                 .setTangent(Math.toRadians(180))
-                .lineToXLinearHeading(-55, Math.toRadians(45));
+                .lineToXLinearHeading(-53, Math.toRadians(45));
 
         TrajectoryActionBuilder grabSample1 = placeSample.endTrajectory().fresh()
-                .setTangent(Math.toRadians(50))
+                .setTangent(Math.toRadians(45))
                 .lineToXLinearHeading(-48, Math.toRadians(90));
 
         TrajectoryActionBuilder placeSample1 = grabSample1.endTrajectory().fresh()
-                .setTangent(Math.toRadians(230))
-                .lineToXLinearHeading(-55, Math.toRadians(45));
+                .setTangent(Math.toRadians(225))
+                .lineToXLinearHeading(-53, Math.toRadians(45));
 
         TrajectoryActionBuilder grabSample2 = placeSample1.endTrajectory().fresh()
-                .setTangent(Math.toRadians(110))
+                .setTangent(Math.toRadians(135))
                 .lineToXLinearHeading(-58, Math.toRadians(90));
 
         TrajectoryActionBuilder placeSample2 = grabSample2.endTrajectory().fresh()
-                .setTangent(Math.toRadians(290))
-                .lineToXLinearHeading(-55, Math.toRadians(45));
+                .setTangent(Math.toRadians(315))
+                .lineToXLinearHeading(-53, Math.toRadians(45));
 
         TrajectoryActionBuilder grabSample3 = placeSample2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(80))
@@ -323,7 +244,7 @@ public class LeftSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder placeSample3 = grabSample3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(260))
-                .lineToYLinearHeading(-55, Math.toRadians(45));
+                .lineToYLinearHeading(-51, Math.toRadians(45));
 
         TrajectoryActionBuilder parkAtSubmersible = placeSample3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(70))
@@ -338,38 +259,17 @@ public class LeftSideAutonomous extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
                         placeSample.build(),
-                        armslidesclaw.placeSample(),
-                        armslidesclaw.resetArmSlides(),
-                        armslidesclaw.resetEncoders(),
                         grabSample1.build(),
                         armslidesclaw.grabSample(),
-                        armslidesclaw.resetArmSlides(),
-                        armslidesclaw.resetEncoders(),
+                        armslidesclaw.resetSlides(),
                         placeSample1.build(),
-                        armslidesclaw.placeSample(),
-                        armslidesclaw.resetArmSlides(),
-                        armslidesclaw.resetEncoders(),
                         grabSample2.build(),
-                        armslidesclaw.grabSample(),
-                        armslidesclaw.resetArmSlides(),
-                        armslidesclaw.resetEncoders(),
                         placeSample2.build(),
-                        armslidesclaw.placeSample(),
-                        armslidesclaw.resetArmSlides(),
-                        armslidesclaw.resetEncoders(),
                         grabSample3.build(),
                         placeSample3.build(),
-                        armslidesclaw.placeSample(),
-                        armslidesclaw.resetArmSlides(),
-                        armslidesclaw.resetEncoders(),
                         parkAtSubmersible.build()
                 )
         );
 
-//        Actions.runBlocking(
-//                new SequentialAction(
-//                        armslidesclaw.resetArmSlides()
-//                )
-//        );
     }
 }
