@@ -73,18 +73,18 @@ public final class MecanumDrive {
         public double kA = 0.00001; // 0.0001
 
         // path profile parameters (in inches)
-        public double maxWheelVel = 90; // 50
-        public double minProfileAccel = -40; // -30
-        public double maxProfileAccel = 90; // 50
+        public double maxWheelVel = 70; // 50
+        public double minProfileAccel = -30; // -30
+        public double maxProfileAccel = 70; // 50
 
         // turn profile parameters (in radians)
-        public double maxAngVel = Math.toRadians(200); // shared with path Math.PI
-        public double maxAngAccel = Math.toRadians(200); // Math.PI
+        public double maxAngVel = Math.toRadians(180); // shared with path Math.PI
+        public double maxAngAccel = Math.toRadians(180); // Math.PI
 
         // path controller gains
-        public double axialGain = 5.0; // 6
-        public double lateralGain = 4.0; // 5
-        public double headingGain = 2.0; // 3 shared with turn
+        public double axialGain = 6.0;
+        public double lateralGain = 5.0;
+        public double headingGain = 3.0; // shared with turn
 
         public double axialVelGain = 0.0;
         public double lateralVelGain = 0.0;
@@ -315,8 +315,6 @@ public final class MecanumDrive {
 
             MecanumKinematics.WheelVelocities<Time> wheelVels = kinematics.inverse(command);
             double voltage = voltageSensor.getVoltage();
-
-
 
             final MotorFeedforward feedforward = new MotorFeedforward(PARAMS.kS,
                     PARAMS.kV / PARAMS.inPerTick, PARAMS.kA / PARAMS.inPerTick);

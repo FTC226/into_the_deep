@@ -269,7 +269,7 @@ public class RightSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder placeFirstSpecimen = drive.actionBuilder(initialPose)
                 .setReversed(true)
-                .splineToLinearHeading(new Pose2d(-3.00, -34, Math.toRadians(270.00)), Math.toRadians(90.00))
+                .splineToLinearHeading(new Pose2d(-3.00, -32, Math.toRadians(270.00)), Math.toRadians(90.00))
                 .waitSeconds(1)
                 ;
 
@@ -280,7 +280,6 @@ public class RightSideAutonomous extends LinearOpMode {
                 .strafeToConstantHeading(new Vector2d(45, -52))
                 .strafeToConstantHeading(new Vector2d(45, -15))
                 .splineToLinearHeading(new Pose2d(55, -15, Math.toRadians(0.00)), Math.toRadians(270.00))
-                .waitSeconds(0.001)
                 .strafeToConstantHeading(new Vector2d(55, -52))
                 ;
         TrajectoryActionBuilder pickUpSecondSpecimen = pushPath.endTrajectory().fresh()
@@ -328,43 +327,52 @@ public class RightSideAutonomous extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
 
-                        new ParallelAction(
-                                placeFirstSpecimen.build(),
-                                armslidesclaw.placeFirstSpecimen()
-                        ),
+                        placeFirstSpecimen.build(),
+                        pushPath.build(),
+                        pickUpSecondSpecimen.build(),
+                        placeSecondSpecimen.build(),
+                        pickUpThirdSpecimen.build(),
+                        placeThirdSpecimen.build(),
+                        pickUpForthSpecimen.build(),
+                        placeForthSpecimen.build()
 
-                        new ParallelAction(
-                                pushPath.build()
-                        ),
+//                        new ParallelAction(
+//                                placeFirstSpecimen.build(),
+//                                armslidesclaw.placeFirstSpecimen()
+//                        )
 
-                        new ParallelAction(
-                                pickUpSecondSpecimen.build(),
-                                armslidesclaw.pickUpSecondSpecimen()
-                        ),
-
-                        new ParallelAction(
-                                placeSecondSpecimen.build(),
-                                armslidesclaw.placeOtherSpecimen()
-                        ),
-
-                        new ParallelAction(
-                                pickUpThirdSpecimen.build(),
-                                armslidesclaw.pickUpOtherSpecimen()
-                        ),
-
-                        new ParallelAction(
-                                placeThirdSpecimen.build(),
-                                armslidesclaw.placeOtherSpecimen()
-                        ),
-                        new ParallelAction(
-                                pickUpForthSpecimen.build(),
-                                armslidesclaw.pickUpOtherSpecimen()
-                        ),
-
-                        new ParallelAction(
-                                placeForthSpecimen.build(),
-                                armslidesclaw.placeOtherSpecimen()
-                        )
+//                        new ParallelAction(
+//                                pushPath.build()
+//                        ),
+//
+//                        new ParallelAction(
+//                                pickUpSecondSpecimen.build(),
+//                                armslidesclaw.pickUpSecondSpecimen()
+//                        ),
+//
+//                        new ParallelAction(
+//                                placeSecondSpecimen.build(),
+//                                armslidesclaw.placeOtherSpecimen()
+//                        ),
+//
+//                        new ParallelAction(
+//                                pickUpThirdSpecimen.build(),
+//                                armslidesclaw.pickUpOtherSpecimen()
+//                        ),
+//
+//                        new ParallelAction(
+//                                placeThirdSpecimen.build(),
+//                                armslidesclaw.placeOtherSpecimen()
+//                        ),
+//                        new ParallelAction(
+//                                pickUpForthSpecimen.build(),
+//                                armslidesclaw.pickUpOtherSpecimen()
+//                        ),
+//
+//                        new ParallelAction(
+//                                placeForthSpecimen.build(),
+//                                armslidesclaw.placeOtherSpecimen()
+//                        )
                 )
         );
 
