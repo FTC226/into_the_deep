@@ -76,8 +76,19 @@ public class WristTester extends OpMode {
             rightPos = 1;
         }
 
-        left.setPosition(leftPos);
-        right.setPosition(rightPos);
+        if(gamepad1.dpad_up) {
+            left.setPosition(leftPos);
+            right.setPosition(rightPos);
+        }
+
+        if(gamepad1.dpad_down) {
+            claw.setPosition(-1);
+        }
+        if(gamepad1.dpad_right) {
+            claw.setPosition(1);
+        }
+
+
 
         telemetry.addData("Left pos ", leftPos);
         telemetry.addData("Right pos ", rightPos);

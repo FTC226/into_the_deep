@@ -63,6 +63,9 @@ public class Robot {
         //return new PlaceSample();
 
         return new SequentialAction(
+                claw.close(),
+                claw.moveUp(),
+                slides.moveDown(),
                 claw.moveDown(),
                 arm.moveUp(),//waitMillis(200);//adjust as needed
                 slides.moveUp() //waitMillis(1500);//adjust as needed
@@ -74,6 +77,7 @@ public class Robot {
 
     public Action moveSub(){
         return new SequentialAction(
+                claw.moveDown(),
                 slides.moveDown(),
                 claw.moveUp(),
                 arm.moveDown(),
@@ -87,7 +91,17 @@ public class Robot {
         return new SequentialAction(
                 claw.moveUp(),
                 claw.open(),
-                claw.close()
+                claw.close(),
+                claw.moveDown(),
+                claw.open()
+        );
+    }
+
+    public Action specimenScore(){
+        return new SequentialAction(
+                claw.moveUp(),
+                arm.moveUpSpecimen(),
+                slides.moveUp()
         );
     }
 

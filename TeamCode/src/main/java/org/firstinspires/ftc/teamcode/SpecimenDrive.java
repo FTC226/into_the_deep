@@ -7,7 +7,6 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
@@ -32,8 +31,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
  */
 
 //@Disabled
-@TeleOp (name = "Main Drive")
-public class MainDrive extends LinearOpMode {
+@TeleOp (name = "Specimen Drive")
+public class SpecimenDrive extends LinearOpMode {
 
 
 
@@ -206,7 +205,7 @@ public class MainDrive extends LinearOpMode {
     Drive drive;
     MecanumDrive drive2;
     Action clawCommand, armCommand, slideCommand;
-    Action RunningCommand;
+    Action RunningCommand, DrivingCommand;
     ElapsedTime runtime = new ElapsedTime();
 
     public class Wait implements Action {
@@ -227,22 +226,35 @@ public class MainDrive extends LinearOpMode {
         robot = new Robot(hardwareMap, telemetry);
         drive = new Drive(hardwareMap, telemetry);
 
-        Pose2d initialPose = new Pose2d(-26.59, 0.22, Math.toRadians(0));
-        Pose2d finalPose = new Pose2d(-56.18, -63.06, Math.toRadians(0));
+        Pose2d initialPose = new Pose2d(0, -34 , Math.toRadians(90.00));
+//        Pose2d secondPose = new Pose2d(32.89, -53.98, Math.toRadians(-39.76));
+//        Pose2d thirdPose = new Pose2d(32.89, -53.98, Math.toRadians(-90));
+//        Pose2d finalPose = new Pose2d(32.89, -53.98, Math.toRadians(90));
+
 
         drive2 = new MecanumDrive(hardwareMap, initialPose);
 
-        TrajectoryActionBuilder goToBucket = drive2.actionBuilder(initialPose)
+        TrajectoryActionBuilder goToHumanPlayer = drive2.actionBuilder(initialPose)
                 .setReversed(true)
 
-                .strafeToConstantHeading(new Vector2d(-51, 0.22))
-                .strafeToLinearHeading(new Vector2d(-54.5, -55),Math.toRadians(30))
+                .strafeToLinearHeading(new Vector2d(32.89, -53.98), Math.toRadians(-90))
+                .waitSeconds(1)
                 ;
 
-        TrajectoryActionBuilder goToSub = drive2.actionBuilder(finalPose)
+        ;
+        TrajectoryActionBuilder pickUpSpecimen = drive2.actionBuilder(new Pose2d(32.89, -53.98, Math.toRadians(-39.76)))
+                .setReversed(true)
+                .turn(Math.toRadians(-45))
+                .waitSeconds(1)
+                ;
+
+        TrajectoryActionBuilder goToSub = drive2.actionBuilder(new Pose2d(32.89, -53.98, Math.toRadians(-90)))
                 .setReversed(false)
-                .strafeToLinearHeading(new Vector2d(-51, 0.22),Math.toRadians(-5))
-                .strafeToConstantHeading(new Vector2d(-27, 0.22))
+                .strafeToLinearHeading(new Vector2d(-0, -34),Math.toRadians(-90))
+                .waitSeconds(1)
+                ;
+        TrajectoryActionBuilder turnToSub = drive2.actionBuilder(new Pose2d(-0.22, -30.44,Math.toRadians(-90)))
+                .turn(Math.toRadians(180))
                 ;
 
 
@@ -254,7 +266,7 @@ public class MainDrive extends LinearOpMode {
 
 
             if(gamepad2.a) { //move up sample
-                RunningCommand = new ParallelAction(robot.placeSample(), goToBucket.build());
+                RunningCommand = new ParallelAction(robot.placeSample(), goToHumanPlayer.build());
                 drive.botHeading+=Math.toRadians(45);
 //                RunningCommand = new ParallelAction(goToBucket.build());
             }
@@ -275,11 +287,29 @@ public class MainDrive extends LinearOpMode {
                 RunningCommand = new ParallelAction(robot.holdPosition(), drive.driveFC());
 
 
+            if(gamepad1.a) {
+                DrivingCommand = goToHumanPlayer.build();
+                drive.targetYaw -=Math.toRadians(135);
+            }
+            else if(gamepad1.b) {
+                DrivingCommand = pickUpSpecimen.build();
+                drive.targetYaw -=Math.toRadians(45);
+            }
+            else if(gamepad1.y) {
+                DrivingCommand = goToSub.build();
+                drive.targetYaw +=Math.toRadians(0);
+            }
+            else if(gamepad1.x) {
+                DrivingCommand = turnToSub.build();
+                drive.targetYaw +=Math.toRadians(180);
+            }
+            else
+                DrivingCommand = drive.driveFC();
 
             //robot.drive(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.x);
 
             Actions.runBlocking(new ParallelAction(
-                            RunningCommand
+                        DrivingCommand
                     )
             );
 

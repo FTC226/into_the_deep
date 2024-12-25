@@ -99,7 +99,7 @@ public class Slides {
             Telem.addData("Left Slides", leftSlide.getCurrentPosition());
             Telem.addData("Right Slides", rightSlide.getCurrentPosition());
             Telem.update();
-            return Math.abs(leftSlide.getTargetPosition()-leftSlide.getCurrentPosition())>50;
+            return Math.abs(rightSlide.getTargetPosition()-rightSlide.getCurrentPosition())>150;
         }
     }
 

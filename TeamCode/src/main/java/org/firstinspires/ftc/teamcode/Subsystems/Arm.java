@@ -32,21 +32,43 @@ public class Arm {
         private boolean timerStarted = false;
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket){
-            targetPosition = 1550;
-            arm.setTargetPosition(1550);
+            targetPosition = 1570;
+            arm.setTargetPosition(1570);
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             arm.setPower(0.3);
             Telem.addData("Arm", arm.getCurrentPosition());
             Telem.update();
-            if(Math.abs(arm.getTargetPosition()-arm.getCurrentPosition())<5){
-                timer.reset();
-                timerStarted = true;
-            }
+//            if(Math.abs(arm.getTargetPosition()-arm.getCurrentPosition())<5){
+//                timer.reset();
+//                timerStarted = true;
+//            }
 
-            return Math.abs(arm.getTargetPosition()-arm.getCurrentPosition())>10 || !timerStarted || timer.seconds()<0.5;
+            return Math.abs(arm.getTargetPosition()-arm.getCurrentPosition())>10; // || !timerStarted || timer.seconds()<0.5
         }
 
     }
+
+    public class MoveUpSpecimen implements Action {
+        private boolean timerStarted = false;
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket){
+            targetPosition = 700;
+            arm.setTargetPosition(700);
+            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            arm.setPower(0.3);
+            Telem.addData("Arm", arm.getCurrentPosition());
+            Telem.update();
+//            if(Math.abs(arm.getTargetPosition()-arm.getCurrentPosition())<5){
+//                timer.reset();
+//                timerStarted = true;
+//            }
+
+            return Math.abs(arm.getTargetPosition()-arm.getCurrentPosition())>10; // || !timerStarted || timer.seconds()<0.5
+        }
+
+    }
+
+    public Action moveUpSpecimen(){return new MoveUpSpecimen();}
 
     public Action moveUp(){
         return new MoveUp();

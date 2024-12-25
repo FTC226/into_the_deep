@@ -20,8 +20,8 @@ public class Claw {
         left = hw.get(Servo.class, "leftServo");
         right = hw.get(Servo.class, "rightServo");
         claw1 = hw.get(Servo.class, "clawServo");
-        leftPos =0.086;
-        rightPos =-0.554;
+        leftPos =0.542;
+        rightPos =0.408;
         clawPos= 1.0;
 
 
@@ -75,8 +75,8 @@ public class Claw {
     public class MoveDown implements Action{
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket){
-            leftPos = 0.266;
-            rightPos = 1.0;
+            leftPos = 0.358;
+            rightPos = 0.684;
 
             left.setPosition(leftPos);
             right.setPosition(rightPos);
@@ -106,8 +106,8 @@ public class Claw {
         private boolean timerStarted = false;
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket){
-            leftPos =0.25;
-            rightPos =0.364;
+            leftPos =0.686;
+            rightPos =0.31;
             left.setPosition(leftPos);
             right.setPosition(rightPos);
 
@@ -128,8 +128,8 @@ public class Claw {
         private boolean timerStarted = false;
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket){
-            leftPos =-0.086;
-            rightPos =-0.554;
+            leftPos =0.666;
+            rightPos =0.308;
             left.setPosition(leftPos);
             right.setPosition(rightPos);
 

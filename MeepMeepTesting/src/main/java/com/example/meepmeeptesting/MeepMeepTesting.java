@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.VelConstraint;
 import com.noahbres.meepmeep.MeepMeep;
@@ -18,31 +19,39 @@ public class MeepMeepTesting {
 
         RoadRunnerBotEntity rightNoSpline = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
-                .setConstraints(70, 70, Math.toRadians(180), Math.toRadians(180), 15)
+                .setConstraints(70, 70, Math.toRadians(500), Math.toRadians(500), 15)
                 .build();
 
-//        TrajectoryActionBuilder placeSpecimenPath = rightNoSpline.getDrive().actionBuilder(new Pose2d(8, -62, Math.toRadians(270)))
-//                .setReversed(true)
-//                .splineToLinearHeading(new Pose2d(-3.00, -32, Math.toRadians(270.00)), Math.toRadians(90.00))
-//                .waitSeconds(1)
-//                ;
-//
-//        TrajectoryActionBuilder pushPath = placeSpecimenPath.endTrajectory().fresh()
-//                .setReversed(false)
-//                .splineTo(new Vector2d(24, -38.5), Math.toRadians(0.00))
-//                .splineToLinearHeading(new Pose2d(45, -15, Math.toRadians(0.00)), Math.toRadians(0.00))
-//                .strafeToConstantHeading(new Vector2d(45, -52))
-//                .strafeToConstantHeading(new Vector2d(45, -15))
-//                .splineToLinearHeading(new Pose2d(55, -15, Math.toRadians(0.00)), Math.toRadians(270.00))
-//                .strafeToConstantHeading(new Vector2d(55, -52))
-//                ;
-//        TrajectoryActionBuilder pickUpSecondSpecimen = pushPath.endTrajectory().fresh()
-//                .setReversed(true)
-//                .splineToLinearHeading(new Pose2d(35, -59.50, Math.toRadians(270.00)), Math.toRadians(270.00))
-//                .waitSeconds(0.5)
-//                .strafeToConstantHeading(new Vector2d(35.00, -61.00))
-//
-//                ;
+        TrajectoryActionBuilder placeSpecimenPath = rightNoSpline.getDrive().actionBuilder(new Pose2d(8, -62, Math.toRadians(270)))
+                .setTangent(Math.toRadians(105))
+                .lineToYLinearHeading(-32, Math.toRadians(270))
+                .waitSeconds(1)
+                ;
+
+        TrajectoryActionBuilder grabPlaceFirstSample = placeSpecimenPath.endTrajectory().fresh()
+                .setReversed(false)
+                .splineTo(new Vector2d(32, -38.5), Math.toRadians(0.00))
+                .turn(Math.toRadians(42))
+                .waitSeconds(0.5)
+                .turn(Math.toRadians(-84))
+                .turn(Math.toRadians(42))
+                ;
+        TrajectoryActionBuilder grabPlaceSecondSample = grabPlaceFirstSample.endTrajectory().fresh()
+                .setReversed(false)
+                .splineTo(new Vector2d(48, -38.5), Math.toRadians(0.00))
+                .turn(Math.toRadians(42))
+                .waitSeconds(0.5)
+                .turn(Math.toRadians(-84))
+                .turn(Math.toRadians(42))
+                ;
+
+        TrajectoryActionBuilder grabPlaceThirdSample = grabPlaceSecondSample.endTrajectory().fresh()
+                .setReversed(false)
+                .splineTo(new Vector2d(53, -38.5), Math.toRadians(0.00))
+                .turn(Math.toRadians(42))
+                .waitSeconds(0.5)
+                .turn(Math.toRadians(-84))
+                ;
 //        TrajectoryActionBuilder placeSecondSpecimen = pickUpSecondSpecimen.endTrajectory().fresh()
 //                .setReversed(true)
 //                .strafeToConstantHeading(new Vector2d(0.00, -33.00))
@@ -74,18 +83,20 @@ public class MeepMeepTesting {
 //                .waitSeconds(1)
 //                ;
 //
-//        rightNoSpline.runAction(
-//                new SequentialAction(
-//                        placeSpecimenPath.build(),
-//                        pushPath.build(),
+        rightNoSpline.runAction(
+                new SequentialAction(
+                        placeSpecimenPath.build(),
+                        grabPlaceFirstSample.build(),
+                        grabPlaceSecondSample.build(),
+                        grabPlaceThirdSample.build()
 //                        pickUpSecondSpecimen.build(),
 //                        placeSecondSpecimen.build(),
 //                        pickUpThirdSpecimen.build(),
 //                        placeThirdSpecimen.build(),
 //                        pickUpForthSpecimen.build(),
 //                        placeForthSpecimen.build()
-//                )
-//        );
+                )
+        );
 
 
         RoadRunnerBotEntity rightWithSpline = new DefaultBotBuilder(meepMeep)
@@ -94,31 +105,31 @@ public class MeepMeepTesting {
                 .build();
 
         TrajectoryActionBuilder placeFirstSpecimen = rightWithSpline.getDrive().actionBuilder(new Pose2d(8.00, -62.00, Math.toRadians(270.00)))
-                .setReversed(true)
-                .splineToLinearHeading(new Pose2d(-3.00, -32, Math.toRadians(270.00)), Math.toRadians(90.00))
-                .waitSeconds(1)
+                .setTangent(Math.toRadians(105))
+                .lineToYLinearHeading(-32, Math.toRadians(270))
                 ;
 
         TrajectoryActionBuilder pushPath = placeFirstSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineTo(new Vector2d(24, -38.5), Math.toRadians(0.00))
-                .splineToLinearHeading(new Pose2d(45, -15, Math.toRadians(0.00)), Math.toRadians(0.00))
-                .strafeToConstantHeading(new Vector2d(45, -52))
-                .strafeToConstantHeading(new Vector2d(45, -15))
-                .splineToLinearHeading(new Pose2d(55, -15, Math.toRadians(0.00)), Math.toRadians(270.00))
-                .strafeToConstantHeading(new Vector2d(55, -52))
+                .splineTo(new Vector2d(30, -40), Math.toRadians(0.00))
+                .splineToLinearHeading(new Pose2d(42, -17, Math.toRadians(0.00)), Math.toRadians(0.00))
+                .strafeToConstantHeading(new Vector2d(42, -52), new TranslationalVelConstraint(120))
+                .strafeToConstantHeading(new Vector2d(42, -17), new TranslationalVelConstraint(120))
+                .strafeToConstantHeading(new Vector2d(53, -17))
+                .strafeToConstantHeading(new Vector2d(53, -52), new TranslationalVelConstraint(120))
                 ;
-        TrajectoryActionBuilder pickUpSecondSpecimen = pushPath.endTrajectory().fresh()
-//                .setReversed(true)
-                .splineToLinearHeading(new Pose2d(35, -59.50, Math.toRadians(270.00)), Math.toRadians(270.00))
-                .waitSeconds(0.5)
-                .strafeToConstantHeading(new Vector2d(35.00, -61.00))
 
+
+        TrajectoryActionBuilder pickUpSecondSpecimen = pushPath.endTrajectory().fresh()
+                .strafeToLinearHeading(new Vector2d(35, -52), Math.toRadians(270.00), new TranslationalVelConstraint(40))
+                .waitSeconds(0.7)
+                .strafeToConstantHeading(new Vector2d(35, -61.00))
                 ;
+
+
         TrajectoryActionBuilder placeSecondSpecimen = pickUpSecondSpecimen.endTrajectory().fresh()
-//                .setReversed(true)
-                .strafeToConstantHeading(new Vector2d(0.00, -33.00))
-                .waitSeconds(1)
+                .setTangent(Math.toRadians(140))
+                .lineToYLinearHeading(-32, Math.toRadians(270))
                 ;
         TrajectoryActionBuilder pickUpThirdSpecimen = placeSecondSpecimen.endTrajectory().fresh()
 //                .setReversed(false)
@@ -145,19 +156,49 @@ public class MeepMeepTesting {
                 .strafeToConstantHeading(new Vector2d(1.00, -33.00))
                 .waitSeconds(1)
                 ;
+        Pose2d initialPose2 = new Pose2d(-0.22, -30.44, Math.toRadians(90.00));
+        Pose2d secondPose = new Pose2d(32.89, -53.98, Math.toRadians(-39.76));
+        Pose2d finalPose2 = new Pose2d(32.89, -53.98, Math.toRadians(-90));
+        Pose2d lastPose = new Pose2d(32.89, -53.98, Math.toRadians(90));
 
+        TrajectoryActionBuilder goToHumanPlayer = rightWithSpline.getDrive().actionBuilder(initialPose2)
+                .setReversed(true)
+                .strafeToLinearHeading(new Vector2d(32.89, -53.98), Math.toRadians(-39.76))
+                .waitSeconds(1)
+                ;
+
+        ;
+        TrajectoryActionBuilder pickUpSpecimen = rightWithSpline.getDrive().actionBuilder(new Pose2d(32.89, -53.98, Math.toRadians(-39.76)))
+                .setReversed(true)
+                .turn(Math.toRadians(-90+39.76))
+                .waitSeconds(1)
+                ;
+
+        TrajectoryActionBuilder goToSub = rightWithSpline.getDrive().actionBuilder(new Pose2d(32.89, -53.98, Math.toRadians(-90)))
+                .setReversed(false)
+                .strafeToLinearHeading(new Vector2d(-0.22, -30.44),Math.toRadians(-90))
+                .waitSeconds(1)
+                ;
+        TrajectoryActionBuilder turnToSub = rightWithSpline.getDrive().actionBuilder(new Pose2d(-0.22, -30.44,Math.toRadians(-90)))
+                .turn(Math.toRadians(180))
+                ;
 
 
         rightWithSpline.runAction(
                 new SequentialAction(
+
                         placeFirstSpecimen.build(),
                         pushPath.build(),
+
                         pickUpSecondSpecimen.build(),
-                        placeSecondSpecimen.build(),
-                        pickUpThirdSpecimen.build(),
-                        placeThirdSpecimen.build(),
-                        pickUpForthSpecimen.build(),
-                        placeForthSpecimen.build()
+placeSecondSpecimen.build()
+
+
+//                        placeSecondSpecimen.build(),
+//                        pickUpThirdSpecimen.build(),
+//                        placeThirdSpecimen.build(),
+//                        pickUpForthSpecimen.build(),
+//                        placeForthSpecimen.build()
 //                        pickUpThirdSpecimen.build(),
 //                        placeThirdSpecimen.build(),
 //                        pickUpForthSpecimen.build(),
