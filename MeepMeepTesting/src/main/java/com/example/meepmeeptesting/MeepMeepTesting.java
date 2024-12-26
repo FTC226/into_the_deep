@@ -114,23 +114,25 @@ public class MeepMeepTesting {
                 .splineTo(new Vector2d(30, -40), Math.toRadians(0.00))
                 .splineToLinearHeading(new Pose2d(42, -17, Math.toRadians(0.00)), Math.toRadians(0.00))
                 .strafeToConstantHeading(new Vector2d(42, -52), new TranslationalVelConstraint(120))
-                .strafeToConstantHeading(new Vector2d(42, -17), new TranslationalVelConstraint(120))
+                .strafeToLinearHeading(new Vector2d(42, -17), Math.toRadians(270.0), new TranslationalVelConstraint(120))
                 .strafeToConstantHeading(new Vector2d(53, -17))
                 .strafeToConstantHeading(new Vector2d(53, -52), new TranslationalVelConstraint(120))
                 ;
 
 
         TrajectoryActionBuilder pickUpSecondSpecimen = pushPath.endTrajectory().fresh()
-                .strafeToLinearHeading(new Vector2d(35, -52), Math.toRadians(270.00), new TranslationalVelConstraint(40))
+                .strafeToLinearHeading(new Vector2d(35, -52), Math.toRadians(270.00))
                 .waitSeconds(0.7)
                 .strafeToConstantHeading(new Vector2d(35, -61.00))
                 ;
 
 
         TrajectoryActionBuilder placeSecondSpecimen = pickUpSecondSpecimen.endTrajectory().fresh()
-                .setTangent(Math.toRadians(140))
-                .lineToYLinearHeading(-32, Math.toRadians(270))
+                .strafeToConstantHeading(new Vector2d(8, -58), new TranslationalVelConstraint(120))
+                .strafeToConstantHeading(new Vector2d(0, -32), new TranslationalVelConstraint(120))
                 ;
+
+
         TrajectoryActionBuilder pickUpThirdSpecimen = placeSecondSpecimen.endTrajectory().fresh()
 //                .setReversed(false)
                 .strafeToConstantHeading(new Vector2d(35.00, -59.50))
@@ -191,7 +193,7 @@ public class MeepMeepTesting {
                         pushPath.build(),
 
                         pickUpSecondSpecimen.build(),
-placeSecondSpecimen.build()
+                        placeSecondSpecimen.build()
 
 
 //                        placeSecondSpecimen.build(),
