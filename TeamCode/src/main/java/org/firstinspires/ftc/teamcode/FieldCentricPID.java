@@ -15,8 +15,8 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-//@TeleOp (name = "Field Centric PID")
-@Config
+@TeleOp (name = "Field Centric PID")
+//@Config
 @Disabled
 
 public class FieldCentricPID extends OpMode {
@@ -44,8 +44,6 @@ public class FieldCentricPID extends OpMode {
     ElapsedTime timer = new ElapsedTime();
 
     // FTC Dashboard
-    FtcDashboard dashboard = FtcDashboard.getInstance();
-    TelemetryPacket packet = new TelemetryPacket();
 
     @Override
     public void init() {

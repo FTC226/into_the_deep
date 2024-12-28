@@ -12,24 +12,36 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-public class Arm {
+public class Arm extends DriveParent{
     public DcMotorEx arm;
     public int targetPosition;
+    HardwareMap HwMap;
     Telemetry Telem;
     private ElapsedTime timer = new ElapsedTime();
 
 
     public Arm(HardwareMap hw, Telemetry tm){
-        arm = hw.get(DcMotorEx.class, "arm");
+        super(hw, tm);
+        this.HwMap = hw;
+        arm = HwMap.get(DcMotorEx.class, "arm");
         arm.setDirection(DcMotorSimple.Direction.REVERSE);
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Telem = tm;
+
     }
 
     public class MoveUp implements Action {
         private boolean timerStarted = false;
+        double x,y,rx;
+        boolean resetIMU;
+        public MoveUp(double ax, double ay, double arx, boolean aresetIMU){
+            this.x = ax;
+            this.y = ay;
+            this.rx = arx;
+            this.resetIMU = aresetIMU;
+        }
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket){
             targetPosition = 1570;
@@ -38,6 +50,7 @@ public class Arm {
             arm.setPower(0.3);
             Telem.addData("Arm", arm.getCurrentPosition());
             Telem.update();
+            drive(x,y,rx,resetIMU);
 //            if(Math.abs(arm.getTargetPosition()-arm.getCurrentPosition())<5){
 //                timer.reset();
 //                timerStarted = true;
@@ -70,11 +83,17 @@ public class Arm {
 
     public Action moveUpSpecimen(){return new MoveUpSpecimen();}
 
+    public Action moveUp(double x, double y, double rx, boolean resetIMU){
+        return new MoveUp(x,y,rx,resetIMU);
+    }
+
     public Action moveUp(){
-        return new MoveUp();
+        return null;
     }
 
     public class Hold implements Action {
+        double x,y,rx;
+        boolean resetIMU;
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket){
             arm.setTargetPosition(targetPosition);
@@ -90,6 +109,16 @@ public class Arm {
     }
 
     public class MoveDown implements  Action{
+
+        double x,y,rx;
+        boolean resetIMU;
+        public MoveDown(double ax, double ay, double arx, boolean aresetIMU){
+            this.x = ax;
+            this.y = ay;
+            this.rx = arx;
+            this.resetIMU = aresetIMU;
+        }
+
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket){
             targetPosition = 0;
@@ -98,12 +127,17 @@ public class Arm {
             arm.setPower(0.5);
             Telem.addData("Arm", arm.getCurrentPosition());
             Telem.update();
+            drive(x,y,rx,resetIMU);
             return Math.abs(arm.getTargetPosition()-arm.getCurrentPosition())>10;
         }
     }
 
+    public Action moveDown(double x, double y, double rx, boolean resetIMU){
+        return new MoveDown(x,y,rx,resetIMU);
+    }
+
     public Action moveDown(){
-        return new MoveDown();
+        return null;
     }
 
 

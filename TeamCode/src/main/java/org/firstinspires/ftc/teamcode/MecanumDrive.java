@@ -73,13 +73,13 @@ public final class MecanumDrive {
         public double kA = 0.00001; // 0.0001
 
         // path profile parameters (in inches)
-        public double maxWheelVel = 100; // 50
-        public double minProfileAccel = -40; // -30
-        public double maxProfileAccel = 100; // 50
+        public double maxWheelVel = 70; // 50
+        public double minProfileAccel = -30; // -30
+        public double maxProfileAccel = 70; // 50
 
         // turn profile parameters (in radians)
-        public double maxAngVel = Math.toRadians(400); // shared with path Math.PI
-        public double maxAngAccel = Math.toRadians(400); // Math.PI
+        public double maxAngVel = Math.toRadians(180); // shared with path Math.PI
+        public double maxAngAccel = Math.toRadians(180); // Math.PI
 
         // path controller gains
         public double axialGain = 6.0;
@@ -207,6 +207,9 @@ public final class MecanumDrive {
     }
 
     public MecanumDrive(HardwareMap hardwareMap, Pose2d pose) {
+
+
+
         this.pose = pose;
 
         LynxFirmware.throwIfModulesAreOutdated(hardwareMap);
@@ -365,6 +368,7 @@ public final class MecanumDrive {
         }
     }
 
+
     public final class TurnAction implements Action {
         private final TimeTurn turn;
 
@@ -473,6 +477,10 @@ public final class MecanumDrive {
         c.setStrokeWidth(1);
         c.setStroke("#3F51B5");
         c.strokePolyline(xPoints, yPoints);
+    }
+
+    public Pose2d getPoseEstimate(){
+        return this.pose;
     }
 
     public TrajectoryActionBuilder actionBuilder(Pose2d beginPose) {

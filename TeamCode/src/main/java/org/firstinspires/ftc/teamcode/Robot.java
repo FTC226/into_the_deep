@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -75,6 +76,18 @@ public class Robot {
         );
     }
 
+    public Action placeSampleTest(){
+
+        return new ParallelAction(
+                claw.close(),
+                claw.moveUp(),
+                slides.moveDown(),
+                claw.moveDown(),
+                arm.moveUp(),
+                slides.moveUp()
+        );
+    }
+
     public Action moveSub(){
         return new SequentialAction(
                 claw.moveDown(),
@@ -87,8 +100,30 @@ public class Robot {
         );
     }
 
+    public Action moveSubTest(){
+        return new ParallelAction(
+                claw.moveDown(),
+                slides.moveDown(),
+                claw.moveUp(),
+                arm.moveDown(),
+                slides.moveSub(),
+                claw.moveDown(),
+                claw.openPerm()
+        );
+    }
+
     public Action score(){
         return new SequentialAction(
+                claw.moveUp(),
+                claw.open(),
+                claw.close(),
+                claw.moveDown(),
+                claw.open()
+        );
+    }
+
+    public Action scoreTest(){
+        return new ParallelAction(
                 claw.moveUp(),
                 claw.open(),
                 claw.close(),
@@ -130,6 +165,19 @@ public class Robot {
     }
     public Action resetPosition(){
         return new SequentialAction(
+                claw.close(),
+                claw.moveMiddle(),
+                slides.moveDown(),
+                arm.moveDown()//waitMillis(200);//adjust as needed
+                //waitMillis(1500);//adjust as needed
+                //waitMillis(200);//adjust as needed
+                //waitMillis(200);//adjust as needed
+
+        );
+    }
+
+    public Action resetPositionTest(){
+        return new ParallelAction(
                 claw.close(),
                 claw.moveMiddle(),
                 slides.moveDown(),

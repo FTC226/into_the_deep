@@ -18,9 +18,9 @@ import com.acmerobotics.dashboard.config.Config;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-//@TeleOp (name = "FieldCentric")
+@TeleOp (name = "FieldCentric")
 @Config
-@Disabled
+//@Disabled
 
 public class FieldCentric extends OpMode {
 
