@@ -111,11 +111,10 @@ public class MeepMeepTesting {
 
         TrajectoryActionBuilder pushPath = placeFirstSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToConstantHeading(new Vector2d(30, -40), Math.toRadians(0.00))
-                .splineToConstantHeading(new Vector2d(42, -14), Math.toRadians(270.00))
-                .strafeToConstantHeading(new Vector2d(42, -52), new TranslationalVelConstraint(120))
-                .strafeToLinearHeading(new Vector2d(42, -15), Math.toRadians(270.0), new TranslationalVelConstraint(120))
-
+                .splineToConstantHeading(new Vector2d(18, -40), Math.toRadians(0.00))
+                .splineToConstantHeading(new Vector2d(47, -15), Math.toRadians(270.00))
+                .strafeToConstantHeading(new Vector2d(47, -52))
+                .strafeToLinearHeading(new Vector2d(47, -15), Math.toRadians(270.0))
                 ;
 
 
@@ -126,21 +125,22 @@ public class MeepMeepTesting {
 
 
         TrajectoryActionBuilder placeSecondSpecimen = pickUpSecondSpecimen.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(8, -58), new TranslationalVelConstraint(120))
-                .strafeToConstantHeading(new Vector2d(-1, -32), new TranslationalVelConstraint(120))
+//                .strafeToConstantHeading(new Vector2d(8, -58), new TranslationalVelConstraint(120))
+//                .strafeToConstantHeading(new Vector2d(-1, -32), new TranslationalVelConstraint(120))
+                .setReversed(true)
+                .splineToConstantHeading(new Vector2d(0, -32), Math.toRadians(90.00))
                 ;
 
 
 
         TrajectoryActionBuilder pickUpThirdSpecimen = placeSecondSpecimen.endTrajectory().fresh()
-                .strafeToLinearHeading(new Vector2d(35, -52), Math.toRadians(270.00))
-                .waitSeconds(0.5)
-                .strafeToConstantHeading(new Vector2d(35, -61.00))
+                .setReversed(false)
+                .splineToConstantHeading(new Vector2d(35.80, -62), Math.toRadians(270.00))
                 ;
 
         TrajectoryActionBuilder placeThirdSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(8, -58), new TranslationalVelConstraint(120))
-                .strafeToConstantHeading(new Vector2d(-1, -32), new TranslationalVelConstraint(120))
+                .setReversed(true)
+                .splineToConstantHeading(new Vector2d(2, -32), Math.toRadians(90.00))
                 ;
 
         TrajectoryActionBuilder pickUpForthSpecimen = placeThirdSpecimen.endTrajectory().fresh()
@@ -154,6 +154,11 @@ public class MeepMeepTesting {
 //                .setReversed(true)
                 .strafeToConstantHeading(new Vector2d(1.00, -33.00))
                 .waitSeconds(1)
+                ;
+
+        TrajectoryActionBuilder park = placeThirdSpecimen.endTrajectory().fresh()
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(27.09, -53.07, Math.toRadians(320.00)), Math.toRadians(320.00))
                 ;
         Pose2d initialPose2 = new Pose2d(-0.22, -30.44, Math.toRadians(90.00));
         Pose2d secondPose = new Pose2d(32.89, -53.98, Math.toRadians(-39.76));
@@ -192,7 +197,8 @@ public class MeepMeepTesting {
                         pickUpSecondSpecimen.build(),
                         placeSecondSpecimen.build(),
                         pickUpThirdSpecimen.build(),
-                        placeThirdSpecimen.build()
+                        placeThirdSpecimen.build(),
+                        park.build()
 
 //                        pickUpForthSpecimen.build(),
 //                        placeForthSpecimen.build()

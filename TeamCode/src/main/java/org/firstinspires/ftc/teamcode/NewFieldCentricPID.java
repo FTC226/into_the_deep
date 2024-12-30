@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-@TeleOp (name = "Field Centric PID")
+@TeleOp (name = "WorkingTeleOp")
 @Config
 //@Disabled
 
@@ -22,7 +22,7 @@ public class NewFieldCentricPID extends OpMode {
 
     // Motors
     public DcMotor frontLeft, frontRight, backLeft, backRight;
-    public DcMotor leftSlide, rightSlide;
+    public DcMotorEx leftSlide, rightSlide;
     public DcMotorEx arm;
     public Servo leftClaw, rightClaw, claw;
 
@@ -69,8 +69,8 @@ public class NewFieldCentricPID extends OpMode {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        leftSlide = hardwareMap.get(DcMotor.class, "leftSlide");
-        rightSlide = hardwareMap.get(DcMotor.class, "rightSlide");
+        leftSlide = hardwareMap.get(DcMotorEx.class, "leftSlide");
+        rightSlide = hardwareMap.get(DcMotorEx.class, "rightSlide");
 
 
         leftSlide.setDirection(DcMotor.Direction.FORWARD);
@@ -152,23 +152,21 @@ public class NewFieldCentricPID extends OpMode {
         }
 
         if (gamepad2.dpad_right) {
-            if (isWristUp()) {
-                wristDown();
-            } else {
-                wristUp();
-            }
-            openClaw();
+            wristUp();
             pickupSample();
+            wristDown();
         }
 
         if (gamepad2.dpad_left) {
-            closeClaw();
             wristUp();
             resetSlides();
         }
 
-        if (gamepad2.right_stick_button) {
+        if (gamepad2.right_stick_button && !switchMode) {
             placeSpecimen();
+        }
+        if (gamepad2.left_stick_button) {
+            wristPickUpSpecimenGround();
         }
 
         if(gamepad2.right_bumper) {
@@ -224,73 +222,78 @@ public class NewFieldCentricPID extends OpMode {
         return Math.abs(arm.getCurrentPosition() - targetArm) < threshold;
     }
     public boolean isWristUp() {
-        if (leftClaw.getPosition() != -0.248 && rightClaw.getPosition() != 0.556) {
+        if (leftClaw.getPosition() != 0.15 && rightClaw.getPosition() != 0.684) {
             return false;
         }
         return true;
     }
 
     public void wristUp() {
-        leftClaw.setPosition(-0.248);
-        rightClaw.setPosition(0.556);
+        leftClaw.setPosition(0.15);
+        rightClaw.setPosition(0.684);
     }
 
     public void wristDown() {
-        leftClaw.setPosition(0.676);
-        rightClaw.setPosition(0.218);
+        leftClaw.setPosition(0.6);
+        rightClaw.setPosition(0.4);
     }
     public void wristPickUp0() {
-        leftClaw.setPosition(0.676);
-        rightClaw.setPosition(0.218);
+        leftClaw.setPosition(0.6);
+        rightClaw.setPosition(0.4);
     }
 
     public void wristPickUp45() {
-        leftClaw.setPosition(0.72);
-        rightClaw.setPosition(0.34);
+        leftClaw.setPosition(0.7);
+        rightClaw.setPosition(0.4);
     }
 
     public void wristPickUp90() {
-        leftClaw.setPosition(0.346);
-        rightClaw.setPosition(0.102);
+        leftClaw.setPosition(0.9);
+        rightClaw.setPosition(0.55);
     }
     public void wristPlaceSpecimen() {
-        leftClaw.setPosition(0.296);
-        rightClaw.setPosition(0.5);
+        leftClaw.setPosition(0.3);
+        rightClaw.setPosition(0.65);
     }
 
     public void wristPickUpSpecimen() {
-        leftClaw.setPosition(0.442);
-        rightClaw.setPosition(0.364);
+        leftClaw.setPosition(0.45);
+        rightClaw.setPosition(0.55);
+    }
+
+    public void wristPickUpSpecimenGround() {
+        leftClaw.setPosition(0.48);
+        rightClaw.setPosition(0.48);
     }
 
     public void closeClaw() {
         claw.setPosition(1);
     }public void openClaw() {
-        claw.setPosition(-1);
+        claw.setPosition(0);
     }
 
     public void placeSample() {
 
         armPlacingSample();
-        if(armReachedTarget(1600, 50)) {
+        if(armReachedTarget(1650, 50)) {
             leftSlide.setTargetPosition(2125);
             rightSlide.setTargetPosition(2125);
             leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSlide.setPower(1);
-            rightSlide.setPower(1);
+            leftSlide.setVelocity(4250);
+            rightSlide.setVelocity(4250);
         }
-        if (slidesReachedTarget(2150, 50)) {
+        if (slidesReachedTarget(2125, 50)) {
             wristUp();
         }
     }
 
     public void placeSpecimen() {
         wristPlaceSpecimen();
-        arm.setTargetPosition(1650);
+        arm.setTargetPosition(1700);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         arm.setPower(0.8);
-        if(armReachedTarget(1650, 50)) {
+        if(armReachedTarget(1650, 25)) {
             leftSlide.setTargetPosition(1000);
             rightSlide.setTargetPosition(1000);
             leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -305,64 +308,46 @@ public class NewFieldCentricPID extends OpMode {
         rightSlide.setTargetPosition(1100);
         leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftSlide.setPower(1);
-        rightSlide.setPower(1);
+        leftSlide.setVelocity(4250);
+        rightSlide.setVelocity(4250);
     }
     public void pickupSpecimen() {
-        arm.setTargetPosition(700);
+        arm.setTargetPosition(650);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm.setPower(0.8);
+        arm.setVelocity(1000);
     }
 
     public void resetSlides() {
         leftSlide.setTargetPosition(0);
         rightSlide.setTargetPosition(0);
-        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftSlide.setPower(1);
-        rightSlide.setPower(1);
+        leftSlide.setVelocity(4250);
+        rightSlide.setVelocity(4250);
     }
     public void resetEncoderSlides() {
-        leftSlide.setTargetPosition(0);
-        rightSlide.setTargetPosition(0);
-        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftSlide.setPower(1);
-        rightSlide.setPower(1);
+        resetSlides();
         if (slidesReachedTarget(0, 100)) {
             leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            leftSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
     }
 
     public void resetArm() {
         arm.setTargetPosition(0);
-        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm.setPower(0.8);
-        if (armReachedTarget(0, 100)) {
+        arm.setPower(-1);
+        if (armReachedTarget(0, 30)) {
             arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
     }
     public void armPlacingSample() {
         arm.setTargetPosition(1600);
-        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm.setPower(0.8);
-        if (armReachedTarget(0, 100)) {
-            arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
+        arm.setPower(1.0);
     }
 
     public void resetAction() {
         leftSlide.setTargetPosition(0);
         rightSlide.setTargetPosition(0);
-        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftSlide.setPower(1);
-        rightSlide.setPower(1);
+        leftSlide.setVelocity(4250);
+        rightSlide.setVelocity(4250);
         if(slidesReachedTarget(0, 300)) {
             resetArm();
         }

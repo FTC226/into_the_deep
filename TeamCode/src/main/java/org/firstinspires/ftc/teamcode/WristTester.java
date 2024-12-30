@@ -51,17 +51,17 @@ public class WristTester extends OpMode {
         }
 
         if (gamepad1.a) {
-            leftPos = 0.256;
-            rightPos = 0.636;
+            leftPos = 0.1; //bottom
+            rightPos = 0.1;
         } else if (gamepad1.b) {
-            leftPos = 0.612;
-            rightPos = 0.266;
+            leftPos = 0.3; //top
+            rightPos = 0.3;
         } else if (gamepad1.x) {
-            leftPos = 0.524;
-            rightPos = 0.35;
+            leftPos = 0.48;
+            rightPos = 0.48; //bottom 45
         } else if (gamepad1.y) {
-            leftPos = 0.482;
-            rightPos = 0.406;
+            leftPos = 0.9; //bottom 90
+            rightPos = 0.9;
         }
 
         if (leftPos < -1) {
@@ -81,10 +81,10 @@ public class WristTester extends OpMode {
             right.setPosition(rightPos);
         }
 
-        if(gamepad1.dpad_down) {
-            claw.setPosition(-1);
+        if(gamepad1.right_bumper) {
+            claw.setPosition(0);
         }
-        if(gamepad1.dpad_right) {
+        if(gamepad1.left_bumper) {
             claw.setPosition(1);
         }
 

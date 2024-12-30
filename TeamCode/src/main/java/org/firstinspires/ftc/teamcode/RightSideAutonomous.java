@@ -76,32 +76,30 @@ public class RightSideAutonomous extends LinearOpMode {
             rightSlide.setPower(power);
         }
 
-        public void closeClaw() {
-            claw.setPosition(1);
-        }public void openClaw() {
-            claw.setPosition(-1);
+        public void wristUp() {
+            leftClaw.setPosition(0.944);
+            rightClaw.setPosition(0.33);
         }
 
         public void wristDown() {
-//            leftClaw.setPosition(0.358);
-//            rightClaw.setPosition(0.684);
-            leftClaw.setPosition(0.618);
-            rightClaw.setPosition(0.358);
-        }
-
-        public void wristUp() {
-            leftClaw.setPosition(0.226);
-            rightClaw.setPosition(0.798);
+            leftClaw.setPosition(0.364);
+            rightClaw.setPosition(0.664);
         }
 
         public void wristPlaceSpecimen() {
-            leftClaw.setPosition(0.816);
-            rightClaw.setPosition(0.578);
+            leftClaw.setPosition(0.666);
+            rightClaw.setPosition(0.396);
         }
 
         public void wristPickUp() {
-            leftClaw.setPosition(0.85);
-            rightClaw.setPosition(0.514);
+            leftClaw.setPosition(0.5578);
+            rightClaw.setPosition(0.5356);
+        }
+
+        public void closeClaw() {
+            claw.setPosition(1);
+        }public void openClaw() {
+            claw.setPosition(0.2);
         }
 
         public boolean slidesReachedTarget(int targetSlides, int threshold) {
@@ -115,33 +113,25 @@ public class RightSideAutonomous extends LinearOpMode {
         public class PlaceFirstSpecimen implements Action {
             private int armPlacePosition = 1570;
 
-            private int slidesReady = 700;
             private int slidesPlace = 900;
 
-            private boolean isRest = false;
+            private boolean isReset = false;
+
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                if (!isRest) {
-                    timer.seconds();
-                    isRest = true;
-                }
-
-                if (timer.seconds() <= 2.6) {
+                if (timer.seconds() <= 2.8) {
                     moveArm(armPlacePosition, 1);
                     closeClaw();
                     wristPlaceSpecimen();
 
-                    if (armReachedTarget(armPlacePosition, 300)) {
-                        moveSlides(slidesReady, 1);
-                    }
-
-                    if (slidesReachedTarget(slidesReady, 30)) {
+                    if (armReachedTarget(armPlacePosition, 20)) {
                         moveSlides(slidesPlace, 1);
                     }
+
                 }
 
-                if (timer.seconds() > 2.7) {
+                if (timer.seconds() > 2.9) {
                     openClaw();
                     moveSlides(0, 1);
                     moveArm(0, 1);
@@ -149,9 +139,9 @@ public class RightSideAutonomous extends LinearOpMode {
 
 
 
-                if (timer.seconds() > 2.9) {
+                if (timer.seconds() > 3) {
+                    isReset = false;
                     timer.reset();
-                    isRest = false;
                     return false;
                 }
 
@@ -169,10 +159,9 @@ public class RightSideAutonomous extends LinearOpMode {
 
 
 
-        public class PlaceOtherSpecimen implements Action {
-            private int armPlacePosition = 1570;
+        public class PlaceSecondSpecimen implements Action {
+            private int armPlacePosition = 1590;
 
-            private int slidesReady = 700;
             private int slidesPlace = 900;
 
             private boolean isReset = false;
@@ -185,29 +174,83 @@ public class RightSideAutonomous extends LinearOpMode {
                     isReset = true;
                 }
 
-                if (timer.seconds() <= 2.8) {
-                    moveArm(armPlacePosition, 1);
+                if (timer.seconds() <= 3.9) {
+                    if (timer.seconds() > 1.8) {
+                        moveArm(armPlacePosition, 1);
+                    }
                     closeClaw();
                     wristPlaceSpecimen();
 
-                    if (armReachedTarget(armPlacePosition, 300)) {
-                        moveSlides(slidesReady, 1);
-                    }
-
-                    if (slidesReachedTarget(slidesReady, 30)) {
+                    if (armReachedTarget(armPlacePosition, 20) && timer.seconds() > 2.5) {
                         moveSlides(slidesPlace, 1);
                     }
+
                 }
 
-                if (timer.seconds() > 2.9) {
+                if (timer.seconds() > 3.9) {
                     openClaw();
                     moveSlides(0, 1);
-                    moveArm(0, 1);
+                    if (slidesReachedTarget(0, 300)) {
+                        moveArm(0, 1);
+                    }
                 }
 
 
 
-                if (timer.seconds() > 3.1) {
+                if (timer.seconds() > 4) {
+                    isReset = false;
+                    timer.reset();
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+        public Action placeSecondSpecimen() {
+            return new RightSideAutonomous.ArmSlidesClaw.PlaceSecondSpecimen();
+        }
+
+        public class PlaceOtherSpecimen implements Action {
+            private int armPlacePosition = 1590;
+
+            private int slidesPlace = 900;
+
+            private boolean isReset = false;
+
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if (!isReset) {
+                    resetTimer();
+                    isReset = true;
+                }
+
+                if (timer.seconds() <= 3.2) {
+                    if (timer.seconds() > 1.8) {
+                        moveArm(armPlacePosition, 1);
+                    }
+                    closeClaw();
+                    wristPlaceSpecimen();
+
+                    if (armReachedTarget(armPlacePosition, 20) && timer.seconds() > 2.2) {
+                        moveSlides(slidesPlace, 1);
+                    }
+
+                }
+
+                if (timer.seconds() > 3.2) {
+                    openClaw();
+                    moveSlides(0, 1);
+                    if (timer.seconds() > 3) {
+                        moveArm(0, 1);
+
+                    }
+                }
+
+
+
+                if (timer.seconds() > 3.6) {
                     isReset = false;
                     timer.reset();
                     return false;
@@ -222,7 +265,7 @@ public class RightSideAutonomous extends LinearOpMode {
         }
 
         public class PickUpSecondSpecimen implements Action {
-            private int armPickUpPosition = 560;
+            private int armPickUpPosition = 650;
 
             private boolean isReset = false;
 
@@ -256,6 +299,22 @@ public class RightSideAutonomous extends LinearOpMode {
             return new RightSideAutonomous.ArmSlidesClaw.PickUpSecondSpecimen();
         }
 
+
+        public class Parking implements Action {
+
+            private int slidesParking = 2100;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                moveSlides(slidesParking, 1);
+                return true;
+            }
+        }
+
+        public Action parking() {
+            return new RightSideAutonomous.ArmSlidesClaw.Parking();
+        }
+
     }
 
 
@@ -267,66 +326,65 @@ public class RightSideAutonomous extends LinearOpMode {
         Pose2d initialPose = new Pose2d(8, -62, Math.toRadians(270));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
-
         ArmSlidesClaw armslidesclaw = new ArmSlidesClaw(hardwareMap);
 
         TrajectoryActionBuilder placeFirstSpecimen = drive.actionBuilder(initialPose)
-                .setTangent(Math.toRadians(105))
+                .setTangent(Math.toRadians(106))
                 .lineToYLinearHeading(-32, Math.toRadians(270))
                 ;
 
         TrajectoryActionBuilder pushPath = placeFirstSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToConstantHeading(new Vector2d(30, -40), Math.toRadians(0.00))
-                .splineToConstantHeading(new Vector2d(42, -14), Math.toRadians(270.00))
-                .strafeToConstantHeading(new Vector2d(42, -52), new TranslationalVelConstraint(120))
-                .strafeToLinearHeading(new Vector2d(42, -15), Math.toRadians(270.0), new TranslationalVelConstraint(120))
+                .splineToConstantHeading(new Vector2d(22, -40), Math.toRadians(0.00))
+                .splineToConstantHeading(new Vector2d(44, -18), Math.toRadians(270.00))
+                .strafeToConstantHeading(new Vector2d(44, -52))
+                .strafeToLinearHeading(new Vector2d(47, -15), Math.toRadians(270.0))
 
                 ;
 
 
         TrajectoryActionBuilder pickUpSecondSpecimen = pushPath.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(53, -15))
-                .strafeToConstantHeading(new Vector2d(53, -61), new TranslationalVelConstraint(120))
+                .strafeToConstantHeading(new Vector2d(53, -18))
+                .strafeToConstantHeading(new Vector2d(53, -61))
                 ;
 
 
         TrajectoryActionBuilder placeSecondSpecimen = pickUpSecondSpecimen.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(8, -58), new TranslationalVelConstraint(120))
-                .strafeToConstantHeading(new Vector2d(-1, -32), new TranslationalVelConstraint(120))
+                .setReversed(true)
+                .splineToConstantHeading(new Vector2d(1, -35), Math.toRadians(90.00))
                 ;
 
 
 
         TrajectoryActionBuilder pickUpThirdSpecimen = placeSecondSpecimen.endTrajectory().fresh()
-                .strafeToLinearHeading(new Vector2d(35, -52), Math.toRadians(270.00))
-                .waitSeconds(0.5)
-                .strafeToConstantHeading(new Vector2d(35, -61.00))
+                .setReversed(false)
+                .splineToConstantHeading(new Vector2d(35.80, -62), Math.toRadians(270.00))
                 ;
 
         TrajectoryActionBuilder placeThirdSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(8, -58), new TranslationalVelConstraint(120))
-                .strafeToConstantHeading(new Vector2d(-1, -32), new TranslationalVelConstraint(120))
+                .setReversed(true)
+                .splineToConstantHeading(new Vector2d(2, -32), Math.toRadians(90.00))
                 ;
 
         TrajectoryActionBuilder pickUpForthSpecimen = placeThirdSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .strafeToConstantHeading(new Vector2d(35.00, -59.50))
-                .waitSeconds(0.5)
-                .strafeToConstantHeading(new Vector2d(35.00, -61.00))
+                .splineToConstantHeading(new Vector2d(35.80, -62), Math.toRadians(270.00))
                 ;
 
         TrajectoryActionBuilder placeForthSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
                 .setReversed(true)
-                .strafeToConstantHeading(new Vector2d(1.00, -33.00))
-                .waitSeconds(1)
+                .splineToConstantHeading(new Vector2d(3, -32), Math.toRadians(90.00))
+                ;
+
+        TrajectoryActionBuilder park = placeThirdSpecimen.endTrajectory().fresh()
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(27.09, -53.07, Math.toRadians(320.00)), Math.toRadians(320.00))
                 ;
 
         waitForStart();
 
         if (isStopRequested()) return;
 
-//        armslidesclaw.resetTimer();
 
         Actions.runBlocking(
                 new SequentialAction(
@@ -336,21 +394,44 @@ public class RightSideAutonomous extends LinearOpMode {
                         ),
 
                         pushPath.build(),
-//
+
                         new ParallelAction(
                                 pickUpSecondSpecimen.build(),
                                 armslidesclaw.pickUpSecondSpecimen()
                         ),
-//
+////
                         new ParallelAction(
                                 placeSecondSpecimen.build(),
+                                armslidesclaw.placeSecondSpecimen()
+                        ),
+
+                        new ParallelAction(
+                                pickUpThirdSpecimen.build(),
+                                armslidesclaw.pickUpSecondSpecimen()
+
+                        ),
+
+                        new ParallelAction(
+                                placeThirdSpecimen.build(),
                                 armslidesclaw.placeOtherSpecimen()
+                        ),
+
+                        new ParallelAction(
+                                pickUpForthSpecimen.build(),
+                                armslidesclaw.pickUpSecondSpecimen()
+
+                        ),
+
+                        new ParallelAction(
+                                placeForthSpecimen.build(),
+                                armslidesclaw.placeOtherSpecimen()
+                        ),
+
+                        new ParallelAction(
+                                park.build(),
+                                armslidesclaw.parking()
                         )
 
-//                        new ParallelAction(
-//                                armslidesclaw.pickUpSecondSpecimen()
-
-//                        ),
 //                        armslidesclaw.resetSlides(),
 //                        armslidesclaw.resetArm(),
 
