@@ -105,33 +105,28 @@ public class MeepMeepTesting {
                 .build();
 
         TrajectoryActionBuilder placeFirstSpecimen = rightWithSpline.getDrive().actionBuilder(new Pose2d(8.00, -62.00, Math.toRadians(270.00)))
-                .setTangent(Math.toRadians(105))
+                .setTangent(Math.toRadians(106))
                 .lineToYLinearHeading(-32, Math.toRadians(270))
                 ;
 
         TrajectoryActionBuilder pushPath = placeFirstSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToConstantHeading(new Vector2d(18, -40), Math.toRadians(0.00))
-                .splineToConstantHeading(new Vector2d(47, -15), Math.toRadians(270.00))
-                .strafeToConstantHeading(new Vector2d(47, -52))
+                .splineToConstantHeading(new Vector2d(22, -40), Math.toRadians(0.00))
+                .splineToConstantHeading(new Vector2d(44, -18), Math.toRadians(270.00))
+                .strafeToConstantHeading(new Vector2d(44, -52))
                 .strafeToLinearHeading(new Vector2d(47, -15), Math.toRadians(270.0))
                 ;
 
 
         TrajectoryActionBuilder pickUpSecondSpecimen = pushPath.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(53, -15))
-                .strafeToConstantHeading(new Vector2d(53, -61), new TranslationalVelConstraint(120))
+                .strafeToConstantHeading(new Vector2d(53, -18))
+                .strafeToConstantHeading(new Vector2d(53, -61))
                 ;
-
 
         TrajectoryActionBuilder placeSecondSpecimen = pickUpSecondSpecimen.endTrajectory().fresh()
-//                .strafeToConstantHeading(new Vector2d(8, -58), new TranslationalVelConstraint(120))
-//                .strafeToConstantHeading(new Vector2d(-1, -32), new TranslationalVelConstraint(120))
                 .setReversed(true)
-                .splineToConstantHeading(new Vector2d(0, -32), Math.toRadians(90.00))
+                .splineToConstantHeading(new Vector2d(1, -35), Math.toRadians(90.00))
                 ;
-
-
 
         TrajectoryActionBuilder pickUpThirdSpecimen = placeSecondSpecimen.endTrajectory().fresh()
                 .setReversed(false)
@@ -144,47 +139,18 @@ public class MeepMeepTesting {
                 ;
 
         TrajectoryActionBuilder pickUpForthSpecimen = placeThirdSpecimen.endTrajectory().fresh()
-//                .setReversed(false)
-                .strafeToConstantHeading(new Vector2d(35.00, -59.50))
-                .waitSeconds(0.5)
-                .strafeToConstantHeading(new Vector2d(35.00, -61.00))
+                .setReversed(false)
+                .splineToConstantHeading(new Vector2d(35.80, -62), Math.toRadians(270.00))
                 ;
 
         TrajectoryActionBuilder placeForthSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
-//                .setReversed(true)
-                .strafeToConstantHeading(new Vector2d(1.00, -33.00))
-                .waitSeconds(1)
+                .setReversed(true)
+                .splineToConstantHeading(new Vector2d(4, -32), Math.toRadians(90.00))
                 ;
 
         TrajectoryActionBuilder park = placeThirdSpecimen.endTrajectory().fresh()
                 .setReversed(false)
                 .splineToLinearHeading(new Pose2d(27.09, -53.07, Math.toRadians(320.00)), Math.toRadians(320.00))
-                ;
-        Pose2d initialPose2 = new Pose2d(-0.22, -30.44, Math.toRadians(90.00));
-        Pose2d secondPose = new Pose2d(32.89, -53.98, Math.toRadians(-39.76));
-        Pose2d finalPose2 = new Pose2d(32.89, -53.98, Math.toRadians(-90));
-        Pose2d lastPose = new Pose2d(32.89, -53.98, Math.toRadians(90));
-
-        TrajectoryActionBuilder goToHumanPlayer = rightWithSpline.getDrive().actionBuilder(initialPose2)
-                .setReversed(true)
-                .strafeToLinearHeading(new Vector2d(32.89, -53.98), Math.toRadians(-39.76))
-                .waitSeconds(1)
-                ;
-
-        ;
-        TrajectoryActionBuilder pickUpSpecimen = rightWithSpline.getDrive().actionBuilder(new Pose2d(32.89, -53.98, Math.toRadians(-39.76)))
-                .setReversed(true)
-                .turn(Math.toRadians(-90+39.76))
-                .waitSeconds(1)
-                ;
-
-        TrajectoryActionBuilder goToSub = rightWithSpline.getDrive().actionBuilder(new Pose2d(32.89, -53.98, Math.toRadians(-90)))
-                .setReversed(false)
-                .strafeToLinearHeading(new Vector2d(-0.22, -30.44),Math.toRadians(-90))
-                .waitSeconds(1)
-                ;
-        TrajectoryActionBuilder turnToSub = rightWithSpline.getDrive().actionBuilder(new Pose2d(-0.22, -30.44,Math.toRadians(-90)))
-                .turn(Math.toRadians(180))
                 ;
 
 
@@ -193,11 +159,12 @@ public class MeepMeepTesting {
 
                         placeFirstSpecimen.build(),
                         pushPath.build(),
-
                         pickUpSecondSpecimen.build(),
                         placeSecondSpecimen.build(),
                         pickUpThirdSpecimen.build(),
                         placeThirdSpecimen.build(),
+                        pickUpForthSpecimen.build(),
+                        placeForthSpecimen.build(),
                         park.build()
 
 //                        pickUpForthSpecimen.build(),
