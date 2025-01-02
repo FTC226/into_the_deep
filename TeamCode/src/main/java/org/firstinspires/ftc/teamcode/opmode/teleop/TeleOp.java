@@ -11,10 +11,12 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.teamcode.subsystems.Arm;
-import org.firstinspires.ftc.teamcode.subsystems.Claw;
-import org.firstinspires.ftc.teamcode.subsystems.Slides;
-import org.firstinspires.ftc.teamcode.subsystems.Wrist;
+
+//Want to fix the "can't find symbol" the only thing you need to do is refactor the folder subsystems to another name
+import org.firstinspires.ftc.teamcode.subss.Arm;
+import org.firstinspires.ftc.teamcode.subss.Claw;
+import org.firstinspires.ftc.teamcode.subss.Slides;
+import org.firstinspires.ftc.teamcode.subss.Wrist;
 
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "InsiredAwardTeleop")
@@ -222,7 +224,7 @@ public class TeleOp extends OpMode {
     public void placeSample() {
         wrist.Down();
         arm.moveUp();
-        if(armReachedTarget(1600, 50)) {
+        if(armReachedTarget(1600, 100)) {
             slides.placeSample();
         }
         if (slidesReachedTarget(2150, 50)) {
@@ -232,8 +234,11 @@ public class TeleOp extends OpMode {
     public void placeSpecimen() {
         wrist.PlaceSpecimen();
         arm.moveUp();
-        if(armReachedTarget(1650, 50)) {
+        if(armReachedTarget(1650, 100)) {
             slides.placeSpecimen();
+        }
+        if(slidesReachedTarget(900, 100)) {
+            claw.openClaw();
         }
     }
     public void pickupSample() {

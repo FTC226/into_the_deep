@@ -13,6 +13,7 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -23,8 +24,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.tuning.MecanumDrive;
 
+@Disabled
 @Config
-@Autonomous(name = "LeftAutonomous", group = "Autonomous")
+//@Autonomous(name = "LeftAutonomous", group = "Autonomous")
 public class SampleAutonomous extends LinearOpMode {
 
     public class ArmSlidesClaw {

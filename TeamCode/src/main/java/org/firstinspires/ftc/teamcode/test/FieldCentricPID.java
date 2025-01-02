@@ -11,7 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp (name = "Field Centric PID")
+//@TeleOp (name = "Field Centric PID")
 //@Config
 @Disabled
 

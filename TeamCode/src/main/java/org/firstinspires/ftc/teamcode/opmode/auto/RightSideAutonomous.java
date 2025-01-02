@@ -12,6 +12,7 @@ import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -117,7 +118,7 @@ public class RightSideAutonomous extends LinearOpMode {
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                if (timer.seconds() <= 2.8) {
+                if (timer.seconds() <= 2.7) {
                     moveArm(armPlacePosition, 1);
                     closeClaw();
                     wristPlaceSpecimen();
@@ -128,7 +129,7 @@ public class RightSideAutonomous extends LinearOpMode {
 
                 }
 
-                if (timer.seconds() > 2.9) {
+                if (timer.seconds() > 2.7) {
                     openClaw();
                     moveSlides(0, 1);
                     moveArm(0, 1);
@@ -211,7 +212,7 @@ public class RightSideAutonomous extends LinearOpMode {
         public class PlaceOtherSpecimen implements Action {
             private int armPlacePosition = 1590;
 
-            private int slidesPlace = 900;
+            private int slidesPlace = 1000;
 
             private boolean isReset = false;
 
@@ -223,7 +224,7 @@ public class RightSideAutonomous extends LinearOpMode {
                     isReset = true;
                 }
 
-                if (timer.seconds() <= 3.2) {
+                if (timer.seconds() <= 3.5) {
                     if (timer.seconds() > 1.8) {
                         moveArm(armPlacePosition, 1);
                     }
@@ -236,18 +237,17 @@ public class RightSideAutonomous extends LinearOpMode {
 
                 }
 
-                if (timer.seconds() > 3.2) {
+                if (timer.seconds() > 3.5) {
                     openClaw();
                     moveSlides(0, 1);
-                    if (timer.seconds() > 3) {
+                    if (slidesReachedTarget(0, 300)) {
                         moveArm(0, 1);
-
                     }
                 }
 
 
 
-                if (timer.seconds() > 3.6) {
+                if (timer.seconds() > 3.8) {
                     isReset = false;
                     timer.reset();
                     return false;
@@ -326,52 +326,52 @@ public class RightSideAutonomous extends LinearOpMode {
         ArmSlidesClaw armslidesclaw = new ArmSlidesClaw(hardwareMap);
 
         TrajectoryActionBuilder placeFirstSpecimen = drive.actionBuilder(initialPose)
-                .setTangent(Math.toRadians(106))
-                .lineToYLinearHeading(-32, Math.toRadians(270))
+                .setTangent(Math.toRadians(109))
+                .lineToYLinearHeading(-33, Math.toRadians(270))
                 ;
 
         TrajectoryActionBuilder pushPath = placeFirstSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToConstantHeading(new Vector2d(22, -40), Math.toRadians(0.00))
-                .splineToConstantHeading(new Vector2d(44, -18), Math.toRadians(270.00))
-                .strafeToConstantHeading(new Vector2d(44, -52))
-                .strafeToLinearHeading(new Vector2d(47, -15), Math.toRadians(270.0))
+                .splineToConstantHeading(new Vector2d(25, -40), Math.toRadians(0.00))
+                .splineToConstantHeading(new Vector2d(48, -13), Math.toRadians(270.00))
+                .strafeToConstantHeading(new Vector2d(48, -52), new TranslationalVelConstraint(120))
+                .strafeToLinearHeading(new Vector2d(46, -13), Math.toRadians(270.0), new TranslationalVelConstraint(120))
                 ;
 
 
         TrajectoryActionBuilder pickUpSecondSpecimen = pushPath.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(53, -18))
-                .strafeToConstantHeading(new Vector2d(53, -61))
+                .strafeToConstantHeading(new Vector2d(54, -13))
+                .strafeToConstantHeading(new Vector2d(54, -64.5))
                 ;
 
         TrajectoryActionBuilder placeSecondSpecimen = pickUpSecondSpecimen.endTrajectory().fresh()
                 .setReversed(true)
-                .splineToConstantHeading(new Vector2d(1, -35), Math.toRadians(90.00))
+                .splineToConstantHeading(new Vector2d(0, -35), Math.toRadians(90.00))
                 ;
 
         TrajectoryActionBuilder pickUpThirdSpecimen = placeSecondSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToConstantHeading(new Vector2d(35.80, -62), Math.toRadians(270.00))
+                .splineToConstantHeading(new Vector2d(35.80, -60), Math.toRadians(270.00))
                 ;
 
         TrajectoryActionBuilder placeThirdSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
                 .setReversed(true)
-                .splineToConstantHeading(new Vector2d(2, -32), Math.toRadians(90.00))
+                .splineToConstantHeading(new Vector2d(3, -32), Math.toRadians(90.00))
                 ;
 
         TrajectoryActionBuilder pickUpForthSpecimen = placeThirdSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToConstantHeading(new Vector2d(35.80, -62), Math.toRadians(270.00))
+                .splineToConstantHeading(new Vector2d(35.80, -60), Math.toRadians(270.00))
                 ;
 
         TrajectoryActionBuilder placeForthSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
                 .setReversed(true)
-                .splineToConstantHeading(new Vector2d(4, -32), Math.toRadians(90.00))
+                .splineToConstantHeading(new Vector2d(5, -32), Math.toRadians(90.00))
                 ;
 
         TrajectoryActionBuilder park = placeThirdSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToLinearHeading(new Pose2d(27.09, -53.07, Math.toRadians(320.00)), Math.toRadians(320.00))
+                .splineToLinearHeading(new Pose2d(45.09, -60.07, Math.toRadians(320.00)), Math.toRadians(320.00), new TranslationalVelConstraint(120));
                 ;
 
         waitForStart();
@@ -421,8 +421,8 @@ public class RightSideAutonomous extends LinearOpMode {
                         ),
 
                         new ParallelAction(
-                                park.build(),
-                                armslidesclaw.parking()
+                                park.build()
+//                                armslidesclaw.parking()
                         )
 
                 )
