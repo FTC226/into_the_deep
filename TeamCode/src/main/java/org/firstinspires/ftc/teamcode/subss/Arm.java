@@ -42,6 +42,12 @@ public class Arm {
         arm.setPower(power);
     }
 
+    public void readyForHang() {
+        arm.setTargetPosition(200);
+        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        arm.setPower(power);
+    }
+
 
     public int getCurrentPosition() {
         return arm.getCurrentPosition();

@@ -105,53 +105,53 @@ public class MeepMeepTesting {
                 .build();
 
         TrajectoryActionBuilder placeFirstSpecimen = rightWithSpline.getDrive().actionBuilder(new Pose2d(8.00, -62.00, Math.toRadians(270.00)))
-                .setTangent(Math.toRadians(106))
-                .lineToYLinearHeading(-32, Math.toRadians(270))
+                .setTangent(Math.toRadians(109))
+                .lineToYLinearHeading(-33, Math.toRadians(270))
                 ;
 
         TrajectoryActionBuilder pushPath = placeFirstSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToConstantHeading(new Vector2d(22, -40), Math.toRadians(0.00))
-                .splineToConstantHeading(new Vector2d(44, -18), Math.toRadians(270.00))
-                .strafeToConstantHeading(new Vector2d(44, -52))
-                .strafeToLinearHeading(new Vector2d(47, -15), Math.toRadians(270.0))
+                .splineToConstantHeading(new Vector2d(25, -40), Math.toRadians(0.00))
+                .splineToConstantHeading(new Vector2d(46, -13), Math.toRadians(270.00))
+                .strafeToConstantHeading(new Vector2d(47, -52), new TranslationalVelConstraint(120))
+                .strafeToLinearHeading(new Vector2d(46, -13), Math.toRadians(270.0), new TranslationalVelConstraint(120))
                 ;
 
 
         TrajectoryActionBuilder pickUpSecondSpecimen = pushPath.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(53, -18))
-                .strafeToConstantHeading(new Vector2d(53, -61))
+                .strafeToConstantHeading(new Vector2d(54, -13))
+                .strafeToConstantHeading(new Vector2d(54, -64.5))
                 ;
 
         TrajectoryActionBuilder placeSecondSpecimen = pickUpSecondSpecimen.endTrajectory().fresh()
                 .setReversed(true)
-                .splineToConstantHeading(new Vector2d(1, -35), Math.toRadians(90.00))
+                .splineToConstantHeading(new Vector2d(0, -35), Math.toRadians(90.00))
                 ;
 
         TrajectoryActionBuilder pickUpThirdSpecimen = placeSecondSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToConstantHeading(new Vector2d(35.80, -62), Math.toRadians(270.00))
+                .splineToConstantHeading(new Vector2d(35.80, -60), Math.toRadians(270.00))
                 ;
 
         TrajectoryActionBuilder placeThirdSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
                 .setReversed(true)
-                .splineToConstantHeading(new Vector2d(2, -32), Math.toRadians(90.00))
+                .splineToConstantHeading(new Vector2d(3, -32), Math.toRadians(90.00))
                 ;
 
         TrajectoryActionBuilder pickUpForthSpecimen = placeThirdSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToConstantHeading(new Vector2d(35.80, -62), Math.toRadians(270.00))
+                .splineToConstantHeading(new Vector2d(35.80, -60), Math.toRadians(270.00))
                 ;
 
         TrajectoryActionBuilder placeForthSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
                 .setReversed(true)
-                .splineToConstantHeading(new Vector2d(4, -32), Math.toRadians(90.00))
+                .splineToConstantHeading(new Vector2d(5, -32), Math.toRadians(90.00))
                 ;
 
-        TrajectoryActionBuilder park = placeThirdSpecimen.endTrajectory().fresh()
+        TrajectoryActionBuilder park = placeForthSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToLinearHeading(new Pose2d(27.09, -53.07, Math.toRadians(320.00)), Math.toRadians(320.00))
-                ;
+                .splineToSplineHeading(new Pose2d(45.09, -60.00, Math.toRadians(320.00)), Math.toRadians(320.00), new TranslationalVelConstraint(120));
+        ;
 
 
         rightWithSpline.runAction(

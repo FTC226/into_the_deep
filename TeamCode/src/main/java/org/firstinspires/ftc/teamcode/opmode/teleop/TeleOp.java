@@ -30,6 +30,8 @@ public class TeleOp extends OpMode {
     Wrist wrist = new Wrist(this);
     Claw claw = new Claw(this);
 
+    public boolean switchMode = true;
+
     // Motors
     public DcMotor frontLeft, frontRight, backLeft, backRight;
 
@@ -41,7 +43,6 @@ public class TeleOp extends OpMode {
 
     // Gamepad
     public double leftStickY, leftStickX, rightStickX;
-    public boolean switchMode = true;
 
 
     //Robot Yaw
@@ -96,21 +97,12 @@ public class TeleOp extends OpMode {
         leftStickY = -gamepad1.left_stick_y;
         leftStickX = gamepad1.left_stick_x;
         rightStickX = gamepad1.right_stick_x;
-
-
-        // Yaw Velocity
         double zAccel = imu.getRobotAngularVelocity(AngleUnit.DEGREES).zRotationRate;
-
-
-        // Robot Orientation
         robotOrientation = imu.getRobotYawPitchRollAngles();
         robotYaw = robotOrientation.getYaw(AngleUnit.RADIANS);
-
         if (gamepad1.x) {
             imu.resetYaw();
         }
-
-
         // Field Centric Calculations
         double rotX = leftStickX * Math.cos(-robotYaw) - leftStickY * Math.sin(-robotYaw);
         double rotY = leftStickX * Math.sin(-robotYaw) + leftStickY * Math.cos(-robotYaw);
@@ -129,6 +121,10 @@ public class TeleOp extends OpMode {
 
 
         //Gamepad Controll
+
+//        slides.moveSlidesManual(gamepad2.left_stick_y);
+
+
         if(gamepad2.dpad_up && switchMode) {
             placeSample();
         } else if (gamepad2.dpad_up) {
@@ -171,6 +167,7 @@ public class TeleOp extends OpMode {
         }
 
 
+
         if(gamepad2.y) {
             wrist.PickUp0();
         }
@@ -192,8 +189,12 @@ public class TeleOp extends OpMode {
 
 
         if(gamepad2.left_trigger > 0.3) {
-            arm.resetArm();
+            armHang();
         }
+        if(gamepad2.right_trigger > 0.3) {
+            slides.hangExtend();
+        }
+
 
 
         if(switchMode) {
@@ -219,6 +220,15 @@ public class TeleOp extends OpMode {
     }
 
 
+    public void armHang() {
+        arm.readyForHang();
+        if (armReachedTarget(200, 50)) {
+            slides.hangExtend();
+        }
+        if (slidesReachedTarget(1100, 50)) {
+            arm.moveUp();
+        }
+    }
 
 
     public void placeSample() {

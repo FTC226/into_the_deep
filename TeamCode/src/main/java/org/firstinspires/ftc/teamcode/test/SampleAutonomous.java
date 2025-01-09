@@ -12,7 +12,6 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.ftc.Actions;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -22,7 +21,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.tuning.MecanumDrive;
+import org.firstinspires.ftc.teamcode.opmode.auto.mecanumdrive.LeftMecanumDrive;
 
 @Disabled
 @Config
@@ -187,7 +186,7 @@ public class SampleAutonomous extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Pose2d initialPose = new Pose2d(10, -62, Math.toRadians(270));
-        MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
+        LeftMecanumDrive drive = new LeftMecanumDrive(hardwareMap, initialPose);
 
         ArmSlidesClaw armslidesclaw = new ArmSlidesClaw(hardwareMap);
 
