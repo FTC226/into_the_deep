@@ -1,3 +1,4 @@
+
 package org.firstinspires.ftc.teamcode;
 
 import static java.lang.Thread.sleep;
@@ -13,14 +14,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Subsystems.Arm;
 import org.firstinspires.ftc.teamcode.Subsystems.Claw;
-import org.firstinspires.ftc.teamcode.Subsystems.Drive;
 import org.firstinspires.ftc.teamcode.Subsystems.Slides;
 
 public class Robot {
     public Arm arm;
     public Claw claw;
     public Slides slides;
-    public Drive drive;
     Telemetry Telem;
     private ElapsedTime timer = new ElapsedTime();
 
@@ -29,7 +28,6 @@ public class Robot {
         arm = new Arm(hwMap, tm);
         claw = new Claw(hwMap);
         slides = new Slides(hwMap, tm);
-        drive = new Drive(hwMap, tm);
         Telem = tm;
     }
 
@@ -123,7 +121,7 @@ public class Robot {
                 claw.moveMiddle(),
                 slides.moveDown(),
                 arm.moveDown()//waitMillis(200);//adjust as needed
-                 //waitMillis(1500);//adjust as needed
+                //waitMillis(1500);//adjust as needed
                 //waitMillis(200);//adjust as needed
                 //waitMillis(200);//adjust as needed
 
@@ -136,9 +134,6 @@ public class Robot {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-    }
-    public void drive(double x, double y, double rx, boolean resetIMU){
-        drive.driveFC(x,y,rx,resetIMU);
     }
     /*
     public boolean checkMovement(){
