@@ -1,3 +1,4 @@
+
 package org.firstinspires.ftc.teamcode;
 
 import static java.lang.Thread.sleep;
@@ -7,7 +8,6 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -20,7 +20,6 @@ public class Robot {
     public Arm arm;
     public Claw claw;
     public Slides slides;
-    public Drive drive;
     Telemetry Telem;
     private ElapsedTime timer = new ElapsedTime();
 
@@ -29,7 +28,6 @@ public class Robot {
         arm = new Arm(hwMap, tm);
         claw = new Claw(hwMap);
         slides = new Slides(hwMap, tm);
-        drive = new Drive(hwMap, tm);
         Telem = tm;
     }
 
@@ -77,8 +75,12 @@ public class Robot {
 
     public Action moveSub(){
         return new SequentialAction(
+                slides.moveDown(),
+                claw.moveUp(),
                 arm.moveDown(),
-                slides.moveSub()
+                slides.moveSub(),
+                claw.moveDown(),
+                claw.openPerm()
         );
     }
 
@@ -86,15 +88,15 @@ public class Robot {
         return new SequentialAction(
                 claw.moveUp(),
                 claw.open(),
-                claw.moveDown()
-
+                claw.close()
         );
     }
 
     public Action holdPosition(){
         return new SequentialAction(
                 arm.hold(),
-                slides.hold()
+                slides.hold(),
+                claw.hold()
         );
     }
 
@@ -115,9 +117,11 @@ public class Robot {
     }
     public Action resetPosition(){
         return new SequentialAction(
+                claw.close(),
+                claw.moveMiddle(),
                 slides.moveDown(),
-                arm.moveDown(),//waitMillis(200);//adjust as needed
-                claw.moveDown() //waitMillis(1500);//adjust as needed
+                arm.moveDown()//waitMillis(200);//adjust as needed
+                //waitMillis(1500);//adjust as needed
                 //waitMillis(200);//adjust as needed
                 //waitMillis(200);//adjust as needed
 
@@ -130,9 +134,6 @@ public class Robot {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-    }
-    public void drive(double x, double y, double rx, boolean resetIMU){
-        drive.driveFC(x,y,rx,resetIMU);
     }
     /*
     public boolean checkMovement(){
