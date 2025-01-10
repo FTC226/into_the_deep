@@ -18,6 +18,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -30,15 +31,15 @@ import org.firstinspires.ftc.teamcode.opmode.auto.mecanumdrive.RightMecanumDrive
 public class RightSideAutonomous extends LinearOpMode {
 
     public class ArmSlidesClaw {
-        private DcMotor arm, leftSlide, rightSlide;
+        private DcMotorEx arm, leftSlide, rightSlide;
         private Servo leftClaw, rightClaw, claw;
 
         private ElapsedTime timer = new ElapsedTime();
 
         public ArmSlidesClaw(HardwareMap hardwareMap) {
-            arm = hardwareMap.get(DcMotor.class, "arm");
-            leftSlide = hardwareMap.get(DcMotor.class, "leftSlide");
-            rightSlide = hardwareMap.get(DcMotor.class, "rightSlide");
+            arm = hardwareMap.get(DcMotorEx.class, "arm");
+            leftSlide = hardwareMap.get(DcMotorEx.class, "leftSlide");
+            rightSlide = hardwareMap.get(DcMotorEx.class, "rightSlide");
 
             leftClaw = hardwareMap.get(Servo.class, "leftServo");
             rightClaw = hardwareMap.get(Servo.class, "rightServo");
@@ -74,6 +75,17 @@ public class RightSideAutonomous extends LinearOpMode {
             rightSlide.setPower(power);
         }
 
+        public void moveSlidesVel(int targetSlides, double power) {
+            leftSlide.setTargetPosition(targetSlides);
+            rightSlide.setTargetPosition(targetSlides);
+
+            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            leftSlide.setVelocity(power);
+            rightSlide.setVelocity(power);
+        }
+
         public void wristUp() {
             leftClaw.setPosition(-1);
             rightClaw.setPosition(0.666);
@@ -91,7 +103,7 @@ public class RightSideAutonomous extends LinearOpMode {
 
         public void wristPickUp() {
             leftClaw.setPosition(0.182);
-            rightClaw.setPosition(0.55);
+            rightClaw.setPosition(0.522);
         }
 
         public void closeClaw() {
@@ -115,6 +127,8 @@ public class RightSideAutonomous extends LinearOpMode {
 
             private boolean isReset = false;
 
+            private boolean isClipped = true;
+
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
@@ -125,9 +139,11 @@ public class RightSideAutonomous extends LinearOpMode {
                 }
 
 
-                if (timer.seconds() <= 2.4) {
+                if (timer.seconds() <= 2.2) {
                     moveArm(armPlacePosition, 1);
-                    closeClaw();
+                    if (isClipped) {
+                        closeClaw();
+                    }
                     wristPlaceSpecimen();
 
                     if (armReachedTarget(armPlacePosition, 20)) {
@@ -136,11 +152,12 @@ public class RightSideAutonomous extends LinearOpMode {
 
                 }
 
-                if (timer.seconds() > 2.1) {
+                if (timer.seconds() > 1.5) {
+                    isClipped = false;
                     openClaw();
                 }
 
-                if (timer.seconds() > 2.4) {
+                if (timer.seconds() > 2.2) {
                     moveSlides(0, 1);
                     moveArm(0, 1);
                 }
@@ -325,6 +342,19 @@ public class RightSideAutonomous extends LinearOpMode {
             return new RightSideAutonomous.ArmSlidesClaw.Parking();
         }
 
+        public class MoveSlidesDown implements Action {
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                moveSlidesVel(0, 5500);
+                return true;
+            }
+        }
+
+        public Action moveSlidesDown() {
+            return new RightSideAutonomous.ArmSlidesClaw.MoveSlidesDown();
+        }
+
     }
 
 
@@ -333,7 +363,7 @@ public class RightSideAutonomous extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        Pose2d initialPose = new Pose2d(8, -62, Math.toRadians(270));
+        Pose2d initialPose = new Pose2d(6, -62, Math.toRadians(270));
         RightMecanumDrive drive = new RightMecanumDrive(hardwareMap, initialPose);
 
         ArmSlidesClaw armslidesclaw = new ArmSlidesClaw(hardwareMap);
@@ -346,9 +376,9 @@ public class RightSideAutonomous extends LinearOpMode {
         TrajectoryActionBuilder pushPath = placeFirstSpecimen.endTrajectory().fresh()
                 .setReversed(false)
                 .splineToConstantHeading(new Vector2d(22, -40), Math.toRadians(0.00))
-                .splineToConstantHeading(new Vector2d(47, -15), Math.toRadians(270.00))
-                .strafeToConstantHeading(new Vector2d(47, -52), new TranslationalVelConstraint(120))
-                .strafeToLinearHeading(new Vector2d(47, -15), Math.toRadians(270.0), new TranslationalVelConstraint(120))
+                .splineToConstantHeading(new Vector2d(46, -15), Math.toRadians(270.00))
+                .strafeToConstantHeading(new Vector2d(46, -52), new TranslationalVelConstraint(120))
+                .strafeToLinearHeading(new Vector2d(44, -15), Math.toRadians(270.0), new TranslationalVelConstraint(120))
                 ;
 
 
@@ -359,7 +389,7 @@ public class RightSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder placeSecondSpecimen = pickUpSecondSpecimen.endTrajectory().fresh()
                 .setReversed(true)
-                .splineToConstantHeading(new Vector2d(0, -35), Math.toRadians(90.00))
+                .splineToConstantHeading(new Vector2d(0.2, -37), Math.toRadians(90.00))
                 ;
 
         TrajectoryActionBuilder pickUpThirdSpecimen = placeSecondSpecimen.endTrajectory().fresh()
@@ -433,9 +463,7 @@ public class RightSideAutonomous extends LinearOpMode {
                                 armslidesclaw.placeOtherSpecimen()
                         ),
 
-                        new ParallelAction(
-                                park.build()
-                        )
+                        armslidesclaw.moveSlidesDown()
 
                 )
         );

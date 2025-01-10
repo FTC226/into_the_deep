@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+
 @Config
 public final class LeftMecanumDrive {
     public static class Params {
@@ -76,9 +77,9 @@ public final class LeftMecanumDrive {
         public double kA = 0.00001; // 0.0001
 
         // path profile parameters (in inches)
-        public double maxWheelVel = 80; // 50
+        public double maxWheelVel = 75; // 50
         public double minProfileAccel = -30; // -30
-        public double maxProfileAccel = 80; // 50
+        public double maxProfileAccel = 75; // 50
 
         // turn profile parameters (in radians)
         public double maxAngVel = Math.toRadians(180); // shared with path Math.PI

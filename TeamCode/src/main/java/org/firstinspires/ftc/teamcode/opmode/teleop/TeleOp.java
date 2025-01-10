@@ -222,7 +222,7 @@ public class TeleOp extends OpMode {
 
     public void armHang() {
         arm.readyForHang();
-        if (armReachedTarget(200, 50)) {
+        if (armReachedTarget(500, 50)) {
             slides.hangExtend();
         }
         if (slidesReachedTarget(1100, 50)) {

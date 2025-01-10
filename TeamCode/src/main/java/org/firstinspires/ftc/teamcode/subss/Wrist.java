@@ -48,7 +48,7 @@ public class Wrist {
 
     public void PickUpSpecimen() {
         leftClaw.setPosition(0.182);
-        rightClaw.setPosition(0.55);
+        rightClaw.setPosition(0.522);
     }
 
     public void PickUpSpecimenGround() {
