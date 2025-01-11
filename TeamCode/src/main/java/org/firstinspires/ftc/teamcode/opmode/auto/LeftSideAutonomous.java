@@ -72,8 +72,8 @@ public class LeftSideAutonomous extends LinearOpMode {
         }
 
         public void wristDown() {
-            leftClaw.setPosition(0.466);
-            rightClaw.setPosition(0.35);
+            leftClaw.setPosition(0.316);
+            rightClaw.setPosition(0.366);
         }
 
         public void wristDown90() {
@@ -118,10 +118,10 @@ public class LeftSideAutonomous extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 // Move arm
-                moveArm(1610, 1);
+                moveArm(1650, 1);
 
                 // Once arm reached target, move slides
-                if (armReachedTarget(1610, 600)) {
+                if (armReachedTarget(1650, 200)) {
                     moveSlides(1950, 1);
                 }
 
@@ -194,10 +194,10 @@ public class LeftSideAutonomous extends LinearOpMode {
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                moveSlides(800, 1);
+                moveSlides(780, 1);
                 wristDown90();
 
-                if (slidesReachedTarget(800, 10) && !closeClaw) {
+                if (slidesReachedTarget(780, 10) && !closeClaw) {
                     closeClaw = true;
                     claw.setPosition(1);
                     timer.reset();
@@ -228,7 +228,7 @@ public class LeftSideAutonomous extends LinearOpMode {
                     arm.setPower(-1);
                 }
 
-                if (resetArm && timer.seconds() > 1) {
+                if (resetArm && timer.seconds() > 1.2 ) {
                     arm.setPower(0);
                     arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     return false;
@@ -305,7 +305,7 @@ public class LeftSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder parkAtSubmersible = placeSample3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-20, -10, Math.toRadians(180)), Math.toRadians(0));
+                .splineToLinearHeading(new Pose2d(-20, -10, Math.toRadians(0)), Math.toRadians(0));
 
         waitForStart();
 

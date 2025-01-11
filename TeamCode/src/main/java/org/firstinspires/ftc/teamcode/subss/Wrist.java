@@ -24,12 +24,12 @@ public class Wrist {
     }
 
     public void Down() {
-        leftClaw.setPosition(0.466);
-        rightClaw.setPosition(0.35);
+        leftClaw.setPosition(0.316);
+        rightClaw.setPosition(0.366);
     }
     public void PickUp0() {
-        leftClaw.setPosition(0.466);
-        rightClaw.setPosition(0.35);
+        leftClaw.setPosition(0.316);
+        rightClaw.setPosition(0.366);
     }
 
     public void PickUp45() {

@@ -234,7 +234,7 @@ public class TeleOp extends OpMode {
     public void placeSample() {
         wrist.Down();
         arm.moveUp();
-        if(armReachedTarget(1600, 100)) {
+        if(armReachedTarget(1650, 30)) {
             slides.placeSample();
         }
         if (slidesReachedTarget(2150, 50)) {

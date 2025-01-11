@@ -139,7 +139,7 @@ public class RightSideAutonomous extends LinearOpMode {
                 }
 
 
-                if (timer.seconds() <= 2.2) {
+                if (timer.seconds() <= 1.9) {
                     moveArm(armPlacePosition, 1);
                     if (isClipped) {
                         closeClaw();
@@ -157,14 +157,14 @@ public class RightSideAutonomous extends LinearOpMode {
                     openClaw();
                 }
 
-                if (timer.seconds() > 2.2) {
+                if (timer.seconds() > 1.9) {
                     moveSlides(0, 1);
                     moveArm(0, 1);
                 }
 
 
 
-                if (timer.seconds() > 3) {
+                if (timer.seconds() > 2.3) {
                     isReset = false;
                     timer.reset();
                     return false;
@@ -199,14 +199,14 @@ public class RightSideAutonomous extends LinearOpMode {
                     isReset = true;
                 }
 
-                if (timer.seconds() <= 3.5) {
+                if (timer.seconds() <= 3.7) {
                     if (timer.seconds() > 1.8) {
                         moveArm(armPlacePosition, 1);
                     }
                     closeClaw();
                     wristPlaceSpecimen();
 
-                    if (armReachedTarget(armPlacePosition, 20) && timer.seconds() > 2.4) {
+                    if (armReachedTarget(armPlacePosition, 20) && timer.seconds() > 2.7) {
                         moveSlides(slidesPlace, 1);
                     }
 
@@ -216,7 +216,7 @@ public class RightSideAutonomous extends LinearOpMode {
                     openClaw();
                 }
 
-                if (timer.seconds() > 3.5) {
+                if (timer.seconds() > 3.7) {
                     moveSlides(0, 1);
                     if (slidesReachedTarget(0, 300)) {
                         moveArm(0, 1);
@@ -261,7 +261,7 @@ public class RightSideAutonomous extends LinearOpMode {
                     closeClaw();
                     wristPlaceSpecimen();
 
-                    if (armReachedTarget(armPlacePosition, 20) && timer.seconds() > 2.2) {
+                    if (armReachedTarget(armPlacePosition, 20) && timer.seconds() > 2.4) {
                         moveSlides(slidesPlace, 1);
                     }
 
@@ -375,21 +375,21 @@ public class RightSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder pushPath = placeFirstSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToConstantHeading(new Vector2d(22, -40), Math.toRadians(0.00))
-                .splineToConstantHeading(new Vector2d(46, -15), Math.toRadians(270.00))
-                .strafeToConstantHeading(new Vector2d(46, -52), new TranslationalVelConstraint(120))
-                .strafeToLinearHeading(new Vector2d(44, -15), Math.toRadians(270.0), new TranslationalVelConstraint(120))
+                .splineToConstantHeading(new Vector2d(20, -40), Math.toRadians(0.00))
+                .splineToConstantHeading(new Vector2d(47, -12), Math.toRadians(270.00))
+                .strafeToConstantHeading(new Vector2d(47, -52), new TranslationalVelConstraint(120))
+                .strafeToLinearHeading(new Vector2d(42, -12), Math.toRadians(270.0), new TranslationalVelConstraint(80))
                 ;
 
 
         TrajectoryActionBuilder pickUpSecondSpecimen = pushPath.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(54, -15))
+                .strafeToConstantHeading(new Vector2d(54, -13))
                 .strafeToConstantHeading(new Vector2d(54, -64.5))
                 ;
 
         TrajectoryActionBuilder placeSecondSpecimen = pickUpSecondSpecimen.endTrajectory().fresh()
                 .setReversed(true)
-                .splineToConstantHeading(new Vector2d(0.2, -37), Math.toRadians(90.00))
+                .splineToConstantHeading(new Vector2d(-2, -33), Math.toRadians(90.00))
                 ;
 
         TrajectoryActionBuilder pickUpThirdSpecimen = placeSecondSpecimen.endTrajectory().fresh()
@@ -399,7 +399,7 @@ public class RightSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder placeThirdSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
                 .setReversed(true)
-                .splineToConstantHeading(new Vector2d(3, -32), Math.toRadians(90.00))
+                .splineToConstantHeading(new Vector2d(1, -32), Math.toRadians(90.00))
                 ;
 
         TrajectoryActionBuilder pickUpForthSpecimen = placeThirdSpecimen.endTrajectory().fresh()
@@ -409,7 +409,7 @@ public class RightSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder placeForthSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
                 .setReversed(true)
-                .splineToConstantHeading(new Vector2d(5, -32), Math.toRadians(90.00))
+                .splineToConstantHeading(new Vector2d(3.4, -32), Math.toRadians(90.00))
                 ;
 
         TrajectoryActionBuilder park = placeThirdSpecimen.endTrajectory().fresh()
