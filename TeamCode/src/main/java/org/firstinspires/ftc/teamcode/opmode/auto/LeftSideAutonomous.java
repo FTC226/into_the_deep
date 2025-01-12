@@ -194,10 +194,10 @@ public class LeftSideAutonomous extends LinearOpMode {
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                moveSlides(780, 1);
+                moveSlides(860, 1);
                 wristDown90();
 
-                if (slidesReachedTarget(780, 10) && !closeClaw) {
+                if (slidesReachedTarget(860, 10) && !closeClaw) {
                     closeClaw = true;
                     claw.setPosition(1);
                     timer.reset();
@@ -228,7 +228,7 @@ public class LeftSideAutonomous extends LinearOpMode {
                     arm.setPower(-1);
                 }
 
-                if (resetArm && timer.seconds() > 1.2 ) {
+                if (resetArm && timer.seconds() > 1.2) {
                     arm.setPower(0);
                     arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     return false;
@@ -297,7 +297,7 @@ public class LeftSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder grabSample3 = placeSample2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(80))
-                .lineToXLinearHeading(-52, Math.toRadians(180));
+                .lineToYLinearHeading(-26, Math.toRadians(180));
 
         TrajectoryActionBuilder placeSample3 = grabSample3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(258))
@@ -305,7 +305,7 @@ public class LeftSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder parkAtSubmersible = placeSample3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-20, -10, Math.toRadians(0)), Math.toRadians(0));
+                .splineToLinearHeading(new Pose2d(-20, -6, Math.toRadians(0)), Math.toRadians(0));
 
         waitForStart();
 
