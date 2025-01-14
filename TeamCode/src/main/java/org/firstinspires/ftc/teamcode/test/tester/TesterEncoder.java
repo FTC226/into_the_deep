@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode.test.tester;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 @TeleOp (name = "Tester - Encoder")
-//@Disabled
+@Disabled
 
 public class TesterEncoder extends OpMode {
 

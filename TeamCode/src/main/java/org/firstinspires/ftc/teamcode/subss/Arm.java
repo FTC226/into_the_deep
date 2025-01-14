@@ -48,10 +48,18 @@ public class Arm {
         arm.setPower(power);
     }
 
+    public void pickUpSpecimen() {
+        arm.setTargetPosition(550);
+        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        arm.setPower(power);
+    }
+
 
     public int getCurrentPosition() {
         return arm.getCurrentPosition();
     }
+
+
 
     public void resetEncoder() {
         armEncoder.reset();

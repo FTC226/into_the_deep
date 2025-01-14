@@ -153,7 +153,8 @@ public class TeleOp extends OpMode {
 
 
         if (gamepad2.right_stick_button) {
-            wrist.PickUpSpecimenGround();
+            arm.pickUpSpecimen();
+            wrist.PickUpSpecimen();
         }
 
 
@@ -232,14 +233,15 @@ public class TeleOp extends OpMode {
 
 
     public void placeSample() {
-        wrist.Down();
+//        wrist.Down();
+        wrist.placeSample();
         arm.moveUp();
-        if(armReachedTarget(1650, 30)) {
+        if(armReachedTarget(1650, 500)) {
             slides.placeSample();
         }
-        if (slidesReachedTarget(2150, 50)) {
-            wrist.Up();
-        }
+//        if (slidesReachedTarget(2150, 50)) {
+//            wrist.Up();
+//        }
     }
     public void placeSpecimen() {
         wrist.PlaceSpecimen();

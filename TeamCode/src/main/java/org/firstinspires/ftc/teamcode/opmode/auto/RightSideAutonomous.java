@@ -292,7 +292,7 @@ public class RightSideAutonomous extends LinearOpMode {
         }
 
         public class PickUpSecondSpecimen implements Action {
-            private int armPickUpPosition = 650;
+            private int armPickUpPosition = 550;
 
             private boolean isReset = false;
 
@@ -347,6 +347,7 @@ public class RightSideAutonomous extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 moveSlidesVel(0, 5500);
+                moveArm(0, 1);
                 return true;
             }
         }
@@ -384,27 +385,27 @@ public class RightSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder pickUpSecondSpecimen = pushPath.endTrajectory().fresh()
                 .strafeToConstantHeading(new Vector2d(54, -13))
-                .strafeToConstantHeading(new Vector2d(54, -64.5))
+                .strafeToConstantHeading(new Vector2d(54, -63))
                 ;
 
         TrajectoryActionBuilder placeSecondSpecimen = pickUpSecondSpecimen.endTrajectory().fresh()
                 .setReversed(true)
-                .splineToConstantHeading(new Vector2d(-2, -33), Math.toRadians(90.00))
+                .splineToConstantHeading(new Vector2d(0, -33), Math.toRadians(90.00))
                 ;
 
         TrajectoryActionBuilder pickUpThirdSpecimen = placeSecondSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToConstantHeading(new Vector2d(35.80, -60), Math.toRadians(270.00))
+                .splineToConstantHeading(new Vector2d(35.80, -59.5), Math.toRadians(270.00))
                 ;
 
         TrajectoryActionBuilder placeThirdSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
                 .setReversed(true)
-                .splineToConstantHeading(new Vector2d(1, -32), Math.toRadians(90.00))
+                .splineToConstantHeading(new Vector2d(2, -32), Math.toRadians(90.00))
                 ;
 
         TrajectoryActionBuilder pickUpForthSpecimen = placeThirdSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToConstantHeading(new Vector2d(35.80, -60), Math.toRadians(270.00))
+                .splineToConstantHeading(new Vector2d(35.80, -59.5), Math.toRadians(270.00))
                 ;
 
         TrajectoryActionBuilder placeForthSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
@@ -452,18 +453,21 @@ public class RightSideAutonomous extends LinearOpMode {
                                 armslidesclaw.placeOtherSpecimen()
                         ),
 
+//                        new ParallelAction(
+//                                pickUpForthSpecimen.build(),
+//                                armslidesclaw.pickUpSecondSpecimen()
+//
+//                        ),
+//
+//                        new ParallelAction(
+//                                placeForthSpecimen.build(),
+//                                armslidesclaw.placeOtherSpecimen()
+//                        ),
+
                         new ParallelAction(
-                                pickUpForthSpecimen.build(),
-                                armslidesclaw.pickUpSecondSpecimen()
-
-                        ),
-
-                        new ParallelAction(
-                                placeForthSpecimen.build(),
-                                armslidesclaw.placeOtherSpecimen()
-                        ),
-
-                        armslidesclaw.moveSlidesDown()
+                                park.build(),
+                                armslidesclaw.moveSlidesDown()
+                        )
 
                 )
         );

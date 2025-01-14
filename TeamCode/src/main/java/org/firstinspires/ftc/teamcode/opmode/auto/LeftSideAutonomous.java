@@ -297,7 +297,7 @@ public class LeftSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder grabSample3 = placeSample2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(80))
-                .lineToYLinearHeading(-26, Math.toRadians(180));
+                .lineToYLinearHeading(-24, Math.toRadians(180));
 
         TrajectoryActionBuilder placeSample3 = grabSample3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(258))
@@ -305,7 +305,7 @@ public class LeftSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder parkAtSubmersible = placeSample3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-20, -6, Math.toRadians(0)), Math.toRadians(0));
+                .splineToLinearHeading(new Pose2d(-20, -9, Math.toRadians(0)), Math.toRadians(0));
 
         waitForStart();
 

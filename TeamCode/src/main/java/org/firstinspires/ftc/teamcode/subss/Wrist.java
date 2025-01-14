@@ -23,6 +23,11 @@ public class Wrist {
         rightClaw.setPosition(0.666);
     }
 
+    public void placeSample() {
+        leftClaw.setPosition(0.102);
+        rightClaw.setPosition(0.614);
+    }
+
     public void Down() {
         leftClaw.setPosition(0.316);
         rightClaw.setPosition(0.366);
