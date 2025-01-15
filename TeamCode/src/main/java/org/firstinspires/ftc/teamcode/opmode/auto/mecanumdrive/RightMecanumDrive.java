@@ -84,9 +84,9 @@ public final class RightMecanumDrive {
         public double kA = 0.00001; // 0.0001
 
         // path profile parameters (in inches)
-        public double maxWheelVel = 70; // 50
-        public double minProfileAccel = -30; // -30
-        public double maxProfileAccel = 70; // 50
+        public double maxWheelVel = 90; // 50
+        public double minProfileAccel = -40; // -30
+        public double maxProfileAccel = 90; // 50
 
         // turn profile parameters (in radians)
         public double maxAngVel = Math.toRadians(180); // shared with path Math.PI

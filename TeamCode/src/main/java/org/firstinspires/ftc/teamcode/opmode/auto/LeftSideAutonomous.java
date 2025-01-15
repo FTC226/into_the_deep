@@ -121,7 +121,7 @@ public class LeftSideAutonomous extends LinearOpMode {
                 moveArm(1650, 1);
 
                 // Once arm reached target, move slides
-                if (armReachedTarget(1650, 200)) {
+                if (armReachedTarget(1650, 600)) {
                     moveSlides(1950, 1);
                 }
 
@@ -165,9 +165,9 @@ public class LeftSideAutonomous extends LinearOpMode {
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                moveSlides(1230, 1);
+                moveSlides(1210, 1);
 
-                if (slidesReachedTarget(1230, 10) && !closeClaw) {
+                if (slidesReachedTarget(1210, 10) && !closeClaw) {
                     timer.reset();
                     claw.setPosition(1);
                     closeClaw = true;
@@ -194,10 +194,10 @@ public class LeftSideAutonomous extends LinearOpMode {
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                moveSlides(860, 1);
+                moveSlides(840, 1);
                 wristDown90();
 
-                if (slidesReachedTarget(860, 10) && !closeClaw) {
+                if (slidesReachedTarget(840, 10) && !closeClaw) {
                     closeClaw = true;
                     claw.setPosition(1);
                     timer.reset();
@@ -228,7 +228,7 @@ public class LeftSideAutonomous extends LinearOpMode {
                     arm.setPower(-1);
                 }
 
-                if (resetArm && timer.seconds() > 1.2) {
+                if (resetArm && timer.seconds() > 0.8) {
                     arm.setPower(0);
                     arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     return false;
@@ -297,7 +297,7 @@ public class LeftSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder grabSample3 = placeSample2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(80))
-                .lineToYLinearHeading(-24, Math.toRadians(180));
+                .lineToYLinearHeading(-22, Math.toRadians(180));
 
         TrajectoryActionBuilder placeSample3 = grabSample3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(258))

@@ -25,12 +25,14 @@ import org.firstinspires.ftc.teamcode.subss.Wrist;
 public class TeleOp extends OpMode {
 
     //Subsystems
-    Arm arm = new Arm(this, 0.8);
+    Arm arm = new Arm(this, 1);
     Slides slides = new Slides(this);
     Wrist wrist = new Wrist(this);
     Claw claw = new Claw(this);
 
     public boolean switchMode = true;
+
+    public boolean fastSpeed = true;
 
     // Motors
     public DcMotor frontLeft, frontRight, backLeft, backRight;
@@ -112,8 +114,6 @@ public class TeleOp extends OpMode {
         backLeft.setPower((rotY - rotX + rightStickX) / denominator);
         backRight.setPower((rotY + rotX - rightStickX) / denominator);
 
-
-
         //Switch Mode
         if (gamepad2.back) {
             switchMode = !switchMode;
@@ -154,7 +154,7 @@ public class TeleOp extends OpMode {
 
         if (gamepad2.right_stick_button) {
             arm.pickUpSpecimen();
-            wrist.PickUpSpecimen();
+            wrist.PickUpSpecimenOp();
         }
 
 
@@ -175,7 +175,7 @@ public class TeleOp extends OpMode {
 
 
         if(gamepad2.x) {
-            wrist.PickUp45();
+            placeSampleLow();
         }
 
 
@@ -243,15 +243,27 @@ public class TeleOp extends OpMode {
 //            wrist.Up();
 //        }
     }
+
+    public void placeSampleLow() {
+//        wrist.Down();
+        wrist.placeSample();
+        arm.moveUp();
+        if(armReachedTarget(1650, 500)) {
+            slides.placeSampleLow();
+        }
+//        if (slidesReachedTarget(2150, 50)) {
+//            wrist.Up();
+//        }
+    }
     public void placeSpecimen() {
-        wrist.PlaceSpecimen();
+        wrist.Up();
         arm.moveUp();
         if(armReachedTarget(1650, 100)) {
             slides.placeSpecimen();
         }
-        if(slidesReachedTarget(900, 100)) {
-            claw.openClaw();
-        }
+//        if(slidesReachedTarget(900, 100)) {
+//            claw.openClaw();
+//        }
     }
     public void pickupSample() {
         claw.openClaw();
