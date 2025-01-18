@@ -11,12 +11,20 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.subss.Arm;
+import org.firstinspires.ftc.teamcode.subss.Slides;
+
 //@Disabled
 @Config
 @TeleOp(name = "Tester - Wrist")
 public class TesterWrist extends OpMode {
+    Arm arm = new Arm(this, 1);
+    Slides slides = new Slides(this);
+
+
     public Servo left, right, claw;
     public ElapsedTime runtime;
+
 
     public static double leftPos, rightPos;
 
@@ -25,6 +33,10 @@ public class TesterWrist extends OpMode {
 
     @Override
     public void init(){
+
+        arm.init();
+        slides.init();
+
         left = hardwareMap.get(Servo.class, "leftServo");
         right = hardwareMap.get(Servo.class, "rightServo");
         claw = hardwareMap.get(Servo.class, "clawServo");
@@ -86,6 +98,16 @@ public class TesterWrist extends OpMode {
         }
         if(gamepad1.left_bumper) {
             claw.setPosition(1);
+        }
+
+
+        if (gamepad2.a) {
+            arm.pickUpSpecimen();
+        }
+
+        if (gamepad2.b) {
+            arm.moveUp();
+            slides.placeSpecimen();
         }
 
 

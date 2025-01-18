@@ -19,45 +19,40 @@ public class Wrist {
     }
 
     public void Up() {
-        leftClaw.setPosition(-1);
-        rightClaw.setPosition(0.666);
+        leftClaw.setPosition(0.408);
+        rightClaw.setPosition(0.544);
     }
 
     public void placeSample() {
-        leftClaw.setPosition(0.102);
-        rightClaw.setPosition(0.614);
+        leftClaw.setPosition(0.518);
+        rightClaw.setPosition(0.448);
     }
 
     public void Down() {
-        leftClaw.setPosition(0.316);
-        rightClaw.setPosition(0.366);
+        leftClaw.setPosition(0.728);
+        rightClaw.setPosition(0.222);
     }
     public void PickUp0() {
-        leftClaw.setPosition(0.316);
-        rightClaw.setPosition(0.366);
-    }
-
-    public void PickUp45() {
-        leftClaw.setPosition(0);
-        rightClaw.setPosition(0);
+        leftClaw.setPosition(0.728);
+        rightClaw.setPosition(0.222);
     }
 
     public void PickUp90() {
-        leftClaw.setPosition(0.168);
-        rightClaw.setPosition(0.2);
+        leftClaw.setPosition(0.91);
+        rightClaw.setPosition(0.382);
     }
     public void PlaceSpecimen() {
-        leftClaw.setPosition(0.088);
-        rightClaw.setPosition(0.652);
+        leftClaw.setPosition(0.408);
+        rightClaw.setPosition(0.544);
     }
 
     public void PickUpSpecimen() {
-        leftClaw.setPosition(0.182);
-        rightClaw.setPosition(0.522);
+        leftClaw.setPosition(0.57);
+        rightClaw.setPosition(0.368);
     }
     public void PickUpSpecimenOp() {
-        leftClaw.setPosition(0.182);
-        rightClaw.setPosition(0.522);
+        leftClaw.setPosition(0.57);
+        rightClaw.setPosition(0.368);
     }
 
     public void PickUpSpecimenGround() {
@@ -66,7 +61,7 @@ public class Wrist {
     }
 
     public boolean isUp() {
-        if (leftClaw.getPosition() != -1 && rightClaw.getPosition() != 0.666) {
+        if (leftClaw.getPosition() != 0.408 && rightClaw.getPosition() != 0.544) {
             return false;
         }
         return true;

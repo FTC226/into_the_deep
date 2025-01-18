@@ -21,24 +21,27 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.opmode.auto.mecanumdrive.LeftMecanumDrive;
+import org.firstinspires.ftc.teamcode.subss.Wrist;
 
 @Config
 @Autonomous(name = "LeftSideAutonomous", group = "Autonomous")
 public class LeftSideAutonomous extends LinearOpMode {
+    Wrist wrist = new Wrist(this);
+
 
     public class ArmSlidesClaw {
         private DcMotor arm, leftSlide, rightSlide;
-        private Servo leftClaw, rightClaw, claw;
+        private Servo claw;
 
         private ElapsedTime timer = new ElapsedTime();
 
         public ArmSlidesClaw(HardwareMap hardwareMap) {
+            wrist.init();
+
             arm = hardwareMap.get(DcMotor.class, "arm");
             leftSlide = hardwareMap.get(DcMotor.class, "leftSlide");
             rightSlide = hardwareMap.get(DcMotor.class, "rightSlide");
 
-            leftClaw = hardwareMap.get(Servo.class, "leftServo");
-            rightClaw = hardwareMap.get(Servo.class, "rightServo");
             claw = hardwareMap.get(Servo.class, "clawServo");
 
             arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -69,21 +72,6 @@ public class LeftSideAutonomous extends LinearOpMode {
 
             leftSlide.setPower(power);
             rightSlide.setPower(power);
-        }
-
-        public void wristDown() {
-            leftClaw.setPosition(0.316);
-            rightClaw.setPosition(0.366);
-        }
-
-        public void wristDown90() {
-            leftClaw.setPosition(0.168);
-            rightClaw.setPosition(0.2);
-        }
-
-        public void wristPlaceSample() {
-            leftClaw.setPosition(-0.122);
-            rightClaw.setPosition(0.676);
         }
 
         public boolean slidesReachedTarget(int targetSlides, int threshold) {
@@ -121,14 +109,14 @@ public class LeftSideAutonomous extends LinearOpMode {
                 moveArm(1650, 1);
 
                 // Once arm reached target, move slides
-                if (armReachedTarget(1650, 600)) {
+                if (armReachedTarget(1650, 200)) {
                     moveSlides(1950, 1);
                 }
 
                 // Once slide reached target, move wrist
                 if (slidesReachedTarget(1950, 20) && !wristPlaceSample) {
                     timer.reset();
-                    wristPlaceSample();
+                    wrist.placeSample();
                     wristPlaceSample = true;
                 }
 
@@ -141,7 +129,7 @@ public class LeftSideAutonomous extends LinearOpMode {
 
                 // Once claw is opened and timer reached target, reset wrist
                 if (resetWrist && timer.seconds() > 0.5) {
-                    wristDown();
+                    wrist.PickUp0();
                     return false;
                 }
 
@@ -165,9 +153,9 @@ public class LeftSideAutonomous extends LinearOpMode {
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                moveSlides(1210, 1);
+                moveSlides(1060, 1);
 
-                if (slidesReachedTarget(1210, 10) && !closeClaw) {
+                if (slidesReachedTarget(1060, 10) && !closeClaw) {
                     timer.reset();
                     claw.setPosition(1);
                     closeClaw = true;
@@ -194,10 +182,10 @@ public class LeftSideAutonomous extends LinearOpMode {
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                moveSlides(840, 1);
-                wristDown90();
+                moveSlides(860, 1);
+                wrist.PickUp90();
 
-                if (slidesReachedTarget(840, 10) && !closeClaw) {
+                if (slidesReachedTarget(860, 10) && !closeClaw) {
                     closeClaw = true;
                     claw.setPosition(1);
                     timer.reset();
@@ -228,7 +216,7 @@ public class LeftSideAutonomous extends LinearOpMode {
                     arm.setPower(-1);
                 }
 
-                if (resetArm && timer.seconds() > 0.8) {
+                if (resetArm && timer.seconds() > 1.2) {
                     arm.setPower(0);
                     arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     return false;
@@ -266,6 +254,26 @@ public class LeftSideAutonomous extends LinearOpMode {
             }
         }
         public Action resetSlides() { return new ResetSlides(); }
+
+        public class WristUp implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                wrist.Up();
+
+                return false;
+            }
+        }
+        public Action wristUp() { return new WristUp(); }
+
+        public class CloseClaw implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                claw.setPosition(1);
+
+                return false;
+            }
+        }
+        public Action closeClaw() { return new CloseClaw(); }
     }
 
     @Override
@@ -289,7 +297,7 @@ public class LeftSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder grabSample2 = placeSample1.endTrajectory().fresh()
                 .setTangent(Math.toRadians(96))
-                .lineToXLinearHeading(-58, Math.toRadians(90));
+                .lineToXLinearHeading(-58, Math.toRadians(88));
 
         TrajectoryActionBuilder placeSample2 = grabSample2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(276))
@@ -297,7 +305,7 @@ public class LeftSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder grabSample3 = placeSample2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(80))
-                .lineToYLinearHeading(-22, Math.toRadians(180));
+                .lineToYLinearHeading(-26, Math.toRadians(180));
 
         TrajectoryActionBuilder placeSample3 = grabSample3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(258))
@@ -305,7 +313,7 @@ public class LeftSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder parkAtSubmersible = placeSample3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-20, -9, Math.toRadians(0)), Math.toRadians(0));
+                .splineToLinearHeading(new Pose2d(-25, -8, Math.toRadians(90)), Math.toRadians(0));
 
         waitForStart();
 
@@ -313,6 +321,7 @@ public class LeftSideAutonomous extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
+                        armslidesclaw.closeClaw(),
                         new ParallelAction(
                                 placeSample.build(),
                                 armslidesclaw.placeSample()
@@ -364,10 +373,12 @@ public class LeftSideAutonomous extends LinearOpMode {
                         ),
                         new ParallelAction(
                                 parkAtSubmersible.build(),
+                                armslidesclaw.wristUp(),
                                 new SequentialAction(
                                         armslidesclaw.resetSlides(),
                                         armslidesclaw.resetArm()
                                 )
+
                         )
                 )
         );

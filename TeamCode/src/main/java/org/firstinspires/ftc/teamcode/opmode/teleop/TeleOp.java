@@ -32,7 +32,7 @@ public class TeleOp extends OpMode {
 
     public boolean switchMode = true;
 
-    public boolean fastSpeed = true;
+    public double speed = 1.0;
 
     // Motors
     public DcMotor frontLeft, frontRight, backLeft, backRight;
@@ -109,10 +109,17 @@ public class TeleOp extends OpMode {
         double rotX = leftStickX * Math.cos(-robotYaw) - leftStickY * Math.sin(-robotYaw);
         double rotY = leftStickX * Math.sin(-robotYaw) + leftStickY * Math.cos(-robotYaw);
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rightStickX), 1);
-        frontLeft.setPower((rotY + rotX + rightStickX) / denominator);
-        frontRight.setPower((rotY - rotX - rightStickX) / denominator);
-        backLeft.setPower((rotY - rotX + rightStickX) / denominator);
-        backRight.setPower((rotY + rotX - rightStickX) / denominator);
+
+        if (gamepad1.right_trigger > 0.8) {
+            speed = 0.25;
+        } else {
+            speed = 1.0;
+        }
+
+        frontLeft.setPower(((rotY + rotX + rightStickX) / denominator)*speed);
+        frontRight.setPower(((rotY - rotX - rightStickX) / denominator)*speed);
+        backLeft.setPower(((rotY - rotX + rightStickX) / denominator)*speed);
+        backRight.setPower(((rotY + rotX - rightStickX) / denominator)*speed);
 
         //Switch Mode
         if (gamepad2.back) {
@@ -259,15 +266,19 @@ public class TeleOp extends OpMode {
         wrist.Up();
         arm.moveUp();
         if(armReachedTarget(1650, 100)) {
-            slides.placeSpecimen();
+            slides.getReadyPlaceSpecimen();
         }
 //        if(slidesReachedTarget(900, 100)) {
 //            claw.openClaw();
 //        }
     }
     public void pickupSample() {
-        claw.openClaw();
-        slides.pickupSample();
+        if (armReachedTarget(1650, 100)) {
+            slides.placeSpecimen();
+        } else {
+            claw.openClaw();
+            slides.pickupSample();
+        }
     }
 
     public void resetSlides() {

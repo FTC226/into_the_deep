@@ -40,7 +40,7 @@ public class MeepMeepLeft {
 
         TrajectoryActionBuilder grabSample3 = placeSample2.endTrajectory().fresh()
                 .setTangent(Math.toRadians(80))
-                .lineToYLinearHeading(-26, Math.toRadians(180));
+                .lineToYLinearHeading(-27, Math.toRadians(180));
 
         TrajectoryActionBuilder placeSample3 = grabSample3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(258))
@@ -48,7 +48,7 @@ public class MeepMeepLeft {
 
         TrajectoryActionBuilder parkAtSubmersible = placeSample3.endTrajectory().fresh()
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-20, -6, Math.toRadians(0)), Math.toRadians(0));
+                .splineToLinearHeading(new Pose2d(-25, -8, Math.toRadians(90)), Math.toRadians(0));
         ;
 
         myBot.runAction(

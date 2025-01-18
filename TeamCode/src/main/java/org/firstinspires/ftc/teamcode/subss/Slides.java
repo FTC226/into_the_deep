@@ -71,17 +71,25 @@ public class Slides {
     }
 
     public void placeSampleLow() {
-        leftSlide.setTargetPosition(1000);
-        rightSlide.setTargetPosition(1000);
+        leftSlide.setTargetPosition(700);
+        rightSlide.setTargetPosition(700);
         leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftSlide.setVelocity(velocity);
         rightSlide.setVelocity(velocity);
     }
 
+    public void getReadyPlaceSpecimen() {
+        leftSlide.setTargetPosition(500);
+        rightSlide.setTargetPosition(500);
+        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftSlide.setVelocity(velocity);
+        rightSlide.setVelocity(velocity);
+    }
     public void placeSpecimen() {
-        leftSlide.setTargetPosition(560);
-        rightSlide.setTargetPosition(560);
+        leftSlide.setTargetPosition(1050);
+        rightSlide.setTargetPosition(1050);
         leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftSlide.setVelocity(velocity);
