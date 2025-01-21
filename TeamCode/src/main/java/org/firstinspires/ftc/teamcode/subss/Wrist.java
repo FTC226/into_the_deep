@@ -24,8 +24,8 @@ public class Wrist {
     }
 
     public void placeSample() {
-        leftClaw.setPosition(0.518);
-        rightClaw.setPosition(0.448);
+        leftClaw.setPosition(0.468);
+        rightClaw.setPosition(0.494);
     }
 
     public void Down() {
@@ -44,6 +44,11 @@ public class Wrist {
     public void PlaceSpecimen() {
         leftClaw.setPosition(0.408);
         rightClaw.setPosition(0.544);
+    }
+
+    public void PlaceSpecimenAuto() {
+        leftClaw.setPosition(0.45);
+        rightClaw.setPosition(0.528);
     }
 
     public void PickUpSpecimen() {

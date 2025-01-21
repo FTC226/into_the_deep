@@ -80,8 +80,8 @@ public class Slides {
     }
 
     public void getReadyPlaceSpecimen() {
-        leftSlide.setTargetPosition(500);
-        rightSlide.setTargetPosition(500);
+        leftSlide.setTargetPosition(540);
+        rightSlide.setTargetPosition(540);
         leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftSlide.setVelocity(velocity);

@@ -36,12 +36,13 @@ public class RightSideAutonomousPlus extends LinearOpMode {
         private ElapsedTime timer = new ElapsedTime();
 
         public ArmSlidesClaw(HardwareMap hardwareMap) {
+
+            wrist.init();
+
             arm = hardwareMap.get(DcMotorEx.class, "arm");
             leftSlide = hardwareMap.get(DcMotorEx.class, "leftSlide");
             rightSlide = hardwareMap.get(DcMotorEx.class, "rightSlide");
 
-            leftClaw = hardwareMap.get(Servo.class, "leftServo");
-            rightClaw = hardwareMap.get(Servo.class, "rightServo");
             claw = hardwareMap.get(Servo.class, "clawServo");
 
             arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -85,26 +86,6 @@ public class RightSideAutonomousPlus extends LinearOpMode {
             rightSlide.setVelocity(power);
         }
 
-        public void wristUp() {
-            leftClaw.setPosition(-1);
-            rightClaw.setPosition(0.666);
-        }
-
-        public void wristDown() {
-            leftClaw.setPosition(0.466);
-            rightClaw.setPosition(0.35);
-        }
-
-        public void wristPlaceSpecimen() {
-            leftClaw.setPosition(0.088);
-            rightClaw.setPosition(0.652);
-        }
-
-        public void wristPickUp() {
-            leftClaw.setPosition(0.182);
-            rightClaw.setPosition(0.522);
-        }
-
         public void closeClaw() {
             claw.setPosition(0.7);
         }public void openClaw() {
@@ -122,7 +103,7 @@ public class RightSideAutonomousPlus extends LinearOpMode {
         public class PlaceFirstSpecimen implements Action {
             private int armPlacePosition = 1570;
 
-            private int slidesPlace = 900;
+            private int slidesPlace = 1000;
 
             private boolean isReset = false;
 
@@ -143,7 +124,7 @@ public class RightSideAutonomousPlus extends LinearOpMode {
                     if (isClipped) {
                         closeClaw();
                     }
-                    wristPlaceSpecimen();
+                    wrist.PlaceSpecimenAuto();
 
                     if (armReachedTarget(armPlacePosition, 20)) {
                         moveSlides(slidesPlace, 1);
@@ -186,7 +167,7 @@ public class RightSideAutonomousPlus extends LinearOpMode {
         public class PlaceSecondSpecimen implements Action {
             private int armPlacePosition = 1590;
 
-            private int slidesPlace = 900;
+            private int slidesPlace = 1000;
 
             private boolean isReset = false;
 
@@ -203,7 +184,7 @@ public class RightSideAutonomousPlus extends LinearOpMode {
                         moveArm(armPlacePosition, 1);
                     }
                     closeClaw();
-                    wristPlaceSpecimen();
+                    wrist.PlaceSpecimenAuto();
 
                     if (armReachedTarget(armPlacePosition, 20) && timer.seconds() > 2.7) {
                         moveSlides(slidesPlace, 1);
@@ -258,7 +239,7 @@ public class RightSideAutonomousPlus extends LinearOpMode {
                         moveArm(armPlacePosition, 1);
                     }
                     closeClaw();
-                    wristPlaceSpecimen();
+                    wrist.PlaceSpecimenAuto();
 
                     if (armReachedTarget(armPlacePosition, 20) && timer.seconds() > 2.4) {
                         moveSlides(slidesPlace, 1);
@@ -304,7 +285,7 @@ public class RightSideAutonomousPlus extends LinearOpMode {
 
                 if (timer.seconds() <= 2.5) {
                     moveArm(armPickUpPosition, 1);
-                    wristPickUp();
+                    wrist.PickUpSpecimen();
                     openClaw();
                 }
 
@@ -370,7 +351,7 @@ public class RightSideAutonomousPlus extends LinearOpMode {
         ArmSlidesClaw armslidesclaw = new ArmSlidesClaw(hardwareMap);
 
         TrajectoryActionBuilder placeFirstSpecimen = drive.actionBuilder(initialPose)
-                .setTangent(Math.toRadians(85))
+                .setTangent(Math.toRadians(100))
                 .lineToYLinearHeading(-33, Math.toRadians(270))
                 ;
 

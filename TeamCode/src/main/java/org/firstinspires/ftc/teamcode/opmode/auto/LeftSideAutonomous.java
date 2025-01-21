@@ -153,9 +153,9 @@ public class LeftSideAutonomous extends LinearOpMode {
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                moveSlides(1060, 1);
+                moveSlides(1075, 1);
 
-                if (slidesReachedTarget(1060, 10) && !closeClaw) {
+                if (slidesReachedTarget(1075, 10) && !closeClaw) {
                     timer.reset();
                     claw.setPosition(1);
                     closeClaw = true;
@@ -182,10 +182,10 @@ public class LeftSideAutonomous extends LinearOpMode {
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                moveSlides(860, 1);
+                moveSlides(840, 1);
                 wrist.PickUp90();
 
-                if (slidesReachedTarget(860, 10) && !closeClaw) {
+                if (slidesReachedTarget(840, 10) && !closeClaw) {
                     closeClaw = true;
                     claw.setPosition(1);
                     timer.reset();
