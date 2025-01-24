@@ -14,9 +14,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 //Want to fix the "can't find symbol" the only thing you need to do is refactor the folder subsystems to another name
 import org.firstinspires.ftc.teamcode.subss.Arm;
+import org.firstinspires.ftc.teamcode.subss.Camera;
 import org.firstinspires.ftc.teamcode.subss.Claw;
 import org.firstinspires.ftc.teamcode.subss.Slides;
 import org.firstinspires.ftc.teamcode.subss.Wrist;
+
+
+import org.opencv.core.*;
+
 
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "InsiredAwardTeleop")
@@ -29,10 +34,13 @@ public class TeleOp extends OpMode {
     Slides slides = new Slides(this);
     Wrist wrist = new Wrist(this);
     Claw claw = new Claw(this);
+    Camera camera = new Camera();
 
     public boolean switchMode = true;
 
     public double speed = 1.0;
+    public double angle;
+    public Point center;
 
     // Motors
     public DcMotor frontLeft, frontRight, backLeft, backRight;
@@ -116,10 +124,33 @@ public class TeleOp extends OpMode {
             speed = 1.0;
         }
 
-        frontLeft.setPower(((rotY + rotX + rightStickX) / denominator)*speed);
-        frontRight.setPower(((rotY - rotX - rightStickX) / denominator)*speed);
-        backLeft.setPower(((rotY - rotX + rightStickX) / denominator)*speed);
-        backRight.setPower(((rotY + rotX - rightStickX) / denominator)*speed);
+        if(gamepad1.b){ // moving to centralize the claw
+
+            angle = camera.Angle();
+            center = camera.Center();
+
+            double x = center.x;
+            double y = center.y;
+            if(Math.abs(x-320)>20 && Math.abs(y-180)>20){//setting the center
+                moveRobotCentric(-(x-320)/Math.sqrt((x*x)+(y*y)), -(y-180)/Math.sqrt((x*x)+(y*y)), 0);
+            } else if(angle <= 122.5 && angle >= 67.5){
+                wrist.PickUp0();
+            } else if(angle > 122.5 || angle < 67.5){
+                wrist.PickUp90();
+            } else {
+                claw.openClaw(); //open the claw
+            }
+
+
+        } else{
+
+            frontLeft.setPower(((rotY + rotX + rightStickX) / denominator)*speed);
+            frontRight.setPower(((rotY - rotX - rightStickX) / denominator)*speed);
+            backLeft.setPower(((rotY - rotX + rightStickX) / denominator)*speed);
+            backRight.setPower(((rotY + rotX - rightStickX) / denominator)*speed);
+
+        }
+
 
         //Switch Mode
         if (gamepad2.back) {
@@ -295,6 +326,17 @@ public class TeleOp extends OpMode {
         }
     }
 
+    public void moveRobotCentric(double x, double y, double rx){
+        double d = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+        double frontLeftPower = (y + x + rx) / d;
+        double backLeftPower = (y - x + rx) / d;
+        double frontRightPower = (y - x - rx) / d;
+        double backRightPower = (y + x - rx) / d;
 
+        frontLeft.setPower(frontLeftPower);
+        backLeft.setPower(backLeftPower);
+        frontRight.setPower(frontRightPower);
+        backRight.setPower(backRightPower);
+    }
 
 }
