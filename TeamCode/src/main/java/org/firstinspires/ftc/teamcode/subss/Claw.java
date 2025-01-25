@@ -16,7 +16,7 @@ public class Claw {
     }
 
     public void closeClaw() {
-        claw.setPosition(0.7);
+        claw.setPosition(0.5);
     }
     public void openClaw() {
         claw.setPosition(0);

@@ -338,11 +338,6 @@ public class RightSideAutonomousPlus extends LinearOpMode {
 
     }
 
-
-
-
-
-
     @Override
     public void runOpMode() throws InterruptedException {
         Pose2d initialPose = new Pose2d(6, -62, Math.toRadians(270));
@@ -351,53 +346,82 @@ public class RightSideAutonomousPlus extends LinearOpMode {
         ArmSlidesClaw armslidesclaw = new ArmSlidesClaw(hardwareMap);
 
         TrajectoryActionBuilder placeFirstSpecimen = drive.actionBuilder(initialPose)
-                .setTangent(Math.toRadians(100))
+                .setTangent(Math.toRadians(90))
                 .lineToYLinearHeading(-33, Math.toRadians(270))
                 ;
 
-        TrajectoryActionBuilder pushPath = placeFirstSpecimen.endTrajectory().fresh()
+        TrajectoryActionBuilder pickUpFirstSample = placeFirstSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToConstantHeading(new Vector2d(20, -40), Math.toRadians(0.00))
-                .splineToConstantHeading(new Vector2d(44, -15), Math.toRadians(270.00))
+                .splineToLinearHeading(new Pose2d(30, -40, Math.toRadians(42.00)), Math.toRadians(0.00))
                 ;
 
-        TrajectoryActionBuilder pushPath1 = pushPath.endTrajectory().fresh()
+        TrajectoryActionBuilder putFirstSample = pickUpFirstSample.endTrajectory().fresh()
                 .setReversed(false)
-                .strafeToConstantHeading(new Vector2d(44, -52), new TranslationalVelConstraint(120))
-                .strafeToConstantHeading(new Vector2d(44, -15), new TranslationalVelConstraint(120))
+                .splineToLinearHeading(new Pose2d(35, -40, Math.toRadians(-42.00)), Math.toRadians(0.00))
+                ;
+
+        TrajectoryActionBuilder pickUpSecondSample = putFirstSample.endTrajectory().fresh()
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(42, -40, Math.toRadians(42.00)), Math.toRadians(0.00))
+                ;
+
+        TrajectoryActionBuilder putSecondSample = pickUpSecondSample.endTrajectory().fresh()
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(40, -40, Math.toRadians(-42.00)), Math.toRadians(0.00))
+                ;
+
+        TrajectoryActionBuilder pickUpThirdSample = putSecondSample.endTrajectory().fresh()
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(50, -40, Math.toRadians(42.00)), Math.toRadians(0.00))
+                ;
+
+        TrajectoryActionBuilder putThirdSample = pickUpThirdSample.endTrajectory().fresh()
+                .setReversed(false)
+                .splineToLinearHeading(new Pose2d(42, -40, Math.toRadians(-42.00)), Math.toRadians(0.00))
                 ;
 
 
-        TrajectoryActionBuilder pickUpSecondSpecimen = pushPath.endTrajectory().fresh()
-                .strafeToConstantHeading(new Vector2d(54, -13))
-                .strafeToConstantHeading(new Vector2d(54, -50), new TranslationalVelConstraint(100))
-                .strafeToConstantHeading(new Vector2d(54, -59.5), new TranslationalVelConstraint(10))
+        TrajectoryActionBuilder pickUpSecondSpecimen = putThirdSample.endTrajectory().fresh()
+                .splineToLinearHeading(new Pose2d(36, -40, Math.toRadians(270.00)), Math.toRadians(270.00))
+                .strafeToConstantHeading(new Vector2d(36, -55))
+                .strafeToConstantHeading(new Vector2d(36, -59.5), new TranslationalVelConstraint(10))
                 ;
 
         TrajectoryActionBuilder placeSecondSpecimen = pickUpSecondSpecimen.endTrajectory().fresh()
                 .setReversed(true)
-                .splineToConstantHeading(new Vector2d(3, -33), Math.toRadians(90.00))
+                .splineToConstantHeading(new Vector2d(3.5, -33), Math.toRadians(90.00))
                 ;
 
         TrajectoryActionBuilder pickUpThirdSpecimen = placeSecondSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToConstantHeading(new Vector2d(36, -50), Math.toRadians(270.00))
+                .splineToConstantHeading(new Vector2d(36, -55), Math.toRadians(270.00))
                 .strafeToConstantHeading(new Vector2d(36, -59.5), new TranslationalVelConstraint(10))
 
                 ;
 
         TrajectoryActionBuilder placeThirdSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
                 .setReversed(true)
-                .splineToConstantHeading(new Vector2d(1, -32), Math.toRadians(90.00))
+                .splineToConstantHeading(new Vector2d(2.5, -32), Math.toRadians(90.00))
                 ;
 
         TrajectoryActionBuilder pickUpForthSpecimen = placeThirdSpecimen.endTrajectory().fresh()
                 .setReversed(false)
-                .splineToConstantHeading(new Vector2d(36, -50), Math.toRadians(270.00))
+                .splineToConstantHeading(new Vector2d(36, -55), Math.toRadians(270.00))
                 .strafeToConstantHeading(new Vector2d(36, -59.5), new TranslationalVelConstraint(10))
                 ;
 
         TrajectoryActionBuilder placeForthSpecimen = pickUpThirdSpecimen.endTrajectory().fresh()
+                .setReversed(true)
+                .splineToConstantHeading(new Vector2d(1.5, -32), Math.toRadians(90.00))
+                ;
+
+        TrajectoryActionBuilder pickUpFifthSpecimen = placeForthSpecimen.endTrajectory().fresh()
+                .setReversed(false)
+                .splineToConstantHeading(new Vector2d(36, -55  ), Math.toRadians(270.00))
+                .strafeToConstantHeading(new Vector2d(36, -59.5), new TranslationalVelConstraint(10))
+                ;
+
+        TrajectoryActionBuilder placeFifthSpecimen = pickUpFifthSpecimen.endTrajectory().fresh()
                 .setReversed(true)
                 .splineToConstantHeading(new Vector2d(0, -32), Math.toRadians(90.00))
                 ;
@@ -406,58 +430,31 @@ public class RightSideAutonomousPlus extends LinearOpMode {
                 .setReversed(false)
                 .splineToLinearHeading(new Pose2d(45.09, -60.00, Math.toRadians(320.00)), Math.toRadians(320.00), new TranslationalVelConstraint(300));
         ;
-
         waitForStart();
 
         if (isStopRequested()) return;
 
 
         Actions.runBlocking(
+
                 new SequentialAction(
-                        new ParallelAction(
-                            placeFirstSpecimen.build(),
-                            armslidesclaw.placeFirstSpecimen()
-                        ),
 
-                        pushPath.build(),
-                        pushPath1.build(),
-
-                        new ParallelAction(
-                                pickUpSecondSpecimen.build(),
-                                armslidesclaw.pickUpSecondSpecimen()
-                        ),
-
-                        new ParallelAction(
-                                placeSecondSpecimen.build(),
-                                armslidesclaw.placeSecondSpecimen()
-                        ),
-//
-                        new ParallelAction(
-                                pickUpThirdSpecimen.build(),
-                                armslidesclaw.pickUpSecondSpecimen()
-
-                        ),
-
-                        new ParallelAction(
-                                placeThirdSpecimen.build(),
-                                armslidesclaw.placeOtherSpecimen()
-                        ),
-
-                        new ParallelAction(
-                                pickUpForthSpecimen.build(),
-                                armslidesclaw.pickUpSecondSpecimen()
-
-                        ),
-
-                        new ParallelAction(
-                                placeForthSpecimen.build(),
-                                armslidesclaw.placeOtherSpecimen()
-                        ),
-
-                        new ParallelAction(
-                                park.build(),
-                                armslidesclaw.parking()
-                        )
+                        placeFirstSpecimen.build(),
+                        pickUpFirstSample.build(),
+                        putFirstSample.build(),
+                        pickUpSecondSample.build(),
+                        putSecondSample.build(),
+                        pickUpThirdSample.build(),
+                        putThirdSample.build(),
+                        pickUpSecondSpecimen.build(),
+                        placeSecondSpecimen.build(),
+                        pickUpThirdSpecimen.build(),
+                        placeThirdSpecimen.build(),
+                        pickUpForthSpecimen.build(),
+                        placeForthSpecimen.build(),
+                        pickUpFifthSpecimen.build(),
+                        placeFifthSpecimen.build(),
+                        park.build()
                 )
         );
 
