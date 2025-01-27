@@ -16,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.subss.Arm;
 import org.firstinspires.ftc.teamcode.subss.Camera;
 import org.firstinspires.ftc.teamcode.subss.Claw;
+import org.firstinspires.ftc.teamcode.subss.LimeLightTest;
 import org.firstinspires.ftc.teamcode.subss.Slides;
 import org.firstinspires.ftc.teamcode.subss.Wrist;
 
@@ -34,7 +35,8 @@ public class TeleOp extends OpMode {
     Slides slides = new Slides(this);
     Wrist wrist = new Wrist(this);
     Claw claw = new Claw(this);
-    Camera camera = new Camera();
+    Camera camera = new Camera(this);
+    LimeLightTest lime = new LimeLightTest(this);
 
     public boolean switchMode = true;
 
@@ -126,6 +128,25 @@ public class TeleOp extends OpMode {
 
         if(gamepad1.b){ // moving to centralize the claw
 
+            if(camera.realX() < 0.5){
+                if(camera.realX() > -0.5){
+                    rightStickX = 0.1;
+                } else{
+                    rightStickX = -0.1;
+                }
+            } else if(camera.realY() < 0.5&& camera.realY() > -0.5){
+                if(camera.realY() > -0.5){
+                    rotY = 0.1;
+                } else{
+                    rotY = -0.1;
+                }
+            } else if(camera.realAngle() > 67.5 || camera.realAngle() <  22.5){
+                wrist.PickUp90();
+            } else{
+                wrist.PickUp0();
+            }
+
+            /*
             angle = camera.Angle();
             center = camera.Center();
 
@@ -141,15 +162,17 @@ public class TeleOp extends OpMode {
                 claw.openClaw(); //open the claw
             }
 
-
-        } else{
-
-            frontLeft.setPower(((rotY + rotX + rightStickX) / denominator)*speed);
-            frontRight.setPower(((rotY - rotX - rightStickX) / denominator)*speed);
-            backLeft.setPower(((rotY - rotX + rightStickX) / denominator)*speed);
-            backRight.setPower(((rotY + rotX - rightStickX) / denominator)*speed);
-
+             */
         }
+
+
+        frontLeft.setPower(((rotY + rotX + rightStickX) / denominator)*speed);
+        frontRight.setPower(((rotY - rotX - rightStickX) / denominator)*speed);
+        backLeft.setPower(((rotY - rotX + rightStickX) / denominator)*speed);
+        backRight.setPower(((rotY + rotX - rightStickX) / denominator)*speed);
+
+
+
 
 
         //Switch Mode
