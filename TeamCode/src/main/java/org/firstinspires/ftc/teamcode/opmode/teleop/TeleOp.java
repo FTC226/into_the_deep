@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
@@ -16,13 +18,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.subss.Arm;
 import org.firstinspires.ftc.teamcode.subss.Camera;
 import org.firstinspires.ftc.teamcode.subss.Claw;
-import org.firstinspires.ftc.teamcode.subss.LimeLightTest;
+
 import org.firstinspires.ftc.teamcode.subss.Slides;
 import org.firstinspires.ftc.teamcode.subss.Wrist;
 
 
 import org.opencv.core.*;
-
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "InsiredAwardTeleop")
@@ -36,7 +40,7 @@ public class TeleOp extends OpMode {
     Wrist wrist = new Wrist(this);
     Claw claw = new Claw(this);
     Camera camera = new Camera(this);
-    LimeLightTest lime = new LimeLightTest(this);
+    private OpenCvCamera webcam;
 
     public boolean switchMode = true;
 
@@ -101,6 +105,37 @@ public class TeleOp extends OpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
 
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        WebcamName webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewId);
+
+        // Initialize the pipeline
+
+        webcam.setPipeline(camera);
+
+
+        camera.init();
+
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+
+                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+
+                telemetry.addData("Status", "Camera started");
+
+
+            }
+
+            @Override
+            public void onError(int errorCode) {
+                telemetry.addData("Error", "Camera failed to open with error code: " + errorCode);
+                telemetry.update();
+            }
+        });
+
+
     }
     @Override
     public void loop() {
@@ -116,6 +151,8 @@ public class TeleOp extends OpMode {
             imu.resetYaw();
         }
         // Field Centric Calculations
+
+
         double rotX = leftStickX * Math.cos(-robotYaw) - leftStickY * Math.sin(-robotYaw);
         double rotY = leftStickX * Math.sin(-robotYaw) + leftStickY * Math.cos(-robotYaw);
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rightStickX), 1);
@@ -126,43 +163,26 @@ public class TeleOp extends OpMode {
             speed = 1.0;
         }
 
-        if(gamepad1.b){ // moving to centralize the claw
 
-            if(camera.realX() < 0.5){
-                if(camera.realX() > -0.5){
-                    rightStickX = 0.1;
-                } else{
-                    rightStickX = -0.1;
-                }
-            } else if(camera.realY() < 0.5&& camera.realY() > -0.5){
-                if(camera.realY() > -0.5){
-                    rotY = 0.1;
-                } else{
-                    rotY = -0.1;
-                }
+        telemetry.addData("Angle", camera.realAngle());
+        telemetry.addData("Center X", camera.realX());
+        telemetry.addData("Center Y", camera.realY());
+
+        if(gamepad1.b){
+
+            if(camera.realX() < -0.5 || camera.realX() > 0.5){
+                leftStickX = camera.realX();
+                rotX = 0;
+                rotY = 0;
+            } else if(camera.realY() < -0.5&& camera.realY() > 0.5){
+                leftStickY = camera.realY();
+                rotX = 0;
+                rotY = 0;
             } else if(camera.realAngle() > 67.5 || camera.realAngle() <  22.5){
                 wrist.PickUp90();
             } else{
                 wrist.PickUp0();
             }
-
-            /*
-            angle = camera.Angle();
-            center = camera.Center();
-
-            double x = center.x;
-            double y = center.y;
-            if(Math.abs(x-320)>20 && Math.abs(y-180)>20){//setting the center
-                moveRobotCentric(-(x-320)/Math.sqrt((x*x)+(y*y)), -(y-180)/Math.sqrt((x*x)+(y*y)), 0);
-            } else if(angle <= 122.5 && angle >= 67.5){
-                wrist.PickUp0();
-            } else if(angle > 122.5 || angle < 67.5){
-                wrist.PickUp90();
-            } else {
-                claw.openClaw(); //open the claw
-            }
-
-             */
         }
 
 
