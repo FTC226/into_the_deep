@@ -14,8 +14,8 @@ public class Wrist {
     }
 
     public void init() {
-        leftClaw = opMode.hardwareMap.get(Servo.class, "leftServo");
-        rightClaw = opMode.hardwareMap.get(Servo.class, "rightServo");
+        leftClaw = opMode.hardwareMap.get(Servo.class, "leftArmServo");
+        rightClaw = opMode.hardwareMap.get(Servo.class, "rightArmServo");
     }
 
     public void Up() {

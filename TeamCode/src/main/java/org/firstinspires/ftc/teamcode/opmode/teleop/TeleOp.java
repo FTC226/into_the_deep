@@ -76,6 +76,8 @@ public class TeleOp extends OpMode {
         slides.init();
         wrist.init();
         claw.init();
+        camera.init();
+        FtcDashboard dashboard = FtcDashboard.getInstance();
 
 
         frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
@@ -107,6 +109,7 @@ public class TeleOp extends OpMode {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+
         WebcamName webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
         webcam = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewId);
 
@@ -115,7 +118,7 @@ public class TeleOp extends OpMode {
         webcam.setPipeline(camera);
 
 
-        camera.init();
+
 
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
@@ -123,6 +126,7 @@ public class TeleOp extends OpMode {
 
                 webcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
 
+                dashboard.startCameraStream(webcam, 50);
                 telemetry.addData("Status", "Camera started");
 
 
@@ -164,35 +168,93 @@ public class TeleOp extends OpMode {
         }
 
 
-        telemetry.addData("Angle", camera.realAngle());
-        telemetry.addData("Center X", camera.realX());
-        telemetry.addData("Center Y", camera.realY());
 
-        if(gamepad1.b){
 
-            if(camera.realX() < -0.5 || camera.realX() > 0.5){
-                leftStickX = camera.realX();
-                rotX = 0;
-                rotY = 0;
-            } else if(camera.realY() < -0.5&& camera.realY() > 0.5){
-                leftStickY = camera.realY();
-                rotX = 0;
-                rotY = 0;
-            } else if(camera.realAngle() > 67.5 || camera.realAngle() <  22.5){
+
+        if (gamepad1.b) {
+
+            double moveX = 0;
+            double moveY = 0;
+
+
+            if (camera.realY()> -2) {
+                moveY = Math.abs(camera.realY()+2) / 12.5;
+            }
+            if(Math.abs(camera.realX()) > 0.5){
+                moveX = camera.realX() / 7.5;
+            }
+
+            denominator = Math.max(Math.abs(moveX) + Math.abs(moveY), 1);
+
+
+            frontLeft.setPower(((moveY + moveX + rightStickX)/denominator) * speed);
+            frontRight.setPower(((moveY - moveX - rightStickX)/denominator) * speed);
+            backLeft.setPower(((moveY - moveX + rightStickX)/denominator) * speed);
+            backRight.setPower(((moveY + moveX - rightStickX)/denominator) * speed);
+
+
+
+            if (camera.bigAngle()) {
                 wrist.PickUp90();
-            } else{
+            } else {
                 wrist.PickUp0();
             }
+        } else if(gamepad1.dpad_down ){
+            double horMoveX = 0;
+            double horMoveY = 0;
+
+
+
+
+            if(Math.abs(camera.realX()) > 0.2){
+                horMoveX = camera.realX() / 7.5;
+            }
+
+            denominator = Math.max(Math.abs(horMoveX), 1);
+
+            if (camera.bigAngle()) {
+                wrist.PickUp90();
+            } else {
+                wrist.PickUp0();
+            }
+
+            frontLeft.setPower(((horMoveY + horMoveX + rightStickX)/denominator) * speed);
+            frontRight.setPower(((horMoveY - horMoveX - rightStickX)/denominator) * speed);
+            backLeft.setPower(((horMoveY - horMoveX + rightStickX)/denominator) * speed);
+            backRight.setPower(((horMoveY + horMoveX - rightStickX)/denominator) * speed);
+
+
+        } else {
+            frontLeft.setPower(((rotY + rotX + rightStickX) / denominator) * speed);
+            frontRight.setPower(((rotY - rotX - rightStickX) / denominator) * speed);
+            backLeft.setPower(((rotY - rotX + rightStickX) / denominator) * speed);
+            backRight.setPower(((rotY + rotX - rightStickX) / denominator) * speed);
         }
 
 
-        frontLeft.setPower(((rotY + rotX + rightStickX) / denominator)*speed);
-        frontRight.setPower(((rotY - rotX - rightStickX) / denominator)*speed);
-        backLeft.setPower(((rotY - rotX + rightStickX) / denominator)*speed);
-        backRight.setPower(((rotY + rotX - rightStickX) / denominator)*speed);
 
 
 
+        if(gamepad1.a){
+            camera.setColor("yellow");
+        }
+
+        if(gamepad1.y){
+            camera.setColor("blue");
+        }
+
+        if(gamepad1.dpad_up){
+            camera.setColor("red");
+        }
+
+
+
+
+        telemetry.addData("Angle", camera.realAngle());
+        telemetry.addData("Center X", camera.realX());
+        telemetry.addData("Center Y", camera.realY());
+        telemetry.addData("Angle", camera.bigAngle());
+        telemetry.addData("Color", camera.getColor());
 
 
         //Switch Mode

@@ -40,9 +40,11 @@ public class Camera extends OpenCvPipeline {
     private Mat hierarchy;
     private Mat mask;
 
-    double realerX = 0;
-    double realerY = 0;
-    double bigAngle = 0;
+    double realerX;
+    double realerY;
+    double bigAngle;
+
+    boolean angle =false;
 
     public enum SampleColor {
         YELLOW(),
@@ -56,7 +58,8 @@ public class Camera extends OpenCvPipeline {
 
     public static Scalar lowerYellow = new Scalar(19.0, 150.0, 130.1); // hsv
     public static Scalar upperYellow = new Scalar(30.0, 255.0, 255.0); // hsv
-    public static Scalar lowerBlue = new Scalar(90.0, 150.0, 100.0); // hsv
+    //public static Scalar lowerBlue = new Scalar(90.0, 150.0, 100.0); // hsv
+    public static Scalar lowerBlue = new Scalar(50.0, 50.0, 80.0); // hsv
     public static Scalar upperBlue = new Scalar(120.0, 255.0, 255.0); // hsv
     public static Scalar lowerRedH = new Scalar(10.0, 0.0, 0.0); // hsv
     public static Scalar upperRedH = new Scalar(160.0, 255.0, 255.0); // hsv
@@ -67,71 +70,71 @@ public class Camera extends OpenCvPipeline {
     private double k_translation = 1d/640d;
 
     public static SampleColor colorType = SampleColor.BLUE;
-   //@Override
-  public void init(/*int width, int height, CameraCalibration calibration*/) {
+    //@Override
+    public void init(/*int width, int height, CameraCalibration calibration*/) {
 
-      frame = new Mat();
+        frame = new Mat();
 
-      distance = 0;
-      realerX = 0;
-      realerY = 0;
-      bigAngle = 0;
-
-
-      hsv = new Mat();
+        distance = 0;
+        realerX = 0;
+        realerY = 0;
+        bigAngle = 0;
 
 
-      gray = new Mat();
-
-      mask = new Mat();
-
-      inRange = new Mat();
+        hsv = new Mat();
 
 
-      kernel = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(25, 25));
-      kernel2 = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(10, 10));
+        gray = new Mat();
+
+        mask = new Mat();
+
+        inRange = new Mat();
 
 
-      List<MatOfPoint> unfilteredContours = new ArrayList<>();
-      hierarchy = new Mat();
+        kernel = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(25, 25));
+        kernel2 = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(10, 10));
 
 
-      ArrayList<RotatedRect> rotatedRects = new ArrayList<>();
-
-      List<MatOfPoint> filteredContours = new ArrayList<>();
-
-
-      ArrayList<ArrayList<Double[]>> overlapGroups = new ArrayList<>();
+        List<MatOfPoint> unfilteredContours = new ArrayList<>();
+        hierarchy = new Mat();
 
 
-      ArrayList<RotatedRect> filteredRects = new ArrayList<>();
+        ArrayList<RotatedRect> rotatedRects = new ArrayList<>();
+
+        List<MatOfPoint> filteredContours = new ArrayList<>();
 
 
-      ArrayList<Point> real = new ArrayList<>();
+        ArrayList<ArrayList<Double[]>> overlapGroups = new ArrayList<>();
 
 
-      MatOfPoint2f intersection = new MatOfPoint2f();
+        ArrayList<RotatedRect> filteredRects = new ArrayList<>();
 
 
-      MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
+        ArrayList<Point> real = new ArrayList<>();
 
 
-      MatOfPoint points = new MatOfPoint();
+        MatOfPoint2f intersection = new MatOfPoint2f();
 
 
-      List<MatOfPoint> listThing = new ArrayList<>();
+        MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
+
+
+        MatOfPoint points = new MatOfPoint();
+
+
+        List<MatOfPoint> listThing = new ArrayList<>();
 
 
 
-  }
-/*
-
-    public SampleDetector(Telemetry telemetry){
-        this.telemetry = telemetry;
-//        this.colorType = colorType;
     }
+    /*
 
- */
+        public SampleDetector(Telemetry telemetry){
+            this.telemetry = telemetry;
+    //        this.colorType = colorType;
+        }
+
+     */
     public Camera(OpMode _opMode) {
         opMode = _opMode;
         telemetry = _opMode.telemetry;
@@ -200,7 +203,8 @@ public class Camera extends OpenCvPipeline {
         Imgproc.findContours(inRange, unfilteredContours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Filter contours by size and get rotated rects
-        int minArea = 600;
+        int minArea = 5000;
+        //int minArea = 600;
         ArrayList<RotatedRect> rotatedRects = new ArrayList<>();
         List<MatOfPoint> filteredContours = new ArrayList<>();
         for (MatOfPoint contour : unfilteredContours) {
@@ -260,6 +264,13 @@ public class Camera extends OpenCvPipeline {
                 }
             }
             filteredRects.add(rotatedRects.get(maxIndex));
+        }
+
+        if (filteredRects.isEmpty()) {
+            bigAngle = 0;
+            realerX = 0;
+            realerY = 0;
+            return frame;
         }
 
         //telemetry.addData("filteredRects.size()", filteredRects.size());
@@ -353,9 +364,26 @@ public class Camera extends OpenCvPipeline {
 
             Imgproc.circle(frame, rotatedRect.center, 1, new Scalar(255, 255, 0), 3);
 
-            bigAngle = procAngle;
-            realerX=real_x;
-            realerY=real_y;
+
+
+
+            if(Math.sqrt(Math.pow(real_x, 2) + Math.pow(real_y, 2)) < Math.sqrt(Math.pow(realerX, 2) + Math.pow(realerY, 2)) || i ==0){
+                bigAngle = procAngle;
+                realerX=real_x;
+                realerY=real_y;
+            }
+
+            Point[] vert = new Point[4];
+            rotatedRect.points(vert);
+
+            if(vert[1].x-vert[2].x > vert[1].y-vert[0].y){
+                angle = true;
+            } else{
+                angle = false;
+            }
+
+
+
         }
         Imgproc.circle(frame, new Point(320, 240), 1, new Scalar(255, 255, 0), 3);
 
@@ -374,7 +402,7 @@ public class Camera extends OpenCvPipeline {
                 procAngle *= -1;
             else
                 procAngle = 90-procAngle;
-            telemetry.addData("procAngle ", procAngle);
+            //telemetry.addData("procAngle ", procAngle);
             sampleAngle = procAngle;
         }
         //telemetry.addData("sampleAngle", sampleAngle);
@@ -493,4 +521,25 @@ public class Camera extends OpenCvPipeline {
     public double realAngle() {
         return bigAngle;
     }
+
+    public boolean bigAngle(){
+        return angle;
+    }
+
+
+    public void setColor(String color){
+        if(color.equals("blue")){
+            colorType = SampleColor.BLUE;
+        } else if(color.equals("red")){
+            colorType = SampleColor.RED;
+        } else if(color.equals("yellow")){
+            colorType = SampleColor.YELLOW;
+        }
+    }
+
+    public SampleColor getColor(){
+        return colorType;
+    }
+
+
 }
