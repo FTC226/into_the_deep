@@ -103,6 +103,32 @@ public class Slides {
         rightSlide.setVelocity(velocity);
     }
 
+    public void reach() {
+        leftSlide.setTargetPosition(1500);
+        rightSlide.setTargetPosition(1500);
+        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftSlide.setVelocity(500);
+        rightSlide.setVelocity(500);
+    }
+
+    public boolean atTarget(){
+        return Math.abs(leftSlide.getCurrentPosition() - 1500) < 50;
+    }
+
+    public void bump(int position){
+        leftSlide.setTargetPosition(position);
+        rightSlide.setTargetPosition(position);
+        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftSlide.setVelocity(velocity);
+        rightSlide.setVelocity(velocity);
+    }
+
+    public boolean atTarget2(int position){
+        return Math.abs(leftSlide.getCurrentPosition() - position) < 50;
+    }
+
     public void moveToResetPos() {
         leftSlide.setTargetPosition(0);
         rightSlide.setTargetPosition(0);
@@ -111,6 +137,8 @@ public class Slides {
         leftSlide.setVelocity(velocity);
         rightSlide.setVelocity(velocity);
     }
+
+
 
     public void stop() {
         leftSlide.setTargetPosition(0);

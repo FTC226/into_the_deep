@@ -1,3 +1,4 @@
+
 package org.firstinspires.ftc.teamcode.subss;
 
 import android.graphics.Canvas;
@@ -29,8 +30,6 @@ public class Camera extends OpenCvPipeline {
 
     public double distance;
 
-    Point center = new Point(0, 0);
-
     OpMode opMode;
 
     public Mat frame;
@@ -42,9 +41,13 @@ public class Camera extends OpenCvPipeline {
     private Mat hierarchy;
     private Mat mask;
 
-    double realerX = 0;
-    double realerY = 0;
-    double bigAngle = 0;
+    double realerX;
+    double realerY;
+    double bigAngle;
+    double max = 500000;
+
+    boolean empty = true;
+    boolean angle =false;
 
     public enum SampleColor {
         YELLOW(),
@@ -202,13 +205,15 @@ public class Camera extends OpenCvPipeline {
         Imgproc.findContours(inRange, unfilteredContours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Filter contours by size and get rotated rects
-        int minArea = 600;
+        int minArea = 5000;
+
+        //int minArea = 600;
         ArrayList<RotatedRect> rotatedRects = new ArrayList<>();
         List<MatOfPoint> filteredContours = new ArrayList<>();
         for (MatOfPoint contour : unfilteredContours) {
             RotatedRect minAreaRect = Imgproc.minAreaRect(new MatOfPoint2f(contour.toArray()));
             double area = minAreaRect.size.area();
-            if (area > minArea) {
+            if (area > minArea && area < max) {
                 filteredContours.add(contour);
                 rotatedRects.add(minAreaRect);
             }
@@ -262,6 +267,14 @@ public class Camera extends OpenCvPipeline {
                 }
             }
             filteredRects.add(rotatedRects.get(maxIndex));
+        }
+
+        if (filteredRects.isEmpty()) {
+            bigAngle = 0;
+            realerX = 0;
+            realerY = 0;
+            empty = true;
+            return frame;
         }
 
         //telemetry.addData("filteredRects.size()", filteredRects.size());
@@ -355,9 +368,35 @@ public class Camera extends OpenCvPipeline {
 
             Imgproc.circle(frame, rotatedRect.center, 1, new Scalar(255, 255, 0), 3);
 
-            bigAngle = procAngle;
-            realerX=real_x;
-            realerY=real_y;
+
+
+
+            if(Math.sqrt(Math.pow(real_x, 2) + Math.pow(real_y, 2)) < Math.sqrt(Math.pow(realerX, 2) + Math.pow(realerY, 2)) || i ==0){
+                bigAngle = procAngle;
+                realerX=real_x;
+                realerY=real_y;
+                empty = false;
+            }
+
+            Point[] vert = new Point[4];
+            rotatedRect.points(vert);
+
+            if (filteredRects.get(0).size.width > filteredRects.get(0).size.height) {
+                angle = true;  // Block is horizontal (90 degrees)
+            } else {
+                angle = false; // Block is vertical (0 degrees)
+            }
+
+            /*
+            if(vert[1].x-vert[2].x > vert[1].y-vert[0].y){
+                angle = true;
+            } else{
+                angle = false;
+            }
+             */
+
+
+
         }
         Imgproc.circle(frame, new Point(320, 240), 1, new Scalar(255, 255, 0), 3);
 
@@ -376,7 +415,7 @@ public class Camera extends OpenCvPipeline {
                 procAngle *= -1;
             else
                 procAngle = 90-procAngle;
-            telemetry.addData("procAngle ", procAngle);
+            //telemetry.addData("procAngle ", procAngle);
             sampleAngle = procAngle;
         }
         //telemetry.addData("sampleAngle", sampleAngle);
@@ -496,8 +535,36 @@ public class Camera extends OpenCvPipeline {
         return bigAngle;
     }
 
-    public void setXY(){
-        realerX = 0;
-        realerY = 0;
+    public boolean bigAngle(){
+        return angle;
     }
+
+
+    public void setColor(String color){
+        if(color.equals("blue")){
+            colorType = SampleColor.BLUE;
+        } else if(color.equals("red")){
+            colorType = SampleColor.RED;
+        } else if(color.equals("yellow")){
+            colorType = SampleColor.YELLOW;
+        }
+    }
+
+    public SampleColor getColor(){
+        return colorType;
+    }
+
+    public boolean isEmpty(){
+        return empty;
+    }
+
+    public boolean isAlligned(){
+        return (Math.abs(realerX) < 0.2 && Math.abs(realerY) < 0.2);
+    }
+
+    public void setMax(int maximum){
+        max = maximum;
+    }
+
+
 }

@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -32,9 +34,6 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 public class TeleOp extends OpMode {
 
-    Alignment alignment = new Alignment();
-    Point alignCenter;
-
     //Subsystems
     Arm arm = new Arm(this, 1);
     Slides slides = new Slides(this);
@@ -44,10 +43,23 @@ public class TeleOp extends OpMode {
     private OpenCvCamera webcam;
 
     public boolean switchMode = true;
+    public boolean reaching = false;
+    public boolean alignY = false;
+    public boolean alignX =false;
+    public boolean fullAlign = false;
+    public boolean reaching2 = false;
+    public static int position = 150;
+    public static double dividerX = 7.5;
+    public static double dividerY = 13.5;
+    public static double range = 0.4;
+    public static int max = 500000;
+
 
     public double speed = 1.0;
-
     public double angle;
+    public double moveX = 0;
+    public double moveY = 0;
+    public Point center;
 
     // Motors
     public DcMotor frontLeft, frontRight, backLeft, backRight;
@@ -78,6 +90,8 @@ public class TeleOp extends OpMode {
         wrist.init();
         claw.init();
         camera.init();
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+
 
 
         frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
@@ -117,12 +131,16 @@ public class TeleOp extends OpMode {
 
         webcam.setPipeline(camera);
 
+
+
+
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
 
                 webcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
 
+                dashboard.startCameraStream(webcam, 50);
                 telemetry.addData("Status", "Camera started");
 
 
@@ -163,41 +181,67 @@ public class TeleOp extends OpMode {
         }
 
 
-        if(gamepad1.b) {
-            if (camera.realX() < -1 || camera.realX() > 1) {
-                leftStickX = -camera.realX() / 15;
-                rotX = leftStickX - leftStickY;
-                rotY = leftStickX + leftStickY;
-                denominator = 1;
-            } else if (camera.realY() < -1 || camera.realY() > 1) {
-                leftStickY = camera.realY() / 15;
-                rotX = leftStickX - leftStickY;
-                rotY = leftStickX + leftStickY;
-                denominator = 1;
-            } else if (camera.realAngle() > 67.5 || camera.realAngle() < 22.5) {
-                wrist.PickUp0();
-            } else {
-                wrist.PickUp90();
+        camera.setMax(max);
+
+        if (gamepad1.b) {
+            search();
+        } else if(gamepad1.dpad_down ){
+            double horMoveX = 0;
+            double horMoveY = 0;
+
+            if(camera.isEmpty() && !reaching){
+                horMoveX = -0.2;
+                wrist.mid();
+
+            }else if(Math.abs(camera.realX()) > 0.2 && !reaching2){
+                horMoveX = Math.sqrt(camera.realX());
+                reaching = true;
+
+            } else{
+                reaching = true;
+                reaching2 =true;
+                wrist.Down();
+                if (!slides.atTarget() && camera.isEmpty()) {
+                    slides.reach();
+                } else {
+                    search();
+                }
+
+
             }
-        } else{
-            camera.setXY();
+
+            denominator = Math.max(Math.abs(horMoveX), 1);
+
+
+
+            frontLeft.setPower(((horMoveY + horMoveX + rightStickX)/denominator) * speed);
+            frontRight.setPower(((horMoveY - horMoveX - rightStickX)/denominator) * speed);
+            backLeft.setPower(((horMoveY - horMoveX + rightStickX)/denominator) * speed);
+            backRight.setPower(((horMoveY + horMoveX - rightStickX)/denominator) * speed);
+
+
+        } else {
+            frontLeft.setPower(((rotY + rotX + rightStickX) / denominator) * speed);
+            frontRight.setPower(((rotY - rotX - rightStickX) / denominator) * speed);
+            backLeft.setPower(((rotY - rotX + rightStickX) / denominator) * speed);
+            backRight.setPower(((rotY + rotX - rightStickX) / denominator) * speed);
         }
-        if (gamepad1.a) {
-            angle = camera.realAngle();
-            alignCenter = alignment.returnCenter();
 
-            double x = alignCenter.x;
-            double y = alignCenter.y;
-            if(Math.abs(x-320)>20 && Math.abs(y-180)>20){//setting the center
-                moveRobotCentric(-(x-320)/Math.sqrt((x*x)+(y*y)), -(y-180)/Math.sqrt((x*x)+(y*y)), 0);
-            }
+
+
+        if(gamepad1.a){
+            camera.setColor("yellow");
+        }
+
+        if(gamepad1.y){
+            camera.setColor("blue");
+        }
+
+        if(gamepad1.dpad_up){
+            camera.setColor("red");
         }
 
 
-        frontLeft.setPower(((rotY + rotX + rightStickX) / denominator)*speed);
-        frontRight.setPower(((rotY - rotX - rightStickX) / denominator)*speed);
-        backLeft.setPower(((rotY - rotX + rightStickX) / denominator)*speed);
-        backRight.setPower(((rotY + rotX - rightStickX) / denominator)*speed);
 
         //Switch Mode
         if (gamepad2.back) {
@@ -282,13 +326,6 @@ public class TeleOp extends OpMode {
             slides.hangExtend();
         }
 
-        if (slidesReachedTarget(0, 10)) {
-            slides.stop();
-        }
-
-        if (armReachedTarget(0, 10)) {
-            slides.stop();
-        }
 
         if(switchMode) {
             telemetry.addData("MODE", "SAMPLE");
@@ -299,6 +336,12 @@ public class TeleOp extends OpMode {
         telemetry.addData("Angle", camera.realAngle());
         telemetry.addData("Center X", camera.realX());
         telemetry.addData("Center Y", camera.realY());
+        telemetry.addData("big angle", camera.bigAngle());
+        telemetry.addData("Close 0", wrist.isAt0());
+        telemetry.addData("Close 90", wrist.isAt90());
+        telemetry.addData("MoveX", moveX);
+        telemetry.addData("MoveY", moveY);
+        telemetry.addData("Max", max);
         telemetry.addData("Yaw: ", Math.toDegrees(robotYaw));
         telemetry.addData("Yaw Acceleration", zAccel);
         telemetry.addData("LeftSlide", slides.leftGetCurrentPosition());
@@ -318,7 +361,7 @@ public class TeleOp extends OpMode {
 
     public void armHang() {
         arm.readyForHang();
-        if (armReachedTarget(500, 50)) {
+        if (armReachedTarget(500, 100)) {
             slides.hangExtend();
         }
         if (slidesReachedTarget(1100, 50)) {
@@ -326,12 +369,71 @@ public class TeleOp extends OpMode {
         }
     }
 
+    public void search(){
+
+        moveX = 0;
+        moveY = 0;
+
+        if(camera.realX() == 0 && camera.realY() == 0){
+            alignX = false;
+            alignY = false;
+        }
+
+        if(Math.abs(camera.realY()) > range){
+            if(camera.realY() > 0){
+                moveY = Math.max(camera.realY() / dividerY, 0.1);
+            } else{
+                moveY = Math.min(camera.realY() / dividerY, -0.1);
+            }
+            alignY = false;
+        } else{
+            alignY = true;
+        }
+
+        if(Math.abs(camera.realX()) > range){
+            if(camera.realX() > 0){
+                moveX = Math.max(camera.realX() / dividerX, 0.15);
+            } else{
+                moveX = Math.min(camera.realX() / dividerX, -0.15);
+            }
+            alignX = false;
+        } else{
+            alignX = true;
+        }
+
+        if((alignX && alignY) || fullAlign ){
+            if (camera.bigAngle()) {
+                wrist.PickUp90();
+                slides.bump(position);
+                fullAlign = true;
+                if(wrist.isAt90() && slides.atTarget2(position)){
+                    claw.closeClaw();
+                    fullAlign = false;
+                }
+            } else {
+                wrist.PickUp0();
+                slides.bump(position);
+                fullAlign = true;
+                if(wrist.isAt0() && slides.atTarget2(position)){
+                    claw.closeClaw();
+                    fullAlign = false;
+                }
+            }
+        }
+        double denominator = Math.max(Math.abs(moveX) + Math.abs(moveY), 1);
+
+        frontLeft.setPower(((moveY + moveX + rightStickX)/denominator) * speed);
+        frontRight.setPower(((moveY - moveX - rightStickX)/denominator) * speed);
+        backLeft.setPower(((moveY - moveX + rightStickX)/denominator) * speed);
+        backRight.setPower(((moveY + moveX - rightStickX)/denominator) * speed);
+    }
+
 
     public void placeSample() {
 //        wrist.Down();
         wrist.ReadyPlaceSample();
         arm.moveUp();
-        if(armReachedTarget(1650, 500)) {
+        if(armReachedTarget(1650, 1000)) {
             slides.placeSample();
         }
     }
@@ -339,7 +441,7 @@ public class TeleOp extends OpMode {
     public void placeSampleLow() {
         wrist.PlaceSample();
         arm.moveUp();
-        if(armReachedTarget(1650, 500)) {
+        if(armReachedTarget(1650, 1000)) {
             slides.placeSampleLow();
         }
     }

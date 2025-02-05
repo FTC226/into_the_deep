@@ -30,6 +30,11 @@ public class Wrist {
         rotateServo.setPosition(0.5);
     }
 
+    public void mid(){
+        wristServo.setPosition(0.55);
+        rotateServo.setPosition(0.5);
+    }
+
     public void ReadyPlaceSample() {
         wristServo.setPosition(0.35);
         rotateServo.setPosition(0.5);
@@ -61,6 +66,20 @@ public class Wrist {
     }
 
     public void PickUpSpecimen() {}
+
+    public boolean isAt0(){
+        if(rotateServo.getPosition() == 0.16){
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isAt90(){
+        if(rotateServo.getPosition() == 0.5){
+            return true;
+        }
+        return false;
+    }
 
 
 
