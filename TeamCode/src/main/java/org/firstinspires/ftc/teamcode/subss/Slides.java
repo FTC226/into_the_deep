@@ -109,6 +109,15 @@ public class Slides {
         rightSlide.setVelocity(velocity);
     }
 
+    public void move(int ticks) {
+        leftSlide.setTargetPosition(ticks);
+        rightSlide.setTargetPosition(ticks);
+        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftSlide.setVelocity(velocity);
+        rightSlide.setVelocity(velocity);
+    }
+
     public void stop() {
         leftSlide.setTargetPosition(0);
         rightSlide.setTargetPosition(0);

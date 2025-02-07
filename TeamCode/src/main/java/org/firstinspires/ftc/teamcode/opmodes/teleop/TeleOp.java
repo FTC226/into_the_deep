@@ -62,7 +62,10 @@ public class TeleOp extends OpMode {
     public double targetYaw;
 
 
+
     //Timer
+
+
 
 
     @Override
@@ -137,8 +140,6 @@ public class TeleOp extends OpMode {
             }
         });
 
-
-
     }
     @Override
     public void loop() {
@@ -164,8 +165,11 @@ public class TeleOp extends OpMode {
             speed = 1.0;
         }
 
+
         wrist.Middle();
         search();
+//        extendedSearch();
+
 
         slides.resetEncoder();
 
@@ -301,6 +305,14 @@ public class TeleOp extends OpMode {
         }
     }
 
+    public void extendedSearch(){
+        double moveX = 0;
+        double moveY = camera.realY();
+
+        double functionVal = 0.237604*(Math.pow(moveY,3))+0.93821*(Math.pow(moveY,2))+3.53806*(moveY)+12.0179;
+        slides.move((int)(55.52652208*functionVal));
+
+    }
 
     public void search() {
         double moveX = camera.realX();
@@ -309,8 +321,6 @@ public class TeleOp extends OpMode {
         boolean angleSet = false;
         boolean centralized = false;
 
-        moveX = Math.min(1.0, moveX);
-//        moveY = Math.min(1.0, moveY);
         //move the claw first
 //        if (!angle && !angleSet){
 //            wrist.PickUp90();
@@ -322,15 +332,16 @@ public class TeleOp extends OpMode {
 //            angleSet = true;
 //        }
 
-        double magnitude = Math.sqrt(Math.pow(moveX,2)+Math.pow(moveY,2));
-        double deltaX = moveX/magnitude;
-        double deltaY = moveY/magnitude;
-        double denominator = Math.max(Math.abs(deltaX)+Math.abs(deltaY), 1);
+         double magnitude = Math.sqrt(Math.pow(moveX,2)+Math.pow(moveY,2));
+         double deltaX = moveX/magnitude;
+         double deltaY = moveY/magnitude;
+         double denominator = Math.max(Math.abs(moveX), 1);
+         double searchVelocity = 0.25;
 
-        frontLeft.setPower(((moveY + moveX + rightStickX) / denominator) * 0.25);
-        frontRight.setPower(((moveY - moveX - rightStickX) / denominator) * 0.25);
-        backLeft.setPower(((moveY - moveX + rightStickX) / denominator) * 0.25);
-        backRight.setPower(((moveY + moveX - rightStickX) / denominator) * 0.25);
+        frontLeft.setPower(((moveX) / denominator) * searchVelocity);
+        frontRight.setPower(((-moveX) / denominator) * searchVelocity);
+        backLeft.setPower(((-moveX) / denominator) * searchVelocity);
+        backRight.setPower(((moveX) / denominator) * searchVelocity);
 
 //        if(Math.abs(moveX)>0.1 && Math.abs(moveY)>0.1 && !centralized){
 //            double magnitude = Math.sqrt(Math.pow(moveX,2)+Math.pow(moveY,2));
@@ -356,6 +367,65 @@ public class TeleOp extends OpMode {
 
 
     }
+
+
+
+
+
+//    public void search() {
+//        double moveX = camera.realX();
+//        double moveY = 0;
+//        boolean angle = camera.bigAngle(); //will always be bigAngle
+//        boolean angleSet = false;
+//        boolean centralized = false;
+//
+//        moveX = Math.min(1.0, moveX);
+////        moveY = Math.min(1.0, moveY);
+//        //move the claw first
+////        if (!angle && !angleSet){
+////            wrist.PickUp90();
+////            angleSet = true;
+////        }
+////        else if(angle && !angleSet){
+////            wrist.PickUp0();
+////            moveY+=1;
+////            angleSet = true;
+////        }
+//
+//        double magnitude = Math.sqrt(Math.pow(moveX,2)+Math.pow(moveY,2));
+//        double deltaX = moveX/magnitude;
+//        double deltaY = moveY/magnitude;
+//        double denominator = Math.max(Math.abs(deltaX)+Math.abs(deltaY), 1);
+//
+//        frontLeft.setPower(((moveY + moveX + rightStickX) / denominator) * 0.25);
+//        frontRight.setPower(((moveY - moveX - rightStickX) / denominator) * 0.25);
+//        backLeft.setPower(((moveY - moveX + rightStickX) / denominator) * 0.25);
+//        backRight.setPower(((moveY + moveX - rightStickX) / denominator) * 0.25);
+//
+////        if(Math.abs(moveX)>0.1 && Math.abs(moveY)>0.1 && !centralized){
+////            double magnitude = Math.sqrt(Math.pow(moveX,2)+Math.pow(moveY,2));
+////            double deltaX = moveX/magnitude;
+////            double deltaY = moveY/magnitude;
+////            double denominator = Math.max(Math.abs(deltaX)+Math.abs(deltaY), 1);
+////
+////            frontLeft.setPower(((moveY + moveX + rightStickX) / denominator) * 0.25);
+////            frontRight.setPower(((moveY - moveX - rightStickX) / denominator) * 0.25);
+////            backLeft.setPower(((moveY - moveX + rightStickX) / denominator) * 0.25);
+////            backRight.setPower(((moveY + moveX - rightStickX) / denominator) * 0.25);
+////        } else if (Math.abs(moveX)>0.3 && Math.abs(moveY)>0.3){
+////            centralized = true;
+////            frontLeft.setPower(0);
+////            frontRight.setPower(0);
+////            backLeft.setPower(0);
+////            backRight.setPower(0);
+////        }
+//
+//        //centralize the bot second
+//
+//
+//
+//
+//    }
 
     public void placeSample() {
         wrist.ReadyPlaceSample();
