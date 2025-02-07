@@ -13,6 +13,13 @@ public class Arm {
     OpMode opMode;
     double power;
 
+    ElapsedTime timer = new ElapsedTime();
+
+    public boolean isReset = false;
+
+    int velocity = 5000; //4250
+
+
     public Arm(OpMode _opMode, double power) {
         opMode = _opMode;
         this.power = power;
@@ -28,41 +35,52 @@ public class Arm {
 
         armEncoder = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "arm"));
         armEncoder.setDirection(Encoder.Direction.REVERSE);
+
     }
 
     public void moveUp() {
         arm.setTargetPosition(1650);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm.setPower(power);
+        arm.setVelocity(velocity);
     }
 
     public void moveDown() {
         arm.setTargetPosition(0);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm.setPower(power);
+        arm.setVelocity(velocity);
     }
 
     public void readyForHang() {
         arm.setTargetPosition(500);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm.setPower(power);
+        arm.setVelocity(velocity);
     }
 
     public void pickUpSpecimen() {
         arm.setTargetPosition(550);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm.setPower(power);
+        arm.setVelocity(velocity);
     }
 
-    public void stop() {
-        arm.setTargetPosition(0);
-        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm.setPower(0);
-    }
+
 
 
     public int getCurrentPosition() {
         return arm.getCurrentPosition();
+    }
+
+    public void resetArm(ElapsedTime time) {
+        if (!isReset) {
+            arm.setTargetPosition(0);
+            arm.setVelocity(-velocity);
+            time.reset();
+            isReset = true;
+        }
+
+        if (isReset && time.seconds() > 1.0) {
+            arm.setVelocity(0);
+            resetEncoder();
+        }
     }
 
 
@@ -70,6 +88,8 @@ public class Arm {
     public void resetEncoder() {
         armEncoder.reset();
     }
+
+
 
 
 

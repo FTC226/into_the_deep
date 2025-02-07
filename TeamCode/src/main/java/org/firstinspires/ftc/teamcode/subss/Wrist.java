@@ -18,6 +18,12 @@ public class Wrist {
         rotateServo = opMode.hardwareMap.get(Servo.class, "rotateServo"); //rightServo
 
 
+
+    }
+
+    public void Middle() {
+        wristServo.setPosition(0.2);
+        rotateServo.setPosition(0.5);
     }
 
     public void Up() {

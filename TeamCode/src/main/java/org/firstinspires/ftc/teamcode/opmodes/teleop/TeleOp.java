@@ -15,13 +15,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 //Want to fix the "can't find symbol" the only thing you need to do is refactor the folder subsystems to another name
-import org.firstinspires.ftc.teamcode.subss.Alignment;
 import org.firstinspires.ftc.teamcode.subss.Arm;
 import org.firstinspires.ftc.teamcode.subss.Camera;
 import org.firstinspires.ftc.teamcode.subss.Claw;
 import org.firstinspires.ftc.teamcode.subss.Slides;
 import org.firstinspires.ftc.teamcode.subss.Wrist;
-import org.opencv.core.Point;
+
+
+import org.opencv.core.*;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -32,9 +33,6 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 public class TeleOp extends OpMode {
 
-    Alignment alignment = new Alignment();
-    Point alignCenter;
-
     //Subsystems
     Arm arm = new Arm(this, 1);
     Slides slides = new Slides(this);
@@ -43,11 +41,9 @@ public class TeleOp extends OpMode {
     Camera camera = new Camera(this);
     private OpenCvCamera webcam;
 
-    public boolean switchMode = true;
-
     public double speed = 1.0;
-
     public double angle;
+    public Point center;
 
     // Motors
     public DcMotor frontLeft, frontRight, backLeft, backRight;
@@ -67,7 +63,6 @@ public class TeleOp extends OpMode {
 
 
     //Timer
-    ElapsedTime timer = new ElapsedTime();
 
 
     @Override
@@ -78,6 +73,9 @@ public class TeleOp extends OpMode {
         wrist.init();
         claw.init();
         camera.init();
+
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+
 
 
         frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
@@ -117,12 +115,16 @@ public class TeleOp extends OpMode {
 
         webcam.setPipeline(camera);
 
+
+
+
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
 
-                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPSIDE_DOWN);
 
+                dashboard.startCameraStream(webcam, 50);
                 telemetry.addData("Status", "Camera started");
 
 
@@ -162,53 +164,39 @@ public class TeleOp extends OpMode {
             speed = 1.0;
         }
 
+        wrist.Middle();
+        search();
 
-        if(gamepad1.b) {
-            if (camera.realX() < -1 || camera.realX() > 1) {
-                leftStickX = -camera.realX() / 15;
-                rotX = leftStickX - leftStickY;
-                rotY = leftStickX + leftStickY;
-                denominator = 1;
-            } else if (camera.realY() < -1 || camera.realY() > 1) {
-                leftStickY = camera.realY() / 15;
-                rotX = leftStickX - leftStickY;
-                rotY = leftStickX + leftStickY;
-                denominator = 1;
-            } else if (camera.realAngle() > 67.5 || camera.realAngle() < 22.5) {
-                wrist.PickUp0();
-            } else {
-                wrist.PickUp90();
-            }
-        } else{
-            camera.setXY();
+        slides.resetEncoder();
+
+
+//
+//        if (gamepad1.b) {
+//        } else {
+//            frontLeft.setPower(((rotY + rotX + rightStickX) / denominator) * speed);
+//            frontRight.setPower(((rotY - rotX - rightStickX) / denominator) * speed);
+//            backLeft.setPower(((rotY - rotX + rightStickX) / denominator) * speed);
+//            backRight.setPower(((rotY + rotX - rightStickX) / denominator) * speed);
+//        }
+//
+
+
+        if(gamepad1.a){
+            camera.setColor("yellow");
         }
-        if (gamepad1.a) {
-            angle = camera.realAngle();
-            alignCenter = alignment.returnCenter();
 
-            double x = alignCenter.x;
-            double y = alignCenter.y;
-            if(Math.abs(x-320)>20 && Math.abs(y-180)>20){//setting the center
-                moveRobotCentric(-(x-320)/Math.sqrt((x*x)+(y*y)), -(y-180)/Math.sqrt((x*x)+(y*y)), 0);
-            }
+        if(gamepad1.a){
+            camera.setColor("blue");
+        }
+
+        if(gamepad1.dpad_up){
+            camera.setColor("red");
         }
 
 
-        frontLeft.setPower(((rotY + rotX + rightStickX) / denominator)*speed);
-        frontRight.setPower(((rotY - rotX - rightStickX) / denominator)*speed);
-        backLeft.setPower(((rotY - rotX + rightStickX) / denominator)*speed);
-        backRight.setPower(((rotY + rotX - rightStickX) / denominator)*speed);
 
-        //Switch Mode
-        if (gamepad2.back) {
-            switchMode = !switchMode;
-        }
-
-
-        if(gamepad2.dpad_up && switchMode) {
+        if(gamepad2.dpad_up) {
             placeSample();
-        } else if (gamepad2.dpad_up) {
-            placeSpecimen();
         }
 
 
@@ -282,19 +270,6 @@ public class TeleOp extends OpMode {
             slides.hangExtend();
         }
 
-        if (slidesReachedTarget(0, 10)) {
-            slides.stop();
-        }
-
-        if (armReachedTarget(0, 10)) {
-            slides.stop();
-        }
-
-        if(switchMode) {
-            telemetry.addData("MODE", "SAMPLE");
-        } else {
-            telemetry.addData("MODE", "SPECIMEN");
-        }
 
         telemetry.addData("Angle", camera.realAngle());
         telemetry.addData("Center X", camera.realX());
@@ -318,7 +293,7 @@ public class TeleOp extends OpMode {
 
     public void armHang() {
         arm.readyForHang();
-        if (armReachedTarget(500, 50)) {
+        if (armReachedTarget(500, 100)) {
             slides.hangExtend();
         }
         if (slidesReachedTarget(1100, 50)) {
@@ -327,11 +302,65 @@ public class TeleOp extends OpMode {
     }
 
 
+    public void search() {
+        double moveX = camera.realX();
+        double moveY = 0;
+        boolean angle = camera.bigAngle(); //will always be bigAngle
+        boolean angleSet = false;
+        boolean centralized = false;
+
+        moveX = Math.min(1.0, moveX);
+//        moveY = Math.min(1.0, moveY);
+        //move the claw first
+//        if (!angle && !angleSet){
+//            wrist.PickUp90();
+//            angleSet = true;
+//        }
+//        else if(angle && !angleSet){
+//            wrist.PickUp0();
+//            moveY+=1;
+//            angleSet = true;
+//        }
+
+        double magnitude = Math.sqrt(Math.pow(moveX,2)+Math.pow(moveY,2));
+        double deltaX = moveX/magnitude;
+        double deltaY = moveY/magnitude;
+        double denominator = Math.max(Math.abs(deltaX)+Math.abs(deltaY), 1);
+
+        frontLeft.setPower(((moveY + moveX + rightStickX) / denominator) * 0.25);
+        frontRight.setPower(((moveY - moveX - rightStickX) / denominator) * 0.25);
+        backLeft.setPower(((moveY - moveX + rightStickX) / denominator) * 0.25);
+        backRight.setPower(((moveY + moveX - rightStickX) / denominator) * 0.25);
+
+//        if(Math.abs(moveX)>0.1 && Math.abs(moveY)>0.1 && !centralized){
+//            double magnitude = Math.sqrt(Math.pow(moveX,2)+Math.pow(moveY,2));
+//            double deltaX = moveX/magnitude;
+//            double deltaY = moveY/magnitude;
+//            double denominator = Math.max(Math.abs(deltaX)+Math.abs(deltaY), 1);
+//
+//            frontLeft.setPower(((moveY + moveX + rightStickX) / denominator) * 0.25);
+//            frontRight.setPower(((moveY - moveX - rightStickX) / denominator) * 0.25);
+//            backLeft.setPower(((moveY - moveX + rightStickX) / denominator) * 0.25);
+//            backRight.setPower(((moveY + moveX - rightStickX) / denominator) * 0.25);
+//        } else if (Math.abs(moveX)>0.3 && Math.abs(moveY)>0.3){
+//            centralized = true;
+//            frontLeft.setPower(0);
+//            frontRight.setPower(0);
+//            backLeft.setPower(0);
+//            backRight.setPower(0);
+//        }
+
+        //centralize the bot second
+
+
+
+
+    }
+
     public void placeSample() {
-//        wrist.Down();
         wrist.ReadyPlaceSample();
         arm.moveUp();
-        if(armReachedTarget(1650, 500)) {
+        if(armReachedTarget(1650, 1000)) {
             slides.placeSample();
         }
     }
@@ -339,7 +368,7 @@ public class TeleOp extends OpMode {
     public void placeSampleLow() {
         wrist.PlaceSample();
         arm.moveUp();
-        if(armReachedTarget(1650, 500)) {
+        if(armReachedTarget(1650, 1000)) {
             slides.placeSampleLow();
         }
     }
@@ -374,19 +403,6 @@ public class TeleOp extends OpMode {
         if(slidesReachedTarget(0, 300)) {
             arm.moveDown();
         }
-    }
-
-    public void moveRobotCentric(double x, double y, double rx){
-        double d = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-        double frontLeftPower = (y + x + rx) / d;
-        double backLeftPower = (y - x + rx) / d;
-        double frontRightPower = (y - x - rx) / d;
-        double backRightPower = (y + x - rx) / d;
-
-        frontLeft.setPower(frontLeftPower);
-        backLeft.setPower(backLeftPower);
-        frontRight.setPower(frontRightPower);
-        backRight.setPower(backRightPower);
     }
 
 

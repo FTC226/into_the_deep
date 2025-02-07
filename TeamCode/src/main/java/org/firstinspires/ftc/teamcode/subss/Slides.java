@@ -45,9 +45,6 @@ public class Slides {
         rightSlideEncoder = new Encoder(opMode.hardwareMap.get(DcMotorEx.class, "rightSlide"));
         rightSlideEncoder.setDirection(Encoder.Direction.REVERSE);
 
-        ElapsedTime timer = new ElapsedTime();
-
-//        resetSlides();
     }
 
     public void pickupSample() {
@@ -128,21 +125,9 @@ public class Slides {
     public int rightGetCurrentPosition() {
         return rightSlide.getCurrentPosition();
     }
-    public void resetSlides() {
-        if (!isReset) {
-            leftSlide.setTargetPosition(0);
-            rightSlide.setTargetPosition(0);
-            leftSlide.setPower(-1);
-            rightSlide.setPower(-1);
-            timer.reset();
-            isReset = true;
-        }
 
-        if (isReset && timer.seconds() > 1.0) {
-            leftSlide.setPower(0);
-            rightSlide.setPower(0);
-            resetEncoder();
-        }
+    public void resetSlides() {
+
     }
 
     public void resetEncoder() {
