@@ -31,6 +31,9 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
+import java.util.ArrayList;
+import java.util.Stack;
+
 @Config
 @Autonomous(name = "LeftSideAutonomous", group = "Autonomous")
 public class LeftSideAutonomous extends LinearOpMode {
@@ -44,6 +47,12 @@ public class LeftSideAutonomous extends LinearOpMode {
 
 
     public class ArmSlidesClaw {
+        public int count0 = 0;
+        public int count45l = 0;
+        public int count45r = 0;
+        public int count90 = 0;
+
+
         private DcMotor arm, leftSlide, rightSlide;
 
         public DcMotor frontLeft, frontRight, backLeft, backRight;
@@ -147,23 +156,28 @@ public class LeftSideAutonomous extends LinearOpMode {
         }
 
         public void search() {
+
             double moveX = camera.realX();
             double moveY = 0;
             double realAngle = camera.realAngle();
-            boolean centralized = false;
+//            boolean centralized = false;
 
             //move the claw first
             if (realAngle > -90 && realAngle < -20) {
-                wrist.SearchPickUp45Left();
+                count45l++;
             }
             else if (realAngle <= 0 || realAngle > 50) {
                 wrist.SearchPickUp90();
+                count90++;
             }
             else if (realAngle > 20 && realAngle < 50) { //20<realAngle && realAngle<50
-                wrist.SearchPickUp45Right();
+                count45r++;
+
             }
             if (realAngle < 20 && realAngle > -20) {
                 wrist.SearchPickUp0();
+                count0++;
+
             }
 
 //        if (realAngle )
@@ -392,6 +406,7 @@ public class LeftSideAutonomous extends LinearOpMode {
             private boolean closeClaw = false;
             boolean isExtended = false;
             int slidesTargetPosition = extendedSearchVal();
+            int maxAngle = Math.max(Math.max(count0, count90), Math.max(count45l, count45r));
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
@@ -405,16 +420,11 @@ public class LeftSideAutonomous extends LinearOpMode {
 
 
 
+
                 if (slidesReachedTarget(slidesTargetPosition, 10) && !closeClaw) {
                     closeClaw = true;
                     claw.setPosition(0.5);
                     timer.reset();
-                } else if (rightSlide.getCurrentPosition() < slidesTargetPosition - 100 && leftSlide.getCurrentPosition() < slidesTargetPosition - 100) {
-                    if(camera.realAngle()<45){
-                        wrist.PickUp90();
-                    } else {
-                        wrist.PickUp0();
-                    }
                 }
 
 
@@ -426,6 +436,14 @@ public class LeftSideAutonomous extends LinearOpMode {
                 telemetry.addData("Timer ", timer.seconds());
 
                 telemetry.update();
+
+                //this need to be figured out
+//                if (!closeClaw || !(timer.seconds() > 1)) {
+//                    if(maxAngle == count0){
+//                        wrist.PickUp90();
+//                    }
+//                }
+
 
                 return !closeClaw || !(timer.seconds() > 1);
             }
