@@ -42,7 +42,7 @@ public class Wrist {
     }
 
     public void PlaceSample() {
-        wristServo.setPosition(0.4); //0.45
+        wristServo.setPosition(0); //0.45
         rotateServo.setPosition(0.5);
     }
 
@@ -68,12 +68,33 @@ public class Wrist {
 
     public void PickUpSpecimen() {}
 
+    public void middleWrist(){
+        wristServo.setPosition(0.2);
+    }
 
+    public void SearchPickUp0() {
+        rotateServo.setPosition(0.16);
+    }
 
+    public void SearchPickUp45Right() {
+        rotateServo.setPosition(0.33);
+    }
+
+    public void SearchPickUp45Left() {
+        rotateServo.setPosition(0.67);
+    }
+
+    public void SearchPickUp90() {
+        rotateServo.setPosition(0.5);
+    }
     public boolean isUp() {
         if (wristServo.getPosition() != 0) {
             return false;
         }
         return true;
+    }
+
+    public void moveWristDown(){
+        wristServo.setPosition(1);
     }
 }

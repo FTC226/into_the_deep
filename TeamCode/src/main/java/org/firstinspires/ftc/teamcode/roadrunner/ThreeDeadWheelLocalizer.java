@@ -22,9 +22,9 @@ import org.firstinspires.ftc.teamcode.roadrunner.messages.ThreeDeadWheelInputsMe
 @Config
 public final class ThreeDeadWheelLocalizer implements Localizer {
     public static class Params {
-        public double par0YTicks = 0.0; // y position of the first parallel encoder (in tick units)
-        public double par1YTicks = 1.0; // y position of the second parallel encoder (in tick units)
-        public double perpXTicks = 0.0; // x position of the perpendicular encoder (in tick units)
+        public double par0YTicks = 1960.0965421286026; // y position of the first parallel encoder (in tick units)
+        public double par1YTicks = -2213.961858049357; // y position of the second parallel encoder (in tick units)
+        public double perpXTicks = -3286.9467520266785; // x position of the perpendicular encoder (in tick units)
     }
 
     public static Params PARAMS = new Params();
@@ -37,7 +37,7 @@ public final class ThreeDeadWheelLocalizer implements Localizer {
     private boolean initialized;
     private Pose2d pose;
 
-    public ThreeDeadWheelLocalizer(HardwareMap hardwareMap, double inPerTick, Pose2d pose) {
+    public ThreeDeadWheelLocalizer(HardwareMap hardwareMap, double inPerTick, Pose2d initialPose) {
         // TODO: make sure your config has **motors** with these names (or change them)
         //   the encoders should be plugged into the slot matching the named motor
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
@@ -46,7 +46,6 @@ public final class ThreeDeadWheelLocalizer implements Localizer {
         perp = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "backLeft")));
 
         // TODO: reverse encoder directions if needed
-        //   par0.setDirection(DcMotorSimple.Direction.REVERSE);
         par0.setDirection(DcMotorSimple.Direction.REVERSE);
         par1.setDirection(DcMotorSimple.Direction.REVERSE);
         perp.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -55,7 +54,7 @@ public final class ThreeDeadWheelLocalizer implements Localizer {
 
         FlightRecorder.write("THREE_DEAD_WHEEL_PARAMS", PARAMS);
 
-        this.pose = pose;
+        pose = initialPose;
     }
 
     @Override

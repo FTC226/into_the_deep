@@ -44,6 +44,8 @@ public class TeleOp extends OpMode {
     public double speed = 1.0;
     public double angle;
     public Point center;
+    private boolean angleSet = false;
+
 
     // Motors
     public DcMotor frontLeft, frontRight, backLeft, backRight;
@@ -60,11 +62,12 @@ public class TeleOp extends OpMode {
 
     //Robot Yaw
     public double targetYaw;
+    public int functionVal;
 
 
 
-    //Timer
-
+    //reset
+    public boolean isSlidesReseted = false;
 
 
 
@@ -76,6 +79,8 @@ public class TeleOp extends OpMode {
         wrist.init();
         claw.init();
         camera.init();
+
+        slides.resetSlides();
 
         FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -125,7 +130,7 @@ public class TeleOp extends OpMode {
             @Override
             public void onOpened() {
 
-                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPSIDE_DOWN);
+                webcam.startStreaming(640, 360, OpenCvCameraRotation.UPSIDE_DOWN);
 
                 dashboard.startCameraStream(webcam, 50);
                 telemetry.addData("Status", "Camera started");
@@ -143,6 +148,11 @@ public class TeleOp extends OpMode {
     }
     @Override
     public void loop() {
+
+        if (!isSlidesReseted && slidesReached0() || !isSlidesReseted && slidesReachedTarget(0, 25)) {
+            slides.stop();
+            isSlidesReseted = true;
+        }
 
         //Gamepad JoyStick
         leftStickY = -gamepad1.left_stick_y;
@@ -166,26 +176,35 @@ public class TeleOp extends OpMode {
         }
 
 
-        wrist.Middle();
-        search();
-//        extendedSearch();
 
+        if (gamepad1.b) {
+            if (!(slides.rightGetCurrentPosition() > 100) && !(slides.leftGetCurrentPosition() > 100)) {
+                wrist.middleWrist();
+                search();
+            } else {
+                noAngleSearch();
+            }
+        } else {
+            frontLeft.setPower(((rotY + rotX + rightStickX) / denominator) * speed);
+            frontRight.setPower(((rotY - rotX - rightStickX) / denominator) * speed);
+            backLeft.setPower(((rotY - rotX + rightStickX) / denominator) * speed);
+            backRight.setPower(((rotY + rotX - rightStickX) / denominator) * speed);
+        }
 
-        slides.resetEncoder();
+//        if(gamepad1.y)
 
-
+        if(gamepad1.dpad_right) {
+            functionVal=extendedSearchVal();
+            slides.move(functionVal);
+            if (slidesReachedTarget(functionVal, 50)) {
+                wrist.moveWristDown();
+            }
+            isSlidesReseted = true;
+        }
 //
-//        if (gamepad1.b) {
-//        } else {
-//            frontLeft.setPower(((rotY + rotX + rightStickX) / denominator) * speed);
-//            frontRight.setPower(((rotY - rotX - rightStickX) / denominator) * speed);
-//            backLeft.setPower(((rotY - rotX + rightStickX) / denominator) * speed);
-//            backRight.setPower(((rotY + rotX - rightStickX) / denominator) * speed);
-//        }
-//
 
 
-        if(gamepad1.a){
+        if(gamepad1.y){
             camera.setColor("yellow");
         }
 
@@ -216,11 +235,14 @@ public class TeleOp extends OpMode {
                 wrist.Up();
             }
             pickupSample();
+            isSlidesReseted = true;
+
         }
 
 
         if (gamepad2.dpad_left) {
             resetSlides();
+            isSlidesReseted = false;
         }
 
 
@@ -283,6 +305,8 @@ public class TeleOp extends OpMode {
         telemetry.addData("LeftSlide", slides.leftGetCurrentPosition());
         telemetry.addData("RightSlide", slides.rightGetCurrentPosition());
         telemetry.addData("Arm", arm.getCurrentPosition());
+        telemetry.addData("calcVal", functionVal);
+        telemetry.addData("Distance", camera.getDistance());
         telemetry.update();
 
 
@@ -290,6 +314,11 @@ public class TeleOp extends OpMode {
     public boolean slidesReachedTarget(int targetSlides, int threshold) {
         return Math.abs(slides.rightGetCurrentPosition() - targetSlides) < threshold && Math.abs(slides.rightGetCurrentPosition() - targetSlides) < threshold;
     }
+
+    public boolean slidesReached0( ) {
+        return slides.rightGetCurrentPosition() < 25 || slides.rightGetCurrentPosition() < 25;
+    }
+
     public boolean armReachedTarget(int targetArm, int threshold) {
         return Math.abs(arm.getCurrentPosition() - targetArm) < threshold;
     }
@@ -304,128 +333,97 @@ public class TeleOp extends OpMode {
             arm.moveUp();
         }
     }
-
-    public void extendedSearch(){
+    public int extendedSearchVal(){
         double moveX = 0;
         double moveY = camera.realY();
 
-        double functionVal = 0.237604*(Math.pow(moveY,3))+0.93821*(Math.pow(moveY,2))+3.53806*(moveY)+12.0179;
-        slides.move((int)(55.52652208*functionVal));
-
+        double val = 0.210461*(Math.pow(moveY,3))+0.953735*(Math.pow(moveY,2))+3.553*(moveY)+16.66231;
+        return (int)(83.3333*val);
     }
+
+//    public void extendedSearch(){
+//        double moveX = 0;
+//        double moveY = camera.realY();
+//
+//        double val = 0.210461*(Math.pow(moveY,3))+0.953735*(Math.pow(moveY,2))+3.553*(moveY)+15.16231;
+//        slides.move((int)(55.52652208*val));
+//    }
+
+    public void noAngleSearch() {
+        double moveX = camera.realX();
+        double moveY = 0;
+        double realAngle = camera.realAngle();
+        boolean centralized = false;
+
+        double magnitude = Math.sqrt(Math.pow(moveX,2)+Math.pow(moveY,2));
+        double deltaX = moveX/magnitude;
+        double deltaY = moveY/magnitude;
+        double denominator = Math.max(Math.abs(moveX), 1);
+        double searchBig = 0.4;
+        double searchSmall = 0.6;
+
+
+
+        if (Math.abs(moveX)<=0.5) {
+            frontLeft.setPower(((moveX) / denominator) * searchSmall);
+            frontRight.setPower(((-moveX) / denominator) * searchSmall);
+            backLeft.setPower(((-moveX) / denominator) * searchSmall);
+            backRight.setPower(((moveX) / denominator) * searchSmall);
+        } else {
+            frontLeft.setPower(((moveX) / denominator) * searchBig);
+            frontRight.setPower(((-moveX) / denominator) * searchBig);
+            backLeft.setPower(((-moveX) / denominator) * searchBig);
+            backRight.setPower(((moveX) / denominator) * searchBig);
+        }
+    }
+
 
     public void search() {
         double moveX = camera.realX();
         double moveY = 0;
-        boolean angle = camera.bigAngle(); //will always be bigAngle
-        boolean angleSet = false;
+        double realAngle = camera.realAngle();
         boolean centralized = false;
 
         //move the claw first
-//        if (!angle && !angleSet){
-//            wrist.PickUp90();
-//            angleSet = true;
-//        }
-//        else if(angle && !angleSet){
-//            wrist.PickUp0();
-//            moveY+=1;
-//            angleSet = true;
-//        }
+        if (realAngle > -90 && realAngle < -20) {
+            wrist.SearchPickUp45Left();
+        }
+        else if (realAngle <= 0 || realAngle > 50) {
+            wrist.SearchPickUp90();
+        }
+        else if (realAngle > 20 && realAngle < 50) { //20<realAngle && realAngle<50
+            wrist.SearchPickUp45Right();
+        }
+        if (realAngle < 20 && realAngle > -20) {
+            wrist.SearchPickUp0();
+        }
+
+//        if (realAngle )
+
+
 
          double magnitude = Math.sqrt(Math.pow(moveX,2)+Math.pow(moveY,2));
          double deltaX = moveX/magnitude;
          double deltaY = moveY/magnitude;
          double denominator = Math.max(Math.abs(moveX), 1);
-         double searchVelocity = 0.25;
-
-        frontLeft.setPower(((moveX) / denominator) * searchVelocity);
-        frontRight.setPower(((-moveX) / denominator) * searchVelocity);
-        backLeft.setPower(((-moveX) / denominator) * searchVelocity);
-        backRight.setPower(((moveX) / denominator) * searchVelocity);
-
-//        if(Math.abs(moveX)>0.1 && Math.abs(moveY)>0.1 && !centralized){
-//            double magnitude = Math.sqrt(Math.pow(moveX,2)+Math.pow(moveY,2));
-//            double deltaX = moveX/magnitude;
-//            double deltaY = moveY/magnitude;
-//            double denominator = Math.max(Math.abs(deltaX)+Math.abs(deltaY), 1);
-//
-//            frontLeft.setPower(((moveY + moveX + rightStickX) / denominator) * 0.25);
-//            frontRight.setPower(((moveY - moveX - rightStickX) / denominator) * 0.25);
-//            backLeft.setPower(((moveY - moveX + rightStickX) / denominator) * 0.25);
-//            backRight.setPower(((moveY + moveX - rightStickX) / denominator) * 0.25);
-//        } else if (Math.abs(moveX)>0.3 && Math.abs(moveY)>0.3){
-//            centralized = true;
-//            frontLeft.setPower(0);
-//            frontRight.setPower(0);
-//            backLeft.setPower(0);
-//            backRight.setPower(0);
-//        }
-
-        //centralize the bot second
+         double searchBig = 0.4;
+         double searchSmall = 0.6;
 
 
 
-
+         if (Math.abs(moveX)<=0.5) {
+             frontLeft.setPower(((moveX) / denominator) * searchSmall);
+             frontRight.setPower(((-moveX) / denominator) * searchSmall);
+             backLeft.setPower(((-moveX) / denominator) * searchSmall);
+             backRight.setPower(((moveX) / denominator) * searchSmall);
+         } else {
+            frontLeft.setPower(((moveX) / denominator) * searchBig);
+            frontRight.setPower(((-moveX) / denominator) * searchBig);
+            backLeft.setPower(((-moveX) / denominator) * searchBig);
+            backRight.setPower(((moveX) / denominator) * searchBig);
+         }
     }
 
-
-
-
-
-//    public void search() {
-//        double moveX = camera.realX();
-//        double moveY = 0;
-//        boolean angle = camera.bigAngle(); //will always be bigAngle
-//        boolean angleSet = false;
-//        boolean centralized = false;
-//
-//        moveX = Math.min(1.0, moveX);
-////        moveY = Math.min(1.0, moveY);
-//        //move the claw first
-////        if (!angle && !angleSet){
-////            wrist.PickUp90();
-////            angleSet = true;
-////        }
-////        else if(angle && !angleSet){
-////            wrist.PickUp0();
-////            moveY+=1;
-////            angleSet = true;
-////        }
-//
-//        double magnitude = Math.sqrt(Math.pow(moveX,2)+Math.pow(moveY,2));
-//        double deltaX = moveX/magnitude;
-//        double deltaY = moveY/magnitude;
-//        double denominator = Math.max(Math.abs(deltaX)+Math.abs(deltaY), 1);
-//
-//        frontLeft.setPower(((moveY + moveX + rightStickX) / denominator) * 0.25);
-//        frontRight.setPower(((moveY - moveX - rightStickX) / denominator) * 0.25);
-//        backLeft.setPower(((moveY - moveX + rightStickX) / denominator) * 0.25);
-//        backRight.setPower(((moveY + moveX - rightStickX) / denominator) * 0.25);
-//
-////        if(Math.abs(moveX)>0.1 && Math.abs(moveY)>0.1 && !centralized){
-////            double magnitude = Math.sqrt(Math.pow(moveX,2)+Math.pow(moveY,2));
-////            double deltaX = moveX/magnitude;
-////            double deltaY = moveY/magnitude;
-////            double denominator = Math.max(Math.abs(deltaX)+Math.abs(deltaY), 1);
-////
-////            frontLeft.setPower(((moveY + moveX + rightStickX) / denominator) * 0.25);
-////            frontRight.setPower(((moveY - moveX - rightStickX) / denominator) * 0.25);
-////            backLeft.setPower(((moveY - moveX + rightStickX) / denominator) * 0.25);
-////            backRight.setPower(((moveY + moveX - rightStickX) / denominator) * 0.25);
-////        } else if (Math.abs(moveX)>0.3 && Math.abs(moveY)>0.3){
-////            centralized = true;
-////            frontLeft.setPower(0);
-////            frontRight.setPower(0);
-////            backLeft.setPower(0);
-////            backRight.setPower(0);
-////        }
-//
-//        //centralize the bot second
-//
-//
-//
-//
-//    }
 
     public void placeSample() {
         wrist.ReadyPlaceSample();
@@ -442,16 +440,7 @@ public class TeleOp extends OpMode {
             slides.placeSampleLow();
         }
     }
-    public void placeSpecimen() {
-        wrist.Up();
-        arm.moveUp();
-        if(armReachedTarget(1650, 100)) {
-            slides.getReadyPlaceSpecimen();
-        }
-//        if(slidesReachedTarget(900, 100)) {
-//            claw.openClaw();
-//        }
-    }
+
     public void pickupSample() {
         if (armReachedTarget(1650, 100)) {
             slides.placeSpecimen();
@@ -465,7 +454,6 @@ public class TeleOp extends OpMode {
         wrist.Up();
         slides.moveToResetPos();
     }
-
 
     public void resetAction() {
         wrist.Down();

@@ -175,8 +175,31 @@ public class Camera extends OpenCvPipeline {
 
 
         // Color threshold
+//        if (colorType.equals(SampleColor.RED)) {
+//            Mat inRedRange = new Mat();
+//            Mat inYellowRange = new Mat();
+//
+//            Mat inHRange = new Mat();
+//            Mat inSVRange = new Mat();
+//            Core.inRange(hsv, lowerRedH, upperRedH, inHRange);
+//            Core.bitwise_not(inHRange, inHRange);
+//            Core.inRange(hsv, lowerRedSV, upperRedSV, inSVRange);
+//            Core.bitwise_and(inHRange, inSVRange, inRedRange);
+//
+//            Core.inRange(hsv, lowerYellow, upperYellow, inYellowRange);
+//
+//            Core.bitwise_or(inRedRange, inYellowRange, inRange);
+//        } else if (colorType.equals(SampleColor.BLUE)) {
+//            Mat inBlueRange = new Mat();
+//            Mat inYellowRange = new Mat();
+//
+//            Core.inRange(hsv, lowerBlue, upperBlue, inBlueRange);
+//
+//            Core.inRange(hsv, lowerYellow, upperYellow, inYellowRange);
+//
+//            Core.bitwise_or(inBlueRange, inYellowRange, inRange);
+//        }
 
-//        Core.inRange(hsv, PixelColor.YELLOW.LOWER, PixelColor.YELLOW.UPPER, inRange);
         if (colorType.equals(SampleColor.BLUE)) {
             Core.inRange(hsv, lowerBlue, upperBlue, inRange);
         } else if (colorType.equals(SampleColor.RED)) {
@@ -189,6 +212,8 @@ public class Camera extends OpenCvPipeline {
         } else {
             Core.inRange(hsv, lowerYellow, upperYellow, inRange);
         }
+
+
 
         // Morphology
         kernel = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(25, 25));
@@ -203,7 +228,7 @@ public class Camera extends OpenCvPipeline {
         Imgproc.findContours(inRange, unfilteredContours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Filter contours by size and get rotated rects
-        int minArea = 1000;
+        int minArea = 500;
         //int minArea = 600;
         ArrayList<RotatedRect> rotatedRects = new ArrayList<>();
         List<MatOfPoint> filteredContours = new ArrayList<>();

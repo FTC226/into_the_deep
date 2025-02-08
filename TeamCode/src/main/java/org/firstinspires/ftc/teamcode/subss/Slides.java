@@ -125,6 +125,7 @@ public class Slides {
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftSlide.setVelocity(0);
         rightSlide.setVelocity(0);
+        resetEncoder();
     }
 
     public int leftGetCurrentPosition() {
@@ -136,7 +137,10 @@ public class Slides {
     }
 
     public void resetSlides() {
-
+        leftSlide.setTargetPosition(0);
+        rightSlide.setTargetPosition(0);
+        leftSlide.setVelocity(-1500);
+        rightSlide.setVelocity(-1500);
     }
 
     public void resetEncoder() {
