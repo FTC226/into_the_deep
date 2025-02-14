@@ -25,6 +25,8 @@ import java.util.Set;
 public class SampleDetector extends OpenCvPipeline {
 
     public double distance;
+    ArrayList<RotatedRect> filteredRects;
+    double minDistanceThreshold = 1000;
 
 
     public enum SampleColor {
@@ -122,7 +124,7 @@ public class SampleDetector extends OpenCvPipeline {
         Imgproc.findContours(inRange, unfilteredContours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Filter contours by size and get rotated rects
-        int minArea = 600;
+        int minArea = 20000;
         ArrayList<RotatedRect> rotatedRects = new ArrayList<>();
         List<MatOfPoint> filteredContours = new ArrayList<>();
         for (MatOfPoint contour : unfilteredContours) {
@@ -136,7 +138,7 @@ public class SampleDetector extends OpenCvPipeline {
         Imgproc.drawContours(frame, filteredContours, -1, new Scalar(0, 255, 0), 1);
 
         // Get overlapping rotated rect groups
-        double overlapThreshold = 0.5; // % of smaller box covered
+        double overlapThreshold = 0.3; // % of smaller box covered
         Set<Integer> toSkip = new HashSet<>();
         ArrayList<ArrayList<Double[]>> overlapGroups = new ArrayList<>();
         for (int i = 0; i < rotatedRects.size(); i++) {
@@ -148,13 +150,15 @@ public class SampleDetector extends OpenCvPipeline {
             for (int j = i+1; j < rotatedRects.size(); j++) {
                 if (toSkip.contains(j)) continue;
                 double jArea = rotatedRects.get(j).size.area();
-                for (Double[] rect : overlapGroup) {
-                    double overlapArea = getIntersectionArea(rotatedRects.get(rect[0].intValue()), rotatedRects.get(j));
-                    if (overlapArea / Math.min(rect[1], jArea) >= overlapThreshold) {
-                        overlapGroup.add(new Double[]{(double)j, jArea});
-                        toSkip.add(j);
-                        break;
-                    }
+                double overlapArea = getIntersectionArea(rotatedRects.get(i), rotatedRects.get(j));
+                double distance = Math.sqrt(
+                        Math.pow(rotatedRects.get(i).center.x - rotatedRects.get(j).center.x, 2) +
+                                Math.pow(rotatedRects.get(i).center.y - rotatedRects.get(j).center.y, 2)
+                );
+                // Only merge if overlap is significant AND rectangles are close together
+                if (overlapArea / Math.min(iArea, jArea) >= overlapThreshold && distance <= minDistanceThreshold) {
+                    overlapGroup.add(new Double[]{(double)j, jArea});
+                    toSkip.add(j);
                 }
             }
             overlapGroups.add(overlapGroup);
@@ -171,7 +175,7 @@ public class SampleDetector extends OpenCvPipeline {
         telemetry.addData("overlapGroups", overlapGroups2);
 
         // Filter out overlapping rotated rects
-        ArrayList<RotatedRect> filteredRects = new ArrayList<>();
+        filteredRects = new ArrayList<>();
         for (ArrayList<Double[]> overlapGroup : overlapGroups) {
             int maxIndex = overlapGroup.get(0)[0].intValue();
             double maxArea = overlapGroup.get(0)[1];
@@ -261,8 +265,8 @@ public class SampleDetector extends OpenCvPipeline {
 
             distance = calculateDistance(sampleHeight);
 
-            double real_x = real.get(i).x; // in inches
-            double real_y = real.get(i).y;
+            double real_x = realX(); // in inches
+            double real_y = realY();
             telemetry.addData("real_x", real_x);
             telemetry.addData("real_y", real_y);
             Imgproc.line(frame, center, new Point(320, center.y), new Scalar(255, 255, 0), 1);
@@ -390,6 +394,78 @@ public class SampleDetector extends OpenCvPipeline {
 
 
         return output;
+    }
+
+    public double realX() {
+        if (filteredRects.isEmpty()) return 0; // No rectangles detected
+        ArrayList<Point> real = getOffsets(filteredRects);
+
+        // Find the rectangle with the lowest realY value
+        int minYIndex = 0;
+        double minY = real.get(0).y;
+        for (int i = 1; i < real.size(); i++) {
+            if (real.get(i).y < minY) {
+                minY = real.get(i).y;
+                minYIndex = i;
+            }
+        }
+
+        // Draw a bright red contour around the chosen rectangle
+        RotatedRect chosenRect = filteredRects.get(minYIndex);
+        Point[] vertices = new Point[4];
+        chosenRect.points(vertices);
+        for (int j = 0; j < 4; j++) {
+            Imgproc.line(frame, vertices[j], vertices[(j + 1) % 4], new Scalar(255, 0, 0), 4); // Bright red contour
+        }
+
+        // Return the realX of the rectangle with the lowest realY
+        return real.get(minYIndex).x;
+    }
+
+    public double realY() {
+        if (filteredRects.isEmpty()) return 0; // No rectangles detected
+        ArrayList<Point> real = getOffsets(filteredRects);
+
+        // Find the rectangle with the lowest realY value
+        int minYIndex = 0;
+        double minY = real.get(0).y;
+        for (int i = 1; i < real.size(); i++) {
+            if (real.get(i).y < minY) {
+                minY = real.get(i).y;
+                minYIndex = i;
+            }
+        }
+
+        // Return the realY of the rectangle with the lowest realY
+        return real.get(minYIndex).y;
+    }
+
+    public double realAngle() {
+        if (filteredRects.isEmpty()) return 0; // No rectangles detected
+        ArrayList<Point> real = getOffsets(filteredRects);
+
+        // Find the rectangle with the lowest realY value
+        int minYIndex = 0;
+        double minY = real.get(0).y;
+        for (int i = 1; i < real.size(); i++) {
+            if (real.get(i).y < minY) {
+                minY = real.get(i).y;
+                minYIndex = i;
+            }
+        }
+
+        // Get the angle of the rectangle with the lowest realY
+        RotatedRect targetRect = filteredRects.get(minYIndex);
+        double angle = targetRect.angle;
+
+        // Adjust the angle based on rectangle orientation
+        if (targetRect.size.width > targetRect.size.height) {
+            angle *= -1;
+        } else {
+            angle = 90 - angle;
+        }
+
+        return angle;
     }
 
     private double calculateDistance(double objectHeightInPixels) {

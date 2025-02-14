@@ -66,8 +66,8 @@ public class Slides {
     }
 
     public void placeSample() {
-        leftSlide.setTargetPosition(2125);
-        rightSlide.setTargetPosition(2125);
+        leftSlide.setTargetPosition(2130);
+        rightSlide.setTargetPosition(2130);
         leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftSlide.setVelocity(velocity);
@@ -75,25 +75,8 @@ public class Slides {
     }
 
     public void placeSampleLow() {
-        leftSlide.setTargetPosition(700);
-        rightSlide.setTargetPosition(700);
-        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftSlide.setVelocity(velocity);
-        rightSlide.setVelocity(velocity);
-    }
-
-    public void getReadyPlaceSpecimen() {
-        leftSlide.setTargetPosition(540);
-        rightSlide.setTargetPosition(540);
-        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftSlide.setVelocity(velocity);
-        rightSlide.setVelocity(velocity);
-    }
-    public void placeSpecimen() {
-        leftSlide.setTargetPosition(1050);
-        rightSlide.setTargetPosition(1050);
+        leftSlide.setTargetPosition(750);
+        rightSlide.setTargetPosition(750);
         leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftSlide.setVelocity(velocity);

@@ -39,7 +39,7 @@ public class Arm {
     }
 
     public void moveUp() {
-        arm.setTargetPosition(1650);
+        arm.setTargetPosition(1750);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         arm.setVelocity(velocity);
     }
@@ -56,45 +56,24 @@ public class Arm {
         arm.setVelocity(velocity);
     }
 
-    public void pickUpSpecimen() {
-        arm.setTargetPosition(550);
-        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm.setVelocity(velocity);
-    }
-
-
-
-
     public int getCurrentPosition() {
         return arm.getCurrentPosition();
     }
 
-    public void resetArm(ElapsedTime time) {
-        if (!isReset) {
-            arm.setTargetPosition(0);
-            arm.setVelocity(-velocity);
-            time.reset();
-            isReset = true;
-        }
-
-        if (isReset && time.seconds() > 1.0) {
-            arm.setVelocity(0);
-            resetEncoder();
-        }
+    public void stop() {
+        arm.setTargetPosition(0);
+        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        arm.setVelocity(0);
+        resetEncoder();
     }
 
-
+    public void resetArm() {
+        arm.setTargetPosition(0);
+        arm.setVelocity(-1500);
+    }
 
     public void resetEncoder() {
         armEncoder.reset();
     }
 
-
-
-
-
-
-    private boolean armReachedTarget(int targetArm, int threshold) {
-        return Math.abs(arm.getCurrentPosition() - targetArm) < threshold;
-    }
 }

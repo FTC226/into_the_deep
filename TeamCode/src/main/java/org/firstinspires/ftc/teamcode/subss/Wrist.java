@@ -5,8 +5,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 
 public class Wrist {
-    Servo wristServo;
-    Servo rotateServo;
+    public Servo wristServo;
+    public Servo rotateServo;
     OpMode opMode;
 
     public Wrist(OpMode _opMode) {
@@ -16,15 +16,8 @@ public class Wrist {
     public void init() {
         wristServo = opMode.hardwareMap.get(Servo.class, "wristServo"); //leftServo
         rotateServo = opMode.hardwareMap.get(Servo.class, "rotateServo"); //rightServo
-
-
-
     }
 
-    public void Middle() {
-        wristServo.setPosition(0.2);
-        rotateServo.setPosition(0.5);
-    }
 
     public void Up() {
         wristServo.setPosition(0);
@@ -36,28 +29,28 @@ public class Wrist {
         rotateServo.setPosition(0.5);
     }
 
-    public void ReadyPlaceSample() {
-        wristServo.setPosition(0.35);
-        rotateServo.setPosition(0.5);
-    }
-
     public void PlaceSample() {
         wristServo.setPosition(0); //0.45
         rotateServo.setPosition(0.5);
     }
 
     public void PickUp0() {
-        wristServo.setPosition(1);
+        wristServo.setPosition(0.8);
         rotateServo.setPosition(0.16);
     }
 
+    public void PickUp0Auto() {
+        wristServo.setPosition(0.8);
+        rotateServo.setPosition(0.5);
+    }
+
     public void PickUp45Right() {
-        wristServo.setPosition(1);
-        rotateServo.setPosition(0.33);
+        wristServo.setPosition(0.8);
+        rotateServo.setPosition(0.35);
     }
 
     public void PickUp45Left() {
-        wristServo.setPosition(1);
+        wristServo.setPosition(0.8);
         rotateServo.setPosition(0.67);
     }
 
@@ -96,5 +89,9 @@ public class Wrist {
 
     public void moveWristDown(){
         wristServo.setPosition(1);
+    }
+
+    public void setRotateServo(double pos){
+        rotateServo.setPosition(pos);
     }
 }
