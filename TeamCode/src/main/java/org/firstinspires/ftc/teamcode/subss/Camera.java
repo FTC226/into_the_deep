@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.subss;
 
 import android.graphics.Canvas;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -13,6 +15,7 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.RotatedRect;
 import org.openftc.easyopencv.OpenCvPipeline;
+
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -27,10 +30,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+
+
+import org.apache.commons.math3.linear.*;
+
+
 public class Camera extends OpenCvPipeline {
+
+    FtcDashboard dashboard = FtcDashboard.getInstance();
+    TelemetryPacket packet = new TelemetryPacket();
 
     public double distance;
     public double realArea;
+
+    public double realXMatrix;
+
     ArrayList<RotatedRect> filteredRects;
     double minDistanceThreshold = 1000;
 
@@ -77,6 +91,7 @@ public class Camera extends OpenCvPipeline {
     public static SampleColor colorType = SampleColor.BLUE;
     //@Override
     public void init(/*int width, int height, CameraCalibration calibration*/) {
+
 
         frame = new Mat();
 
@@ -349,6 +364,14 @@ public class Camera extends OpenCvPipeline {
             double real_x = realX(); // in inches
             double real_y = realY();
             telemetry.addData("real_x", real_x);
+            packet.put("real_x", real_x);
+            packet.put("real_y", real_y);
+            packet.put("both","{"+real_x+", " + real_y + ", }");
+            double outputData = MatrixTransformation();
+            realXMatrix = outputData;
+            packet.put("Estimated Inches: X=", realXMatrix);
+
+            dashboard.sendTelemetryPacket(packet);
             telemetry.addData("real_y", real_y);
             Imgproc.line(frame, center, new Point(320, center.y), new Scalar(255, 255, 0), 1);
             Imgproc.putText(frame, (Math.round(10*real_x)/10d)+(Math.abs(real_x)>1?" in":""), new Point(320+(center.x-320)*0.5-20, center.y+15), 0, 0.5, new Scalar(255, 255, 0));
@@ -361,6 +384,7 @@ public class Camera extends OpenCvPipeline {
             Imgproc.circle(frame, rotatedRect.center, 1, new Scalar(255, 255, 0), 3);
         }
         Imgproc.circle(frame, new Point(320, 240), 1, new Scalar(255, 255, 0), 3);
+
 
 
         // telemetry
@@ -561,6 +585,10 @@ public class Camera extends OpenCvPipeline {
         return angle;
     }
 
+    public double getRealXMatrix() {
+        return realXMatrix;
+    }
+
     private double calculateDistance(double objectHeightInPixels) {
         double KNOWN_OBJECT_HEIGHT = 89;
         double FOCAL_LENGTH = 4;
@@ -580,5 +608,118 @@ public class Camera extends OpenCvPipeline {
         }
     }
 
+    public double MatrixTransformation() {
+        double[][] inputData = {
+                {-0.6562495231628418, 0.4140622615814209, 2.0},
+                {1.4065628051757812, 1.6775000095367432, -5.5},
+                {1.6590147018432617, 0.4481973648071289, -4.5},
+                {-2.6480417251586914, -0.07192468643188477, 6.0},
+                {0.13501930236816406, 1.375683069229126, -0.1},
+                {1.5557489395141602, 0.7365269660949707, -3.5},
+                {2.329928398132324, -0.3894233703613281, -4.5},
+                {-3.7540390491485596, -0.8121838569641113, 7},
+                {-2.280069351196289, 0.6705715656280518, 6.5},
+                {1.674018383026123, 1.0803275108337402, -4.1},
+                {-2.7781505584716797, -0.8471565246582031, 5.25},
+                {2.1376609802246094, -0.812842845916748, -3.8},
+                {3.9182558059692383, 0.3498799800872803, -9.12},
+                {-3.843922972679138, 0.5793275833129883, 9.65},
+                {-0.7470364570617676, -0.9730601310729979, 1.6},
+                {1.411851406097412, 0.6558308601379395, -3.5},
+                {3.252963066101074, 0.6681859493255615, -6.9},
+                {1.8828125, -1.1953125, -2.75},
+                {-1.9765625, -0.0546875, 4.6},
+                {1.9214386940002441, -1.3307805061340332, -3.12},
+                {2.1171875, 0.7265625, -5.1},
+                {-1.5580658912658691, 0.8312921524047852, 4.8},
+                {-1.1903128623962402, 1.4881248474121094, 4.75},
+                {1.946850299835205, 1.2122178077697754, -5.36},
+
+                {-1.3671875, -0.0859375, 3.125},
+                {-1.1348590850830078, 0.55476975440979, 3.125},
+                {-1.4296875, 1.078125, 4.5},
+                {-1.498551845550537, 1.4312236309051514, 5.25},
+                {-1.546954870223999, -0.4732394218444825, 3},
+                {1.7448434829711914, -0.2526741027832031, -3.6},
+                {1.278602123260498, 0.9172871112823486, -3.75},
+                {0.9651298522949219, 1.5611662864685059, -3.5},
+                {-1.552565097808838, -0.040128469467163086, 3.5},
+                {-2.745312213897705, 0.45937466621398926, 7},
+                {2.484495162963867, 1.1150240898132324, -7.35},
+                {2.8495335578918457, 0.16408872604370117, -6.75},
+
+
+                {1.128281593322754, -0.40192270278930664, -2.25},
+                {-1.1693480014801025, 0.6112194061279297, 3.25},
+                {-2.784764289855957, 0.3787224292755127, 7.25},
+                {2.4296875, 1.3671875, -7.75},
+                {2.7425684928894043, 0.7856326103210449, -7.5},
+                {3.2653121948242188, 0.025624752044677734, -7.25},
+                {3.1000289916992188, -0.6841230392456055, -5.75},
+                {2.6894636154174805, 1.3120081424713135, -8.6},
+                {-4.157591998577118, 1.3625452518463135, 13.75},
+
+                {-4.178485631942749, 1.482572078704834, 15},
+                {4.298190116882324, 1.632608413696289, -15.75},
+                {2.5859375, 1.609375, -9.25},
+                {-2.6328125, 1.4609375, 9},
+                {0, 1.4431838989257812, 0},
+                {-4.136507630348206, 0.9504857063293457, 12.8},
+                {-2.4765625, 0.9609374999999999, 7.5},
+                {0, 1, 0},
+                {2.2734375, 1.0625, -6.9},
+                {4.231176376342773, 1.1092703342437744, -13.4},
+                {-3.9765623807907104, -0.0312502384185791, 9.25},
+                {-1.9140625, -0.1484375, 4.4},
+                {0,0,0},
+                {1.9656133651733398, 0.03010940551757813, -4.35},
+                {4.062877655029297, 0.0706026554107666, -9.45},
+                {4.021059036254883, -0.8780989646911621, -7.25},
+                {2.0390625, -1.125, -3.25},
+                {0,-0.5,0},
+                {-2.194890022277832, -1.1431589126586914, 4},
+                {-4.002005219459534, -1.2824254035949707, 7.5}
+
+        };
+
+        // Compute transformation matrix
+        // Compute homography matrix
+        double[] H = computeHomography(inputData);
+
+        // Test: Convert new (realX, realY) from (cameraX, cameraY)
+        return transform(realX(), realY(), H);
+    }
+
+    public double[] computeHomography(double[][] points) {
+        int n = points.length;
+        if (n < 3) throw new IllegalArgumentException("Need at least 3 points for a 3-parameter homography");
+
+        RealMatrix A = new Array2DRowRealMatrix(n, 6); // 3 columns for h0, h1, h2
+        RealVector b = new ArrayRealVector(n);
+
+        for (int i = 0; i < n; i++) {
+            double x = points[i][0], y = points[i][1];  // Camera space
+            double xReal = points[i][2];  // Real-world x-coordinate
+
+            // Set up the equation for x'
+            A.setRow(i, new double[]{1, x, y, x*x, y*y, x*y});
+            b.setEntry(i, xReal);
+        }
+
+        // Solve for the homography parameters
+        DecompositionSolver solver = new QRDecomposition(A).getSolver();
+        RealVector h = solver.solve(b);
+
+        // Return the 3 parameters
+        return h.toArray();
+    }
+
+    /**
+     * Applies the homography transformation to a given (cameraX, cameraY) to get real inches.
+     */
+    public double transform(double x, double y, double[] H) {
+        // Compute x' = h0 * x + h1 * y + h2
+        return H[0] + H[1]*x + H[2]*y +H[3]*x*x + H[4]*y + H[5]*x*y;
+    }
 
 }

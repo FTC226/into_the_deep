@@ -25,7 +25,7 @@ public class TesterWrist extends OpMode {
     public ElapsedTime runtime;
 
 
-    public static double  wristPos, rotatePos;
+    public static double  wristPos, rotatePos, clawPos;
 
     TelemetryPacket packet = new TelemetryPacket();
     FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -41,16 +41,16 @@ public class TesterWrist extends OpMode {
         wrist = hardwareMap.get(Servo.class, "wristServo");
 
 
-        claw.setPosition(0.5);
-        rotate.setPosition(0.5);
-        wrist.setPosition(0.5);
+        claw.setPosition(0);
+        rotate.setPosition(0.48);
+        wrist.setPosition(0.2);
 
     }
 
     @Override
     public void loop(){
 
-        if (gamepad1.a) {
+        if (gamepad1.b) {
             wrist.setPosition(wristPos);
         }
         if (gamepad1.x) {
@@ -61,7 +61,7 @@ public class TesterWrist extends OpMode {
             claw.setPosition(0);
         }
         if(gamepad1.left_bumper) {
-            claw.setPosition(0.5);
+            claw.setPosition(clawPos);
         }
 
         telemetry.addData("wristPos ", wristPos);

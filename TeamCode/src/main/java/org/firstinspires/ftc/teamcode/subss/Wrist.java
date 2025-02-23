@@ -20,17 +20,17 @@ public class Wrist {
 
 
     public void Up() {
-        wristServo.setPosition(0);
-        rotateServo.setPosition(0.5);
+        wristServo.setPosition(0.2);
+        rotateServo.setPosition(0.48);
     }
 
     public void Down() {
-        wristServo.setPosition(1);
-        rotateServo.setPosition(0.5);
+        wristServo.setPosition(0.8);
+        rotateServo.setPosition(0.48);
     }
 
     public void PlaceSample() {
-        wristServo.setPosition(0); //0.45
+        wristServo.setPosition(0.2); //0.45
         rotateServo.setPosition(0.5);
     }
 
@@ -51,35 +51,20 @@ public class Wrist {
 
     public void PickUp45Left() {
         wristServo.setPosition(0.8);
-        rotateServo.setPosition(0.67);
+        rotateServo.setPosition(0.65);
     }
 
     public void PickUp90() {
-        wristServo.setPosition(1);
-        rotateServo.setPosition(0.5);
+        wristServo.setPosition(0.8);
+        rotateServo.setPosition(0.48);
     }
 
     public void PickUpSpecimen() {}
 
     public void middleWrist(){
-        wristServo.setPosition(0.2);
+        wristServo.setPosition(0.5);
     }
 
-    public void SearchPickUp0() {
-        rotateServo.setPosition(0.16);
-    }
-
-    public void SearchPickUp45Right() {
-        rotateServo.setPosition(0.33);
-    }
-
-    public void SearchPickUp45Left() {
-        rotateServo.setPosition(0.67);
-    }
-
-    public void SearchPickUp90() {
-        rotateServo.setPosition(0.5);
-    }
     public boolean isUp() {
         if (wristServo.getPosition() != 0) {
             return false;
@@ -88,7 +73,7 @@ public class Wrist {
     }
 
     public void moveWristDown(){
-        wristServo.setPosition(1);
+        wristServo.setPosition(0.8);
     }
 
     public void setRotateServo(double pos){
