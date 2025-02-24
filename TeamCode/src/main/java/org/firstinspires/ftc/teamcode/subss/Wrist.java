@@ -31,7 +31,7 @@ public class Wrist {
 
     public void PlaceSample() {
         wristServo.setPosition(0.2); //0.45
-        rotateServo.setPosition(0.5);
+        rotateServo.setPosition(0.48);
     }
 
     public void PickUp0() {
@@ -41,7 +41,7 @@ public class Wrist {
 
     public void PickUp0Auto() {
         wristServo.setPosition(0.8);
-        rotateServo.setPosition(0.5);
+        rotateServo.setPosition(0.48);
     }
 
     public void PickUp45Right() {

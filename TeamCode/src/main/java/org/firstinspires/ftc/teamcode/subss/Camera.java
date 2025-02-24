@@ -34,7 +34,6 @@ import java.util.Set;
 
 import org.apache.commons.math3.linear.*;
 
-
 public class Camera extends OpenCvPipeline {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -44,6 +43,7 @@ public class Camera extends OpenCvPipeline {
     public double realArea;
 
     public double realXMatrix;
+    public double realYMatrix;
 
     ArrayList<RotatedRect> filteredRects;
     double minDistanceThreshold = 1000;
@@ -59,6 +59,12 @@ public class Camera extends OpenCvPipeline {
     private Mat hierarchy;
     private Mat mask;
 
+    private MatOfDouble muMat;
+    private MatOfDouble sigmaMat;
+
+    private Mat inHRange;
+    private Mat inSVRange;
+
 //    double realerX;
 //    double realerY;
 //    double bigAngle;
@@ -70,8 +76,6 @@ public class Camera extends OpenCvPipeline {
         BLUE(),
         RED();
     }
-
-
 
     public static Telemetry telemetry;
 
@@ -91,51 +95,38 @@ public class Camera extends OpenCvPipeline {
     public static SampleColor colorType = SampleColor.BLUE;
     //@Override
     public void init(/*int width, int height, CameraCalibration calibration*/) {
-
-
         frame = new Mat();
-
         hsv = new Mat();
-
-
         gray = new Mat();
-
         mask = new Mat();
-
         inRange = new Mat();
+        muMat = new MatOfDouble();
+        sigmaMat = new MatOfDouble();
 
+        inHRange = new Mat();
+        inSVRange = new Mat();
 
         kernel = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(25, 25));
         kernel2 = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(10, 10));
 
-
         List<MatOfPoint> unfilteredContours = new ArrayList<>();
         hierarchy = new Mat();
-
 
         ArrayList<RotatedRect> rotatedRects = new ArrayList<>();
 
         List<MatOfPoint> filteredContours = new ArrayList<>();
 
-
         ArrayList<ArrayList<Double[]>> overlapGroups = new ArrayList<>();
 
         ArrayList<Point> real = new ArrayList<>();
 
-
         MatOfPoint2f intersection = new MatOfPoint2f();
-
 
         MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
 
-
         MatOfPoint points = new MatOfPoint();
 
-
         List<MatOfPoint> listThing = new ArrayList<>();
-
-
-
     }
     /*
 
@@ -153,15 +144,10 @@ public class Camera extends OpenCvPipeline {
     //@Override
     public Mat processFrame(Mat input) {
         frame = input.clone();
-        Mat hsv = new Mat(); // convert to hsv
-        Mat gray = new Mat(); // convert to hsv
         Imgproc.cvtColor(input, hsv, Imgproc.COLOR_RGB2HSV);
         Imgproc.cvtColor(input, gray, Imgproc.COLOR_RGB2GRAY);
 
-
         // Getting representative brightness of image and correcting brightness
-        MatOfDouble muMat = new MatOfDouble();
-        MatOfDouble sigmaMat = new MatOfDouble();
         Core.meanStdDev(gray, muMat, sigmaMat);
 //        telemetry.addData("gray mu", muMat.get(0,0)[0]);
 //        telemetry.addData("gray sigma", sigmaMat.get(0,0)[0]);
@@ -172,7 +158,6 @@ public class Camera extends OpenCvPipeline {
         Scalar lowerBound = new Scalar(mu-k*sigma);
         Scalar upperBound = new Scalar(mu+k*sigma);
 
-        Mat mask = new Mat();
         Core.inRange(gray, lowerBound, upperBound, mask);
         Scalar maskedMean = Core.mean(gray, mask);
         double averageInRange = maskedMean.val[0];
@@ -181,16 +166,11 @@ public class Camera extends OpenCvPipeline {
 
         telemetry.addData("averageInRange", averageInRange);
 
-
-
         // Color threshold
-        Mat inRange = new Mat();
 //        Core.inRange(hsv, PixelColor.YELLOW.LOWER, PixelColor.YELLOW.UPPER, inRange);
         if (colorType.equals(SampleColor.BLUE)) {
             Core.inRange(hsv, lowerBlue, upperBlue, inRange);
         } else if (colorType.equals(SampleColor.RED)) {
-            Mat inHRange = new Mat();
-            Mat inSVRange = new Mat();
             Core.inRange(hsv, lowerRedH, upperRedH, inHRange);
             Core.bitwise_not(inHRange, inHRange);
             Core.inRange(hsv, lowerRedSV, upperRedSV, inSVRange);
@@ -198,10 +178,6 @@ public class Camera extends OpenCvPipeline {
         } else {
             Core.inRange(hsv, lowerYellow, upperYellow, inRange);
         }
-
-        // Morphology
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(25, 25));
-        Mat kernel2 = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(10, 10));
 
 //        Imgproc.erode(inRange, inRange, kernel);
 //        Imgproc.dilate(inRange, inRange, kernel2);
@@ -212,7 +188,6 @@ public class Camera extends OpenCvPipeline {
 
         // Find all contours
         List<MatOfPoint> unfilteredContours = new ArrayList<>();
-        Mat hierarchy = new Mat();
         Imgproc.findContours(inRange, unfilteredContours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Filter contours by size and get rotated rects
@@ -286,7 +261,6 @@ public class Camera extends OpenCvPipeline {
 
         telemetry.addData("filteredRects.size()", filteredRects.size());
 
-
 //        // Draw unfiltered rects as blue
 //        for (RotatedRect rotatedRect : rotatedRects) {
 //            Point[] vertices = new Point[4];
@@ -351,10 +325,6 @@ public class Camera extends OpenCvPipeline {
             Imgproc.polylines(frame, listThing, false, color, thickness);
             Imgproc.putText(frame, (Math.round(10*procAngle)/10d)+" deg", new Point(center.x+30, center.y-10), 0, 0.5, new Scalar(0, 255, 255));
 
-
-
-
-
             double sampleHeight = (1d/rotatedRect.size.area()+2.28e-5)/(7.14e-6);
             sampleHeight = (1/rotatedRect.size.area()+2.57e-5)/(7.6e-6); // calculate height of camer based on area of sample
             telemetry.addData("sampleHeight", sampleHeight);
@@ -367,9 +337,11 @@ public class Camera extends OpenCvPipeline {
             packet.put("real_x", real_x);
             packet.put("real_y", real_y);
             packet.put("both","{"+real_x+", " + real_y + ", }");
-            double outputData = MatrixTransformation();
-            realXMatrix = outputData;
+            double[] outputData = MatrixTransformation();
+            realXMatrix = outputData[0];
+            realYMatrix = outputData[1];
             packet.put("Estimated Inches: X=", realXMatrix);
+            packet.put("Estimated Inches: Y=", realYMatrix);
 
             dashboard.sendTelemetryPacket(packet);
             telemetry.addData("real_y", real_y);
@@ -378,14 +350,9 @@ public class Camera extends OpenCvPipeline {
             Imgproc.line(frame, new Point(320, center.y), new Point(320,240), new Scalar(255, 255, 0), 1);
             Imgproc.putText(frame, (Math.round(10*real_y)/10d)+(Math.abs(real_y)>1?" in":""), new Point(315-10*Double.toString(Math.round(10*real_y)/10d).length()-(Math.abs(real_y)>1?22:0), 240+(center.y-240)*0.5+10), 0, 0.5, new Scalar(255, 255, 0));
 
-
-
-
             Imgproc.circle(frame, rotatedRect.center, 1, new Scalar(255, 255, 0), 3);
         }
         Imgproc.circle(frame, new Point(320, 240), 1, new Scalar(255, 255, 0), 3);
-
-
 
         // telemetry
         if (!filteredRects.isEmpty()) {
@@ -408,14 +375,7 @@ public class Camera extends OpenCvPipeline {
 //        telemetry.addData("sampleAngle", sampleAngle);
 //        telemetry.addData("Distance", distance);
 
-
-
-
-
-
-
         telemetry.update();
-
 
         return frame;
     }
@@ -589,6 +549,10 @@ public class Camera extends OpenCvPipeline {
         return realXMatrix;
     }
 
+    public double getRealYMatrix() {
+        return realYMatrix;
+    }
+
     private double calculateDistance(double objectHeightInPixels) {
         double KNOWN_OBJECT_HEIGHT = 89;
         double FOCAL_LENGTH = 4;
@@ -608,89 +572,52 @@ public class Camera extends OpenCvPipeline {
         }
     }
 
-    public double MatrixTransformation() {
+    public double[] MatrixTransformation() {
         double[][] inputData = {
-                {-0.6562495231628418, 0.4140622615814209, 2.0},
-                {1.4065628051757812, 1.6775000095367432, -5.5},
-                {1.6590147018432617, 0.4481973648071289, -4.5},
-                {-2.6480417251586914, -0.07192468643188477, 6.0},
-                {0.13501930236816406, 1.375683069229126, -0.1},
-                {1.5557489395141602, 0.7365269660949707, -3.5},
-                {2.329928398132324, -0.3894233703613281, -4.5},
-                {-3.7540390491485596, -0.8121838569641113, 7},
-                {-2.280069351196289, 0.6705715656280518, 6.5},
-                {1.674018383026123, 1.0803275108337402, -4.1},
-                {-2.7781505584716797, -0.8471565246582031, 5.25},
-                {2.1376609802246094, -0.812842845916748, -3.8},
-                {3.9182558059692383, 0.3498799800872803, -9.12},
-                {-3.843922972679138, 0.5793275833129883, 9.65},
-                {-0.7470364570617676, -0.9730601310729979, 1.6},
-                {1.411851406097412, 0.6558308601379395, -3.5},
-                {3.252963066101074, 0.6681859493255615, -6.9},
-                {1.8828125, -1.1953125, -2.75},
-                {-1.9765625, -0.0546875, 4.6},
-                {1.9214386940002441, -1.3307805061340332, -3.12},
-                {2.1171875, 0.7265625, -5.1},
-                {-1.5580658912658691, 0.8312921524047852, 4.8},
-                {-1.1903128623962402, 1.4881248474121094, 4.75},
-                {1.946850299835205, 1.2122178077697754, -5.36},
+                {-0.6562495231628418, 0.4140622615814209, 2.0, 11},
+                {1.4065628051757812, 1.6775000095367432, -5.5, 18.6},
+                {1.6590147018432617, 0.4481973648071289, -4.5, 11.25},
+                {-2.6480417251586914, -0.07192468643188477, 6.0, 9.3},
+                {0.13501930236816406, 1.375683069229126, -0.1, 16.25},
+                {1.5557489395141602, 0.7365269660949707, -3.5, 12.5},
+                {2.329928398132324, -0.3894233703613281, -4.5, 8.25},
+                {-3.7540390491485596, -0.8121838569641113, 7, 7.2},
+                {-2.280069351196289, 0.6705715656280518, 6.5, 12.25},
+                {1.674018383026123, 1.0803275108337402, -4.1, 14.3},
+                {-2.7781505584716797, -0.8471565246582031, 5.25, 7.2},
 
-                {-1.3671875, -0.0859375, 3.125},
-                {-1.1348590850830078, 0.55476975440979, 3.125},
-                {-1.4296875, 1.078125, 4.5},
-                {-1.498551845550537, 1.4312236309051514, 5.25},
-                {-1.546954870223999, -0.4732394218444825, 3},
-                {1.7448434829711914, -0.2526741027832031, -3.6},
-                {1.278602123260498, 0.9172871112823486, -3.75},
-                {0.9651298522949219, 1.5611662864685059, -3.5},
-                {-1.552565097808838, -0.040128469467163086, 3.5},
-                {-2.745312213897705, 0.45937466621398926, 7},
-                {2.484495162963867, 1.1150240898132324, -7.35},
-                {2.8495335578918457, 0.16408872604370117, -6.75},
+                {2.1376609802246094, -0.812842845916748, -3.8, 7.5},
+                {3.9182558059692383, 0.3498799800872803, -9.12, 11.75},
+                {-3.843922972679138, 0.5793275833129883, 9.65, 11.5},
+                {-0.7470364570617676, -0.9730601310729979, 1.6, 6.75},
+                {1.411851406097412, 0.6558308601379395, -3.5, 12},
+                {3.252963066101074, 0.6681859493255615, -6.9, 12.1},
+                {1.8828125, -1.1953125, -2.75, 6.3},
+                {-1.9765625, -0.0546875, 4.6, 9.5},
+                {1.9214386940002441, -1.3307805061340332, -3.12, 5.8},
+                {2.1171875, 0.7265625, -5.1, 12.25},
+                {-1.5580658912658691, 0.8312921524047852, 4.8, 12.5},
+                {-1.1903128623962402, 1.4881248474121094, 4.75, 17},
+                {1.946850299835205, 1.2122178077697754, -5.36, 15.1},
 
-
-                {1.128281593322754, -0.40192270278930664, -2.25},
-                {-1.1693480014801025, 0.6112194061279297, 3.25},
-                {-2.784764289855957, 0.3787224292755127, 7.25},
-                {2.4296875, 1.3671875, -7.75},
-                {2.7425684928894043, 0.7856326103210449, -7.5},
-                {3.2653121948242188, 0.025624752044677734, -7.25},
-                {3.1000289916992188, -0.6841230392456055, -5.75},
-                {2.6894636154174805, 1.3120081424713135, -8.6},
-                {-4.157591998577118, 1.3625452518463135, 13.75},
-
-                {-4.178485631942749, 1.482572078704834, 15},
-                {4.298190116882324, 1.632608413696289, -15.75},
-                {2.5859375, 1.609375, -9.25},
-                {-2.6328125, 1.4609375, 9},
-                {0, 1.4431838989257812, 0},
-                {-4.136507630348206, 0.9504857063293457, 12.8},
-                {-2.4765625, 0.9609374999999999, 7.5},
-                {0, 1, 0},
-                {2.2734375, 1.0625, -6.9},
-                {4.231176376342773, 1.1092703342437744, -13.4},
-                {-3.9765623807907104, -0.0312502384185791, 9.25},
-                {-1.9140625, -0.1484375, 4.4},
-                {0,0,0},
-                {1.9656133651733398, 0.03010940551757813, -4.35},
-                {4.062877655029297, 0.0706026554107666, -9.45},
-                {4.021059036254883, -0.8780989646911621, -7.25},
-                {2.0390625, -1.125, -3.25},
-                {0,-0.5,0},
-                {-2.194890022277832, -1.1431589126586914, 4},
-                {-4.002005219459534, -1.2824254035949707, 7.5}
+                {-1.3671875, -0.0859375, 3.125, 9.25},
+                {-1.1348590850830078, 0.55476975440979, 3.125, 11.75},
+                {-1.4296875, 1.078125, 4.5, 14.25},
+                {-1.498551845550537, 1.4312236309051514, 5.25, 16.5},
+                {-1.546954870223999, -0.4732394218444825, 3, 8.25},
 
         };
 
         // Compute transformation matrix
         // Compute homography matrix
-        double[] H = computeHomography(inputData);
+        double[] coeffsX = computeHomography(inputData, true);
+        double[] coeffsY = computeHomography(inputData, false);
 
         // Test: Convert new (realX, realY) from (cameraX, cameraY)
-        return transform(realX(), realY(), H);
+        return new double[]{transform(realX(), realY(), coeffsX), transform(realX(), realY(), coeffsY)};
     }
 
-    public double[] computeHomography(double[][] points) {
+    public double[] computeHomography(double[][] points, boolean isX) {
         int n = points.length;
         if (n < 3) throw new IllegalArgumentException("Need at least 3 points for a 3-parameter homography");
 
@@ -699,7 +626,7 @@ public class Camera extends OpenCvPipeline {
 
         for (int i = 0; i < n; i++) {
             double x = points[i][0], y = points[i][1];  // Camera space
-            double xReal = points[i][2];  // Real-world x-coordinate
+            double xReal = isX? points[i][2] : points[i][3];  // Real-world x-coordinate
 
             // Set up the equation for x'
             A.setRow(i, new double[]{1, x, y, x*x, y*y, x*y});
