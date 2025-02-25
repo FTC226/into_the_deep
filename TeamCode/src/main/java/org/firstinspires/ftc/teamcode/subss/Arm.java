@@ -51,7 +51,7 @@ public class Arm {
     }
 
     public void readyForHang() {
-        arm.setTargetPosition(500);
+        arm.setTargetPosition(0);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         arm.setVelocity(velocity);
     }
