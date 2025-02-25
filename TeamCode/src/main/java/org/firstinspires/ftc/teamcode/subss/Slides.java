@@ -66,8 +66,8 @@ public class Slides {
     }
 
     public void placeSample() {
-        leftSlide.setTargetPosition(2130);
-        rightSlide.setTargetPosition(2130);
+        leftSlide.setTargetPosition(2350);
+        rightSlide.setTargetPosition(2350);
         leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftSlide.setVelocity(velocity);
@@ -75,8 +75,8 @@ public class Slides {
     }
 
     public void placeSampleLow() {
-        leftSlide.setTargetPosition(750);
-        rightSlide.setTargetPosition(750);
+        leftSlide.setTargetPosition(550);
+        rightSlide.setTargetPosition(550);
         leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftSlide.setVelocity(velocity);
@@ -84,8 +84,8 @@ public class Slides {
     }
 
     public void moveToResetPos() {
-        leftSlide.setTargetPosition(0);
-        rightSlide.setTargetPosition(0);
+        leftSlide.setTargetPosition(10);
+        rightSlide.setTargetPosition(10);
         leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftSlide.setVelocity(velocity);
@@ -102,10 +102,10 @@ public class Slides {
     }
 
     public void stop() {
-        leftSlide.setTargetPosition(0);
-        rightSlide.setTargetPosition(0);
-        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        leftSlide.setTargetPosition(0);
+//        rightSlide.setTargetPosition(0);
+//        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftSlide.setVelocity(0);
         rightSlide.setVelocity(0);
         resetEncoder();

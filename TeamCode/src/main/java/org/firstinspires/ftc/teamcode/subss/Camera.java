@@ -34,6 +34,7 @@ import java.util.Set;
 
 import org.apache.commons.math3.linear.*;
 
+
 public class Camera extends OpenCvPipeline {
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -59,12 +60,6 @@ public class Camera extends OpenCvPipeline {
     private Mat hierarchy;
     private Mat mask;
 
-    private MatOfDouble muMat;
-    private MatOfDouble sigmaMat;
-
-    private Mat inHRange;
-    private Mat inSVRange;
-
 //    double realerX;
 //    double realerY;
 //    double bigAngle;
@@ -76,6 +71,8 @@ public class Camera extends OpenCvPipeline {
         BLUE(),
         RED();
     }
+
+
 
     public static Telemetry telemetry;
 
@@ -95,38 +92,51 @@ public class Camera extends OpenCvPipeline {
     public static SampleColor colorType = SampleColor.BLUE;
     //@Override
     public void init(/*int width, int height, CameraCalibration calibration*/) {
-        frame = new Mat();
-        hsv = new Mat();
-        gray = new Mat();
-        mask = new Mat();
-        inRange = new Mat();
-        muMat = new MatOfDouble();
-        sigmaMat = new MatOfDouble();
 
-        inHRange = new Mat();
-        inSVRange = new Mat();
+
+        frame = new Mat();
+
+        hsv = new Mat();
+
+
+        gray = new Mat();
+
+        mask = new Mat();
+
+        inRange = new Mat();
+
 
         kernel = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(25, 25));
         kernel2 = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(10, 10));
 
+
         List<MatOfPoint> unfilteredContours = new ArrayList<>();
         hierarchy = new Mat();
+
 
         ArrayList<RotatedRect> rotatedRects = new ArrayList<>();
 
         List<MatOfPoint> filteredContours = new ArrayList<>();
 
+
         ArrayList<ArrayList<Double[]>> overlapGroups = new ArrayList<>();
 
         ArrayList<Point> real = new ArrayList<>();
 
+
         MatOfPoint2f intersection = new MatOfPoint2f();
+
 
         MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
 
+
         MatOfPoint points = new MatOfPoint();
 
+
         List<MatOfPoint> listThing = new ArrayList<>();
+
+
+
     }
     /*
 
@@ -144,10 +154,15 @@ public class Camera extends OpenCvPipeline {
     //@Override
     public Mat processFrame(Mat input) {
         frame = input.clone();
+        Mat hsv = new Mat(); // convert to hsv
+        Mat gray = new Mat(); // convert to hsv
         Imgproc.cvtColor(input, hsv, Imgproc.COLOR_RGB2HSV);
         Imgproc.cvtColor(input, gray, Imgproc.COLOR_RGB2GRAY);
 
+
         // Getting representative brightness of image and correcting brightness
+        MatOfDouble muMat = new MatOfDouble();
+        MatOfDouble sigmaMat = new MatOfDouble();
         Core.meanStdDev(gray, muMat, sigmaMat);
 //        telemetry.addData("gray mu", muMat.get(0,0)[0]);
 //        telemetry.addData("gray sigma", sigmaMat.get(0,0)[0]);
@@ -158,6 +173,7 @@ public class Camera extends OpenCvPipeline {
         Scalar lowerBound = new Scalar(mu-k*sigma);
         Scalar upperBound = new Scalar(mu+k*sigma);
 
+        Mat mask = new Mat();
         Core.inRange(gray, lowerBound, upperBound, mask);
         Scalar maskedMean = Core.mean(gray, mask);
         double averageInRange = maskedMean.val[0];
@@ -166,11 +182,16 @@ public class Camera extends OpenCvPipeline {
 
         telemetry.addData("averageInRange", averageInRange);
 
+
+
         // Color threshold
+        Mat inRange = new Mat();
 //        Core.inRange(hsv, PixelColor.YELLOW.LOWER, PixelColor.YELLOW.UPPER, inRange);
         if (colorType.equals(SampleColor.BLUE)) {
             Core.inRange(hsv, lowerBlue, upperBlue, inRange);
         } else if (colorType.equals(SampleColor.RED)) {
+            Mat inHRange = new Mat();
+            Mat inSVRange = new Mat();
             Core.inRange(hsv, lowerRedH, upperRedH, inHRange);
             Core.bitwise_not(inHRange, inHRange);
             Core.inRange(hsv, lowerRedSV, upperRedSV, inSVRange);
@@ -178,6 +199,10 @@ public class Camera extends OpenCvPipeline {
         } else {
             Core.inRange(hsv, lowerYellow, upperYellow, inRange);
         }
+
+        // Morphology
+        Mat kernel = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(25, 25));
+        Mat kernel2 = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(10, 10));
 
 //        Imgproc.erode(inRange, inRange, kernel);
 //        Imgproc.dilate(inRange, inRange, kernel2);
@@ -188,6 +213,7 @@ public class Camera extends OpenCvPipeline {
 
         // Find all contours
         List<MatOfPoint> unfilteredContours = new ArrayList<>();
+        Mat hierarchy = new Mat();
         Imgproc.findContours(inRange, unfilteredContours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Filter contours by size and get rotated rects
@@ -261,6 +287,7 @@ public class Camera extends OpenCvPipeline {
 
         telemetry.addData("filteredRects.size()", filteredRects.size());
 
+
 //        // Draw unfiltered rects as blue
 //        for (RotatedRect rotatedRect : rotatedRects) {
 //            Point[] vertices = new Point[4];
@@ -325,6 +352,10 @@ public class Camera extends OpenCvPipeline {
             Imgproc.polylines(frame, listThing, false, color, thickness);
             Imgproc.putText(frame, (Math.round(10*procAngle)/10d)+" deg", new Point(center.x+30, center.y-10), 0, 0.5, new Scalar(0, 255, 255));
 
+
+
+
+
             double sampleHeight = (1d/rotatedRect.size.area()+2.28e-5)/(7.14e-6);
             sampleHeight = (1/rotatedRect.size.area()+2.57e-5)/(7.6e-6); // calculate height of camer based on area of sample
             telemetry.addData("sampleHeight", sampleHeight);
@@ -350,9 +381,14 @@ public class Camera extends OpenCvPipeline {
             Imgproc.line(frame, new Point(320, center.y), new Point(320,240), new Scalar(255, 255, 0), 1);
             Imgproc.putText(frame, (Math.round(10*real_y)/10d)+(Math.abs(real_y)>1?" in":""), new Point(315-10*Double.toString(Math.round(10*real_y)/10d).length()-(Math.abs(real_y)>1?22:0), 240+(center.y-240)*0.5+10), 0, 0.5, new Scalar(255, 255, 0));
 
+
+
+
             Imgproc.circle(frame, rotatedRect.center, 1, new Scalar(255, 255, 0), 3);
         }
         Imgproc.circle(frame, new Point(320, 240), 1, new Scalar(255, 255, 0), 3);
+
+
 
         // telemetry
         if (!filteredRects.isEmpty()) {
@@ -375,7 +411,14 @@ public class Camera extends OpenCvPipeline {
 //        telemetry.addData("sampleAngle", sampleAngle);
 //        telemetry.addData("Distance", distance);
 
+
+
+
+
+
+
         telemetry.update();
+
 
         return frame;
     }

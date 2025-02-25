@@ -172,7 +172,10 @@ public class TeleOp extends OpMode {
 
 
         if (gamepad2.dpad_left) {
-            retractSlide();
+            resetSlides();
+            if(slidesReachedTarget(0,50)){
+                slides.stop();
+            }
         }
 
 
@@ -275,7 +278,7 @@ public class TeleOp extends OpMode {
     }
 
     public void resetAction() {
-        wrist.Down();
+        wrist.Up();
         slides.moveToResetPos();
         if(slidesReachedTarget(0, 300)) {
             arm.moveDown();

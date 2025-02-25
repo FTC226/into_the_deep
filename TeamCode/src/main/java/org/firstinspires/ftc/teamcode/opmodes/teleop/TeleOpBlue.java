@@ -184,7 +184,7 @@ public class TeleOpBlue extends OpMode {
         if(gamepad2.dpad_up && switchMode) {
             placeSample();
         } else if (gamepad2.dpad_up) {
-            // placeSpecimen();
+            placeSpecimen();
         }
 
         if (gamepad2.dpad_down) {
@@ -197,7 +197,7 @@ public class TeleOpBlue extends OpMode {
             } else {
                 wrist.Up();
             }
-            // pickupSample();
+            pickupSample();
         }
 
         if (gamepad2.dpad_left) {
@@ -281,7 +281,6 @@ public class TeleOpBlue extends OpMode {
             slides.placeSampleLow();
         }
     }
-    /*
     public void placeSpecimen() {
         wrist.Up();
         arm.moveUp();
@@ -297,7 +296,6 @@ public class TeleOpBlue extends OpMode {
             slides.pickupSample();
         }
     }
-     */
 
     public void resetSlides() {
         wrist.Up();
