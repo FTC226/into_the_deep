@@ -88,8 +88,8 @@ public class LeftSideAutonomous4Sample extends LinearOpMode {
             backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-            moveArm(800, 1);
-             claw.setPosition(clawClose);
+            // moveArm(800, 1);
+            // claw.setPosition(clawClose);
         }
 
         /*
@@ -421,7 +421,6 @@ public class LeftSideAutonomous4Sample extends LinearOpMode {
 
         if (isStopRequested()) return;
 
-        /*
         Actions.runBlocking(
                 new SequentialAction(
                         placeSample1.build(),
@@ -433,8 +432,8 @@ public class LeftSideAutonomous4Sample extends LinearOpMode {
                         placeSample4.build()
                 )
         );
-         */
 
+        /*
         Actions.runBlocking(
                 new SequentialAction(
                         new ParallelAction(
@@ -467,6 +466,7 @@ public class LeftSideAutonomous4Sample extends LinearOpMode {
                         )
                 )
         );
+         */
 
     }
 

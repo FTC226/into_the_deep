@@ -676,7 +676,8 @@ public class TestSubmersibleSample extends LinearOpMode {
                                 placeSample5.build(),
                                 new SequentialAction(
                                         armslidesclaw.resetAfterSubmersible(),
-                                        armslidesclaw.placeSampleSubmersible()
+                                        armslidesclaw.placeSampleSubmersible(),
+                                        armslidesclaw.resetWristAfterPlaceSample()
                                 )
                         ),
                         new ParallelAction(
@@ -684,7 +685,8 @@ public class TestSubmersibleSample extends LinearOpMode {
                                 armslidesclaw.resetWristAfterPlaceSample(),
                                 new SequentialAction(
                                         armslidesclaw.resetSlides(),
-                                        armslidesclaw.resetArm()
+                                        armslidesclaw.resetArm(),
+                                        armslidesclaw.resetWristAfterPlaceSample()
                                 )
                         )
                 )
