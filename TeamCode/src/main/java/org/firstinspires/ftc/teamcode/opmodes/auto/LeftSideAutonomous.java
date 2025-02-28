@@ -440,7 +440,7 @@ public class LeftSideAutonomous extends LinearOpMode {
                 }
 
                 // Once arm reached target, move slides
-                if (armReachedTarget(1600, 1000)) {
+                if (armReachedTarget(1600, 800)) {
                     moveSlides(2100, 1);
                     wristSample = true;
                 }
@@ -630,26 +630,27 @@ public class LeftSideAutonomous extends LinearOpMode {
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
-        double sampleCoord = -49.2;
+        double sampleCoord = -50.2;
 
         TrajectoryActionBuilder placeSample1 = drive.actionBuilder(initialPose)
                 .setTangent(Math.toRadians(100))
-                .splineToLinearHeading(new Pose2d(sampleCoord, sampleCoord, Math.toRadians(45)), Math.toRadians(180));
+                .splineToLinearHeading(new Pose2d(sampleCoord, sampleCoord, Math.toRadians(45)), Math.toRadians(180))
+                .waitSeconds(1);
 
         TrajectoryActionBuilder grabSample2 = placeSample1.endTrajectory().fresh()
-                .strafeToLinearHeading(new Vector2d(-47, -41), Math.toRadians(90));
+                .strafeToLinearHeading(new Vector2d(-46, -41), Math.toRadians(89));
 
         TrajectoryActionBuilder placeSample2 = grabSample2.endTrajectory().fresh()
                 .strafeToLinearHeading(new Vector2d(sampleCoord, sampleCoord), Math.toRadians(45));
 
         TrajectoryActionBuilder grabSample3 = placeSample2.endTrajectory().fresh()
-                .strafeToLinearHeading(new Vector2d(-57, -41), Math.toRadians(90));
+                .strafeToLinearHeading(new Vector2d(-57, -41), Math.toRadians(85));
 
         TrajectoryActionBuilder placeSample3 = grabSample3.endTrajectory().fresh()
                 .strafeToLinearHeading(new Vector2d(sampleCoord, sampleCoord), Math.toRadians(45));
 
         TrajectoryActionBuilder grabSample4 = placeSample3.endTrajectory().fresh()
-                .strafeToLinearHeading(new Vector2d(-57, -43), Math.toRadians(115));
+                .strafeToLinearHeading(new Vector2d(-57, -43), Math.toRadians(110));
 
         TrajectoryActionBuilder placeSample4 = grabSample4.endTrajectory().fresh()
                 .strafeToLinearHeading(new Vector2d(sampleCoord, sampleCoord), Math.toRadians(45));

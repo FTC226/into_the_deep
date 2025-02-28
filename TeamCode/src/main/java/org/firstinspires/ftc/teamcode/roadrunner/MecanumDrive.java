@@ -41,6 +41,9 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.roadrunner.Drawing;
+import org.firstinspires.ftc.teamcode.roadrunner.Localizer;
+import org.firstinspires.ftc.teamcode.roadrunner.ThreeDeadWheelLocalizer;
 import org.firstinspires.ftc.teamcode.roadrunner.messages.DriveCommandMessage;
 import org.firstinspires.ftc.teamcode.roadrunner.messages.MecanumCommandMessage;
 import org.firstinspires.ftc.teamcode.roadrunner.messages.MecanumLocalizerInputsMessage;
@@ -63,28 +66,28 @@ public final class MecanumDrive {
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
 
         // drive model parameters
-        public double inPerTick = 0.0019894174046392;
-        public double lateralInPerTick = 0.001408200037347431;
-        public double trackWidthTicks = 5869.613988244718;
+        public double inPerTick = 0.0019639663851648;
+        public double lateralInPerTick = 0.001309589673468912;
+        public double trackWidthTicks = 5899.670563858378;
 
         // feedforward parameters (in tick units)
-        public double kS = 1.7023715063490594;
-        public double kV = 0.0002519056781962865;
+        public double kS = 1.7833273496578936;
+        public double kV = 0.00024844830219705266;
         public double kA = 0.00001;
 
         // path profile parameters (in inches)
-        public double maxWheelVel = 60; // 50
-        public double minProfileAccel = -30; // -30
-        public double maxProfileAccel = 60; // 50
+        public double maxWheelVel = 30;
+        public double minProfileAccel = -45;
+        public double maxProfileAccel = 30;
 
         // turn profile parameters (in radians)
         public double maxAngVel = Math.PI; // shared with path
         public double maxAngAccel = Math.PI;
 
         // path controller gains
-        public double axialGain = 7.0;
-        public double lateralGain = 3.0;
-        public double headingGain = 2.0; // shared with turn
+        public double axialGain = 10.0;
+        public double lateralGain = 6.0;
+        public double headingGain = 3.0; // shared with turn
 
         public double axialVelGain = 0.0;
         public double lateralVelGain = 0.0;
