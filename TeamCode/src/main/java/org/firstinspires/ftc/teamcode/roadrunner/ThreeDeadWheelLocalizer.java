@@ -16,15 +16,14 @@ import com.acmerobotics.roadrunner.ftc.RawEncoder;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.roadrunner.Localizer;
 import org.firstinspires.ftc.teamcode.roadrunner.messages.ThreeDeadWheelInputsMessage;
 
 @Config
 public final class ThreeDeadWheelLocalizer implements Localizer {
     public static class Params {
-        public double par0YTicks = 1492.095121992291; // y position of the first parallel encoder (in tick units)
-        public double par1YTicks = -1979.299991927792; // y position of the second parallel encoder (in tick units)
-        public double perpXTicks = -3699.7226898615836; // x position of the perpendicular encoder (in tick units)
+        public double par0YTicks = 1505.8793748979294; // y position of the first parallel encoder (in tick units)
+        public double par1YTicks = -1962.5160178115552; // y position of the second parallel encoder (in tick units)
+        public double perpXTicks = -3725.9308712345087; // x position of the perpendicular encoder (in tick units)
     }
 
     public static Params PARAMS = new Params();
