@@ -81,7 +81,7 @@ public class TeleOp extends OpMode {
         claw.init();
 
         slides.resetSlides();
-//        arm.resetArm();
+        arm.resetArm();
 
         FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -284,7 +284,4 @@ public class TeleOp extends OpMode {
             arm.moveDown();
         }
     }
-
-
-
 }

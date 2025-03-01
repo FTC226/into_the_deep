@@ -29,10 +29,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @Config
 @Autonomous(name = "LeftSideAutonomous4Sample", group = "Autonomous")
-public class LeftSideAutonomous4Sample extends LinearOpMode {
+public class    LeftSideAutonomous4Sample extends LinearOpMode {
     Wrist wrist = new Wrist(this);
-
-    private OpenCvCamera webcam;
 
     public class ArmSlidesClaw {
         double RealYValue = 0.0;
@@ -88,8 +86,8 @@ public class LeftSideAutonomous4Sample extends LinearOpMode {
             backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-            // moveArm(800, 1);
-            // claw.setPosition(clawClose);
+            moveArm(800, 1);
+            claw.setPosition(clawClose);
         }
 
         /*
@@ -170,7 +168,8 @@ public class LeftSideAutonomous4Sample extends LinearOpMode {
             return new PlaceSampleSubmersible();
         }
 
-        public class PlaceSample implements Action {
+        public class PlaceSample1 implements Action {
+            private boolean moveArmMedium = false;
             private boolean wristPlaceSample = false;
             private boolean resetWrist = false;
             private boolean wristSample = false;
@@ -178,7 +177,7 @@ public class LeftSideAutonomous4Sample extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
                 // Move arm
-                moveArm(1600, 1);
+                moveArm(1650, 1);
 
                 if (!wristSample) {
                     wrist.PlaceSample();
@@ -186,21 +185,66 @@ public class LeftSideAutonomous4Sample extends LinearOpMode {
                 }
 
                 // Once arm reached target, move slides
-                if (armReachedTarget(1600, 1000)) {
-                    moveSlides(2250, 1);
+                if (armReachedTarget(1650, 400)) {
+                    moveSlides(2150, 1);
                     wristSample = true;
                 }
 
                 // Once slide reached target, move wrist
-                if (slidesReachedTarget(2250, 20) && !wristPlaceSample) {
+                if (slidesReachedTarget(2150, 20) && !wristPlaceSample) {
                     timer.reset();
                     claw.setPosition(clawOpen);
                     wristPlaceSample = true;
                 }
 
                 // Once claw is opened and timer reached target, reset wrist
-                if (wristPlaceSample && timer.seconds() > 0.2 && !resetWrist) {
-                    wrist.PickUp0Auto();
+                if (wristPlaceSample && timer.seconds() > 0.4 && !resetWrist) {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+        public Action placeSample1() {
+            return new PlaceSample1();
+        }
+
+
+        public class PlaceSample implements Action {
+            private boolean moveArmMedium = false;
+            private boolean wristPlaceSample = false;
+            private boolean resetWrist = false;
+            private boolean wristSample = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                // Move arm
+                if (!moveArmMedium) {
+                    moveArm(1300, 1);
+                    moveArmMedium = true;
+                }
+
+                if (!wristSample) {
+                    wrist.PlaceSample();
+                    claw.setPosition(clawClose);
+                }
+
+                // Once arm reached target, move slides
+                if (armReachedTarget(1300, 200)) {
+                    moveSlides(2150, 1);
+                    moveArm(1650, 1);
+                    wristSample = true;
+                }
+
+                // Once slide reached target, move wrist
+                if (slidesReachedTarget(2150, 20) && !wristPlaceSample) {
+                    timer.reset();
+                    claw.setPosition(clawOpen);
+                    wristPlaceSample = true;
+                }
+
+                // Once claw is opened and timer reached target, reset wrist
+                if (wristPlaceSample && timer.seconds() > 0.4 && !resetWrist) {
                     return false;
                 }
 
@@ -226,6 +270,7 @@ public class LeftSideAutonomous4Sample extends LinearOpMode {
                 if (slidesReachedTarget(200, 800) && !slidesMoveDownAfterSample) {
                     timer.reset();
                     resetArm();
+                    wrist.PickUp0Auto();
                     slidesMoveDownAfterSample = true;
                 }
 
@@ -376,36 +421,26 @@ public class LeftSideAutonomous4Sample extends LinearOpMode {
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
-        double sampleCoord = -49.2;
-
         TrajectoryActionBuilder placeSample1 = drive.actionBuilder(initialPose)
-                .setTangent(Math.toRadians(100))
-                .splineToLinearHeading(new Pose2d(sampleCoord, sampleCoord, Math.toRadians(45)), Math.toRadians(180))
-                .waitSeconds(1);
+                .strafeToLinearHeading(new Vector2d(-50, -48), Math.toRadians(45));
 
         TrajectoryActionBuilder grabSample2 = placeSample1.endTrajectory().fresh()
-                .strafeToLinearHeading(new Vector2d(-47, -41), Math.toRadians(90))
-                .waitSeconds(1);
+                .strafeToLinearHeading(new Vector2d(-46, -41), Math.toRadians(88));
 
         TrajectoryActionBuilder placeSample2 = grabSample2.endTrajectory().fresh()
-                .strafeToLinearHeading(new Vector2d(sampleCoord, sampleCoord), Math.toRadians(45))
-                .waitSeconds(1);
+                .strafeToLinearHeading(new Vector2d(-50.4, -48.4), Math.toRadians(45));
 
         TrajectoryActionBuilder grabSample3 = placeSample2.endTrajectory().fresh()
-                .strafeToLinearHeading(new Vector2d(-57, -41), Math.toRadians(90))
-                .waitSeconds(1);
+                .strafeToLinearHeading(new Vector2d(-55.5 , -41), Math.toRadians(80));
 
         TrajectoryActionBuilder placeSample3 = grabSample3.endTrajectory().fresh()
-                .strafeToLinearHeading(new Vector2d(sampleCoord, sampleCoord), Math.toRadians(45))
-                .waitSeconds(1);
+                .strafeToLinearHeading(new Vector2d(-50.4, -48.4), Math.toRadians(45));
 
         TrajectoryActionBuilder grabSample4 = placeSample3.endTrajectory().fresh()
-                .strafeToLinearHeading(new Vector2d(-57, -43), Math.toRadians(115))
-                .waitSeconds(1);
+                .strafeToLinearHeading(new Vector2d(-57, -43), Math.toRadians(108));
 
         TrajectoryActionBuilder placeSample4 = grabSample4.endTrajectory().fresh()
-                .strafeToLinearHeading(new Vector2d(sampleCoord, sampleCoord), Math.toRadians(45))
-                .waitSeconds(1);
+                .strafeToLinearHeading(new Vector2d(-50.4, -48.4), Math.toRadians(45));
 
         TrajectoryActionBuilder grabSample5 = placeSample4.endTrajectory().fresh()
                 .setTangent(Math.toRadians(90))
@@ -421,6 +456,7 @@ public class LeftSideAutonomous4Sample extends LinearOpMode {
 
         if (isStopRequested()) return;
 
+        /*
         Actions.runBlocking(
                 new SequentialAction(
                         placeSample1.build(),
@@ -432,8 +468,8 @@ public class LeftSideAutonomous4Sample extends LinearOpMode {
                         placeSample4.build()
                 )
         );
+         */
 
-        /*
         Actions.runBlocking(
                 new SequentialAction(
                         new ParallelAction(
@@ -466,8 +502,6 @@ public class LeftSideAutonomous4Sample extends LinearOpMode {
                         )
                 )
         );
-         */
-
     }
 
 }

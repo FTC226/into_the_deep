@@ -194,84 +194,34 @@ public class TestSubmersibleSample extends LinearOpMode {
             }
         }
 
-        public double realXtoMM(double x){
-            double inches = 2.3027*x;
-            return 0.89887640449*inches;
-        }
-
-
         public double realXtoMM(){
             double inches = camera.getRealXMatrix();
             RealYValue = camera.realY();
             RealAngleValue = camera.realAngle();
 
-            return inches;
+            if(inches<0){
+                inches -=1.0;
+                return 0.95*inches;
+            }
+            return 0.89887640449*inches;
         }
 
         public double angleOrientation(){
-            if (RealYValue != -90) {
-                return (0.00377778*(RealAngleValue)+0.16);
-            } else {
-                return (0.00377778*(Math.abs(RealAngleValue))+0.16);
+            if (RealAngleValue != -90) {
+                return (0.00355556*RealAngleValue+0.16);
+            }
+            else {
+                return (0.00355556*Math.abs(RealAngleValue)+0.16);
             }
         }
 
         public int extendedSearchVal(){
             double moveX = 0;
-            double moveY = RealYValue;
+            double slidesYInches = camera.getRealYMatrix();
 
 
-            return (int)(110.263*camera.getRealYMatrix());
+            return (int)(75.38799*slidesYInches);
         }
-
-        public class AlignRobot implements  Action {
-            double xValue = camera.realX();
-            boolean isReset = false;
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                if (!isReset) {
-                    timer.reset();
-                    isReset = true;
-                }
-                wrist.middleWrist();
-                search();
-                telemetry.addData("Real X:", camera.realX());
-                telemetry.addData("Real Y:", camera.realY());
-                telemetry.addData("calcVal", extendedSearchVal());
-                telemetry.addData("Real Angle:", camera.realAngle());
-                return !(timer.seconds() > 4);
-
-//                return !(Math.abs(xValue) < 0.2);
-            }
-        }
-        public Action alignRobot() {
-            return new AlignRobot();
-        }
-
-        public class NewRobotAlign implements Action {
-            double xValue = realXtoMM();
-            boolean isReset = false;
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                if (!isReset) {
-                    claw.setPosition(clawOpen);
-                    timer.reset();
-                    isReset = true;
-                }
-                xAlign = xValue;
-
-
-                telemetry.addData("xAlign", xAlign);
-                telemetry.addData("xValue ", xValue);
-                telemetry.addData("realX ", camera.realX());
-
-                telemetry.update();
-
-
-                return !(timer.seconds() > 4);
-            }
-        }
-        public Action newRobotAlign() { return new NewRobotAlign();}
 
         public class GrabSampleSubmersible implements Action {
             private boolean closeClaw = false;
@@ -631,11 +581,11 @@ public class TestSubmersibleSample extends LinearOpMode {
 
         TrajectoryActionBuilder grabSample5 = drive.actionBuilder(initialPose)
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-20, -5, Math.toRadians(0)), Math.toRadians(0));
+                .splineToLinearHeading(new Pose2d(-18, -5, Math.toRadians(0)), Math.toRadians(0));
 
         TrajectoryActionBuilder grabSample6 = drive.actionBuilder(initialPose)
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-20, 0, Math.toRadians(0)), Math.toRadians(0));
+                .splineToLinearHeading(new Pose2d(-18, 0, Math.toRadians(0)), Math.toRadians(0));
 
         ArmSlidesClaw armslidesclaw = new ArmSlidesClaw(hardwareMap);
 
@@ -692,7 +642,7 @@ public class TestSubmersibleSample extends LinearOpMode {
                 )
         );
 
-        Vector2d grabSample6Pose = new Vector2d(-20, 0+armslidesclaw.realXtoMM()); // + 9
+        Vector2d grabSample6Pose = new Vector2d(-18, 0+armslidesclaw.realXtoMM()); // + 9
 
         TrajectoryActionBuilder alignRobot1 = grabSample6.endTrajectory().fresh()
                 .strafeToConstantHeading(grabSample6Pose);
