@@ -39,6 +39,9 @@ public class GrabbingSample extends LinearOpMode {
         double RealYValue = 0.0;
         double RealAngleValue = 0.0;
 
+        double amountToMoveX = 0.0;
+        double amountToMoveY = 0.0;
+
         public DcMotor frontLeft, frontRight, backLeft, backRight;
 
         private DcMotor arm, leftSlide, rightSlide;
@@ -207,9 +210,15 @@ public class GrabbingSample extends LinearOpMode {
 
             if(inches<0){
                 inches -=1.0;
-                return 0.95*inches;
+                amountToMoveX = 0.95*inches;
             }
-            return 0.89887640449*inches;
+            else {
+                amountToMoveX = 0.89887640449*inches;
+            }
+
+            amountToMoveY = extendedSearchVal();
+
+            return amountToMoveX;
         }
 
         public double angleOrientation(){
@@ -246,18 +255,18 @@ public class GrabbingSample extends LinearOpMode {
 
                 if (!isExtended && timer.seconds() > 0.5) {
                     claw.setPosition(clawOpen);
-                    moveSlides(extendedSearchVal(), 1);
+                    moveSlides((int)amountToMoveY, 1);
                     slidesTargetPosition = extendedSearchVal();
                     isExtended = true;
                 }
 
 
-                if (slidesReachedTarget(slidesTargetPosition, slidesTargetPosition/2) && !closeClaw) {
+                if (slidesReachedTarget((int)amountToMoveY, (int)amountToMoveY/2) && !closeClaw) {
                     wrist.moveWristDown();
                 }
 
 
-                if (slidesReachedTarget(slidesTargetPosition, 50) && !closeClaw) {
+                if (slidesReachedTarget((int)amountToMoveY, 50) && !closeClaw) {
                     closeClaw = true;
                     claw.setPosition(clawClose);
                     timer.reset();
@@ -594,19 +603,20 @@ public class GrabbingSample extends LinearOpMode {
         if (isStopRequested()) return;
 
 
-        Vector2d grabSample5Pose = new Vector2d(-25, -5+armslidesclaw.realXtoMM());
+        Vector2d grabSample5Pose = new Vector2d(-25, -5+ armslidesclaw.realXtoMM());
 
         TrajectoryActionBuilder alignRobot = drive.actionBuilder(initialPose)
                 .strafeToConstantHeading(grabSample5Pose);
 
         Actions.runBlocking(
-                new SequentialAction(
+                new ParallelAction(
                         alignRobot.build(),
-                        armslidesclaw.stopRobot(),
                         armslidesclaw.grabSampleSubmersible()
+
                 )
         );
 
+        /*
         Actions.runBlocking(
                 new SequentialAction(
                         armslidesclaw.resetWristAfterSubmersible(),
@@ -634,9 +644,8 @@ public class GrabbingSample extends LinearOpMode {
                 .strafeToConstantHeading(grabSample6Pose);
 
         Actions.runBlocking(
-                new SequentialAction(
+                new ParallelAction(
                         alignRobot1.build(),
-                        armslidesclaw.stopRobot(),
                         armslidesclaw.grabSampleSubmersible()
                 )
         );
@@ -652,6 +661,6 @@ public class GrabbingSample extends LinearOpMode {
                         )
                 )
         );
+         */
     }
-
 }
