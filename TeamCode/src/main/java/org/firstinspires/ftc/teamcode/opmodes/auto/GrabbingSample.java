@@ -209,10 +209,10 @@ public class GrabbingSample extends LinearOpMode {
             RealAngleValue = camera.realAngle();
 
             if(inches<0){
-                inches -=1.0;
                 amountToMoveX = 0.95*inches;
             }
             else {
+                inches -=2.0;
                 amountToMoveX = 0.89887640449*inches;
             }
 

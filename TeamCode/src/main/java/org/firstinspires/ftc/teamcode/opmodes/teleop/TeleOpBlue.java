@@ -182,10 +182,10 @@ public class TeleOpBlue extends OpMode {
 
         //Gamepad Controll
         if(gamepad2.dpad_up && switchMode) {
-            placeSample();
-        } else if (gamepad2.dpad_up) {
-            placeSpecimen();
-        }
+            placeSample();}
+//        } else if (gamepad2.dpad_up) {
+//            placeSpecimen();
+//        }
 
         if (gamepad2.dpad_down) {
             resetAction();
@@ -285,12 +285,12 @@ public class TeleOpBlue extends OpMode {
         wrist.Up();
         arm.moveUp();
         if(armReachedTarget(1650, 100)) {
-            slides.getReadyPlaceSpecimen();
+            //slides.getReadyPlaceSpecimen();
         }
     }
     public void pickupSample() {
         if (armReachedTarget(1650, 100)) {
-            slides.placeSpecimen();
+            //slides.placeSpecimen();
         } else {
             claw.openClaw();
             slides.pickupSample();

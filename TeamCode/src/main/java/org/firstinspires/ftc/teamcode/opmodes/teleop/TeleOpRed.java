@@ -182,10 +182,10 @@ public class TeleOpRed extends OpMode {
 
         //Gamepad Controll
         if(gamepad2.dpad_up && switchMode) {
-            placeSample();
-        } else if (gamepad2.dpad_up) {
-            placeSpecimen();
-        }
+            placeSample();}
+//        } else if (gamepad2.dpad_up) {
+//            placeSpecimen();
+//        }
 
         if (gamepad2.dpad_down) {
             resetAction();
@@ -204,10 +204,10 @@ public class TeleOpRed extends OpMode {
             resetSlides();
         }
 
-        if (gamepad2.right_stick_button) {
-            arm.pickUpSpecimen();
-            wrist.PickUpSpecimen();
-        }
+//        if (gamepad2.right_stick_button) {
+//            arm.pickUpSpecimen();
+//            wrist.PickUpSpecimen();
+//        }
 
         if(gamepad2.right_bumper) {
             claw.openClaw();
@@ -289,12 +289,12 @@ public class TeleOpRed extends OpMode {
         wrist.Up();
         arm.moveUp();
         if(armReachedTarget(1650, 100)) {
-            slides.getReadyPlaceSpecimen();
+            //slides.getReadyPlaceSpecimen();
         }
     }
     public void pickupSample() {
         if (armReachedTarget(1650, 100)) {
-            slides.placeSpecimen();
+            //slides.placeSpecimen();
         } else {
             claw.openClaw();
             slides.pickupSample();

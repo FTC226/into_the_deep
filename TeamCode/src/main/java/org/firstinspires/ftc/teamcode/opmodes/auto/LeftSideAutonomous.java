@@ -173,10 +173,10 @@ public class    LeftSideAutonomous extends LinearOpMode {
             RealAngleValue = camera.realAngle();
 
             if(inches<0){
-                inches -=1.0;
                 amountToMoveX = 0.95*inches;
             }
             else {
+                inches -=2.0;
                 amountToMoveX = 0.89887640449*inches;
             }
 
@@ -199,7 +199,7 @@ public class    LeftSideAutonomous extends LinearOpMode {
             double slidesYInches = camera.getRealYMatrix();
 
 
-            return (int)(75.38799*slidesYInches);
+            return (int)(75.38799*((0.108686*Math.pow(RealYValue,4) + 0.0831163*Math.pow(RealYValue,3) + 0.798838*Math.pow(RealYValue,2) + 3.69055*RealYValue + 12.3154)));
         }
 
         public class GrabSampleSubmersible implements Action {
@@ -626,12 +626,12 @@ public class    LeftSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder grabSample5 = placeSample4.endTrajectory().fresh()
                 .setTangent(Math.toRadians(107))
-                .splineToLinearHeading(new Pose2d(-17, -15, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(150))
+                .splineToLinearHeading(new Pose2d(-17, -10, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(150))
                 .waitSeconds(0.65);
 
         TrajectoryActionBuilder grabSample6 = placeSample4.endTrajectory().fresh()
                 .setTangent(Math.toRadians(107))
-                .splineToLinearHeading(new Pose2d(-17, -15, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(150))
+                .splineToLinearHeading(new Pose2d(-17, -10, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(150))
                 .waitSeconds(0.65);
 
         ArmSlidesClaw armslidesclaw = new ArmSlidesClaw(hardwareMap);
@@ -700,7 +700,7 @@ public class    LeftSideAutonomous extends LinearOpMode {
         );
 
         // Vector2d grabSample5Pose = new Vector2d(-18, -15+armslidesclaw.realXtoMM());
-        double grabSample5Pose = -15+armslidesclaw.realXtoMM();
+        double grabSample5Pose = -10+armslidesclaw.realXtoMM();
 
         TrajectoryActionBuilder alignRobot = grabSample5.endTrajectory().fresh()
                 .setTangent(Math.toRadians(90))
@@ -718,7 +718,7 @@ public class    LeftSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder placeSample5 = alignRobot.endTrajectory().fresh()
                 .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(-52.2, -43.2, Math.toRadians(45)), Math.toRadians(270), new TranslationalVelConstraint(150));
+                .splineToLinearHeading(new Pose2d(-52.2, -43.2, Math.toRadians(48)), Math.toRadians(270), new TranslationalVelConstraint(150));
 
 
         Actions.runBlocking(
@@ -745,7 +745,7 @@ public class    LeftSideAutonomous extends LinearOpMode {
         );
 
         // Vector2d grabSample6Pose = new Vector2d(-18, -15+armslidesclaw.realXtoMM());
-        double grabSample6Pose = -15+armslidesclaw.realXtoMM();
+        double grabSample6Pose = -10+armslidesclaw.realXtoMM();
 
         TrajectoryActionBuilder alignRobot1 = grabSample6.endTrajectory().fresh()
                 .setTangent(Math.toRadians(90))
@@ -760,7 +760,7 @@ public class    LeftSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder placeSample6 = alignRobot1.endTrajectory().fresh()
                 .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(-52.2, -43.2, Math.toRadians(45)), Math.toRadians(270), new TranslationalVelConstraint(150));
+                .splineToLinearHeading(new Pose2d(-52.2, -43.2, Math.toRadians(48)), Math.toRadians(270), new TranslationalVelConstraint(150));
 
         Actions.runBlocking(
                 new ParallelAction(
