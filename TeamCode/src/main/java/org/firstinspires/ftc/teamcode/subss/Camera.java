@@ -203,6 +203,7 @@ public class Camera extends OpenCvPipeline {
 
         // Filter contours by size and get rotated rects
         int minArea = 2000;
+        int largest = 9000;
         ArrayList<RotatedRect> rotatedRects = new ArrayList<>();
         List<MatOfPoint> filteredContours = new ArrayList<>();
         Iterator<MatOfPoint> iterator = unfilteredContours.iterator();
@@ -210,7 +211,7 @@ public class Camera extends OpenCvPipeline {
             MatOfPoint contour = iterator.next();
             RotatedRect minAreaRect = Imgproc.minAreaRect(new MatOfPoint2f(contour.toArray()));
             double area = minAreaRect.size.area();
-            if (area <= minArea) {
+            if (area <= minArea || area >=largest) {
                 iterator.remove(); // Safely remove the element
             } else {
                 filteredContours.add(contour);

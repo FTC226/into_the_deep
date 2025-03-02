@@ -222,11 +222,11 @@ public class GrabbingSample extends LinearOpMode {
         }
 
         public double angleOrientation(){
-            if (RealAngleValue != -90) {
+            if (RealAngleValue > 0) {
                 return (0.00355556*RealAngleValue+0.16);
             }
             else {
-                return (0.00355556*Math.abs(RealAngleValue)+0.16);
+                return (0.004*RealAngleValue+0.84);
             }
         }
 
