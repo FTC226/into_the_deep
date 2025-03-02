@@ -431,13 +431,13 @@ public class    LeftSideAutonomous4Sample extends LinearOpMode {
                 .strafeToLinearHeading(new Vector2d(-50.4, -48.4), Math.toRadians(45));
 
         TrajectoryActionBuilder grabSample3 = placeSample2.endTrajectory().fresh()
-                .strafeToLinearHeading(new Vector2d(-57, -41), Math.toRadians(80));
+                .strafeToLinearHeading(new Vector2d(-55.5 , -41), Math.toRadians(80));
 
         TrajectoryActionBuilder placeSample3 = grabSample3.endTrajectory().fresh()
                 .strafeToLinearHeading(new Vector2d(-50.4, -48.4), Math.toRadians(45));
 
         TrajectoryActionBuilder grabSample4 = placeSample3.endTrajectory().fresh()
-                .strafeToLinearHeading(new Vector2d(-57, -43), Math.toRadians(118));
+                .strafeToLinearHeading(new Vector2d(-57, -43), Math.toRadians(108));
 
         TrajectoryActionBuilder placeSample4 = grabSample4.endTrajectory().fresh()
                 .strafeToLinearHeading(new Vector2d(-50.4, -48.4), Math.toRadians(45));

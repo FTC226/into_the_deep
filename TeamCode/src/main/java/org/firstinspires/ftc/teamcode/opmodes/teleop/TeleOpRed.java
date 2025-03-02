@@ -205,7 +205,7 @@ public class TeleOpRed extends OpMode {
         }
 
         if (gamepad2.right_stick_button) {
-            // arm.pickUpSpecimen();
+            arm.pickUpSpecimen();
             wrist.PickUpSpecimen();
         }
 
@@ -289,12 +289,12 @@ public class TeleOpRed extends OpMode {
         wrist.Up();
         arm.moveUp();
         if(armReachedTarget(1650, 100)) {
-            // slides.getReadyPlaceSpecimen();
+            slides.getReadyPlaceSpecimen();
         }
     }
     public void pickupSample() {
         if (armReachedTarget(1650, 100)) {
-            // slides.placeSpecimen();
+            slides.placeSpecimen();
         } else {
             claw.openClaw();
             slides.pickupSample();

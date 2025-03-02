@@ -28,8 +28,8 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @Config
-@Autonomous(name = "TestSubmersibleSample", group = "Autonomous")
-public class TestSubmersibleSample extends LinearOpMode {
+@Autonomous(name = "GrabbingSample", group = "Autonomous")
+public class GrabbingSample extends LinearOpMode {
     Wrist wrist = new Wrist(this);
     Camera camera = new Camera(this);
 
@@ -38,6 +38,9 @@ public class TestSubmersibleSample extends LinearOpMode {
     public class ArmSlidesClaw {
         double RealYValue = 0.0;
         double RealAngleValue = 0.0;
+
+        double amountToMoveX = 0.0;
+        double amountToMoveY = 0.0;
 
         public DcMotor frontLeft, frontRight, backLeft, backRight;
 
@@ -194,6 +197,12 @@ public class TestSubmersibleSample extends LinearOpMode {
             }
         }
 
+        public double realXtoMM(double x){
+            double inches = 2.3027*x;
+            return 0.89887640449*inches;
+        }
+
+
         public double realXtoMM(){
             double inches = camera.getRealXMatrix();
             RealYValue = camera.realY();
@@ -201,17 +210,23 @@ public class TestSubmersibleSample extends LinearOpMode {
 
             if(inches<0){
                 inches -=1.0;
-                return 0.95*inches;
+                amountToMoveX = 0.95*inches;
             }
-            return 0.89887640449*inches;
+            else {
+                amountToMoveX = 0.89887640449*inches;
+            }
+
+            amountToMoveY = extendedSearchVal();
+
+            return amountToMoveX;
         }
 
         public double angleOrientation(){
-            if (RealAngleValue != -90) {
+            if (RealAngleValue > 0) {
                 return (0.00355556*RealAngleValue+0.16);
             }
             else {
-                return (0.00355556*Math.abs(RealAngleValue)+0.16);
+                return (0.004*RealAngleValue+0.84);
             }
         }
 
@@ -240,18 +255,18 @@ public class TestSubmersibleSample extends LinearOpMode {
 
                 if (!isExtended && timer.seconds() > 0.5) {
                     claw.setPosition(clawOpen);
-                    moveSlides(extendedSearchVal(), 1);
+                    moveSlides((int)amountToMoveY, 1);
                     slidesTargetPosition = extendedSearchVal();
                     isExtended = true;
                 }
 
 
-                if (slidesReachedTarget(slidesTargetPosition, slidesTargetPosition/2) && !closeClaw) {
+                if (slidesReachedTarget((int)amountToMoveY, (int)amountToMoveY/2) && !closeClaw) {
                     wrist.moveWristDown();
                 }
 
 
-                if (slidesReachedTarget(slidesTargetPosition, 50) && !closeClaw) {
+                if (slidesReachedTarget((int)amountToMoveY, 50) && !closeClaw) {
                     closeClaw = true;
                     claw.setPosition(clawClose);
                     timer.reset();
@@ -573,19 +588,10 @@ public class TestSubmersibleSample extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        Pose2d initialPose = new Pose2d(-49.2, -49.2, Math.toRadians(45));
+        Pose2d initialPose = new Pose2d(-25, -5, Math.toRadians(0));
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
-        double sampleCoord = -49.2;
-
-        TrajectoryActionBuilder grabSample5 = drive.actionBuilder(initialPose)
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-18, -5, Math.toRadians(0)), Math.toRadians(0));
-
-        TrajectoryActionBuilder grabSample6 = drive.actionBuilder(initialPose)
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-18, 0, Math.toRadians(0)), Math.toRadians(0));
 
         ArmSlidesClaw armslidesclaw = new ArmSlidesClaw(hardwareMap);
 
@@ -596,34 +602,25 @@ public class TestSubmersibleSample extends LinearOpMode {
 
         if (isStopRequested()) return;
 
-        Actions.runBlocking(
-                new SequentialAction(
-                        grabSample5.build()
-                )
-        );
 
-        Vector2d grabSample5Pose = new Vector2d(-20, -5+armslidesclaw.realXtoMM());
+        Vector2d grabSample5Pose = new Vector2d(-25, -5+ armslidesclaw.realXtoMM());
 
-        TrajectoryActionBuilder alignRobot = grabSample5.endTrajectory().fresh()
+        TrajectoryActionBuilder alignRobot = drive.actionBuilder(initialPose)
                 .strafeToConstantHeading(grabSample5Pose);
 
         Actions.runBlocking(
-                new SequentialAction(
+                new ParallelAction(
                         alignRobot.build(),
-                        armslidesclaw.stopRobot(),
                         armslidesclaw.grabSampleSubmersible()
+
                 )
         );
 
-        TrajectoryActionBuilder placeSample5 = alignRobot.endTrajectory().fresh()
-                .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(sampleCoord, sampleCoord, Math.toRadians(45)), Math.toRadians(270));
-
+        /*
         Actions.runBlocking(
                 new SequentialAction(
                         armslidesclaw.resetWristAfterSubmersible(),
                         new ParallelAction(
-                                placeSample5.build(),
                                 new SequentialAction(
                                         armslidesclaw.resetAfterSubmersible(),
                                         armslidesclaw.placeSampleSubmersible(),
@@ -631,7 +628,6 @@ public class TestSubmersibleSample extends LinearOpMode {
                                 )
                         ),
                         new ParallelAction(
-                                grabSample6.build(),
                                 armslidesclaw.resetWristAfterPlaceSample(),
                                 new SequentialAction(
                                         armslidesclaw.resetSlides(),
@@ -642,28 +638,22 @@ public class TestSubmersibleSample extends LinearOpMode {
                 )
         );
 
-        Vector2d grabSample6Pose = new Vector2d(-18, 0+armslidesclaw.realXtoMM()); // + 9
+        Vector2d grabSample6Pose = new Vector2d(-25, -5+armslidesclaw.realXtoMM()); // + 9
 
-        TrajectoryActionBuilder alignRobot1 = grabSample6.endTrajectory().fresh()
+        TrajectoryActionBuilder alignRobot1 = alignRobot.endTrajectory().fresh()
                 .strafeToConstantHeading(grabSample6Pose);
 
         Actions.runBlocking(
-                new SequentialAction(
+                new ParallelAction(
                         alignRobot1.build(),
-                        armslidesclaw.stopRobot(),
                         armslidesclaw.grabSampleSubmersible()
                 )
         );
-
-        TrajectoryActionBuilder placeSample6 = alignRobot1.endTrajectory().fresh()
-                .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(sampleCoord, sampleCoord, Math.toRadians(45)), Math.toRadians(270));
 
         Actions.runBlocking(
                 new SequentialAction(
                         armslidesclaw.resetWristAfterSubmersible(),
                         new ParallelAction(
-                                placeSample6.build(),
                                 new SequentialAction(
                                         armslidesclaw.resetAfterSubmersible(),
                                         armslidesclaw.placeSampleSubmersible()
@@ -671,6 +661,6 @@ public class TestSubmersibleSample extends LinearOpMode {
                         )
                 )
         );
+         */
     }
-
 }

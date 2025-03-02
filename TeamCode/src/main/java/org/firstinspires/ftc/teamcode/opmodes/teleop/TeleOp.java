@@ -81,7 +81,7 @@ public class TeleOp extends OpMode {
         claw.init();
 
         slides.resetSlides();
-//        arm.resetArm();
+        arm.resetArm();
 
         FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -173,7 +173,7 @@ public class TeleOp extends OpMode {
 
         if (gamepad2.dpad_left) {
             resetSlides();
-            if(slidesReachedTarget(0,50)){
+            if(slidesReachedTarget(0,500)){
                 slides.stop();
             }
         }
@@ -189,15 +189,19 @@ public class TeleOp extends OpMode {
         }
 
         if(gamepad2.y) {
-            wrist.PickUp0();
+            wrist.PickUp90();
         }
 
         if(gamepad2.a) {
-            wrist.PickUp90();
+            wrist.PickUp0();
         }
 
         if(gamepad2.b) {
             wrist.Up();
+        }
+
+        if(gamepad2.x) {
+            placeSampleLow();
         }
 
         if(gamepad2.left_trigger > 0.3) {
@@ -284,7 +288,4 @@ public class TeleOp extends OpMode {
             arm.moveDown();
         }
     }
-
-
-
 }

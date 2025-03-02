@@ -75,8 +75,8 @@ public class Slides {
     }
 
     public void placeSampleLow() {
-        leftSlide.setTargetPosition(550);
-        rightSlide.setTargetPosition(550);
+        leftSlide.setTargetPosition(750);
+        rightSlide.setTargetPosition(750);
         leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftSlide.setVelocity(velocity);
@@ -122,8 +122,8 @@ public class Slides {
     public void resetSlides() {
         leftSlide.setTargetPosition(0);
         rightSlide.setTargetPosition(0);
-        leftSlide.setVelocity(-1500);
-        rightSlide.setVelocity(-1500);
+        leftSlide.setVelocity(-3000);
+        rightSlide.setVelocity(-3000);
     }
 
     public void resetEncoder() {

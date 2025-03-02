@@ -39,7 +39,7 @@ public class Arm {
     }
 
     public void moveUp() {
-        arm.setTargetPosition(1750);
+        arm.setTargetPosition(1800);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         arm.setVelocity(velocity);
     }
