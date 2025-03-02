@@ -30,8 +30,8 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @Config
-@Autonomous(name = "LeftSideAutonomous", group = "Autonomous")
-public class    LeftSideAutonomous extends LinearOpMode {
+@Autonomous(name = "LeftSideAutonomous5", group = "Autonomous")
+public class LeftSideAutonomous5 extends LinearOpMode {
     Wrist wrist = new Wrist(this);
     Camera camera = new Camera(this);
 
@@ -626,12 +626,7 @@ public class    LeftSideAutonomous extends LinearOpMode {
 
         TrajectoryActionBuilder grabSample5 = placeSample4.endTrajectory().fresh()
                 .setTangent(Math.toRadians(107))
-                .splineToLinearHeading(new Pose2d(-17, -10, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(150))
-                .waitSeconds(0.65);
-
-        TrajectoryActionBuilder grabSample6 = placeSample4.endTrajectory().fresh()
-                .setTangent(Math.toRadians(107))
-                .splineToLinearHeading(new Pose2d(-17, -10, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(150))
+                .splineToLinearHeading(new Pose2d(-17, -10, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(100))
                 .waitSeconds(0.65);
 
         ArmSlidesClaw armslidesclaw = new ArmSlidesClaw(hardwareMap);
@@ -731,47 +726,8 @@ public class    LeftSideAutonomous extends LinearOpMode {
                                         armslidesclaw.placeSampleSubmersible(),
                                         armslidesclaw.resetWristAfterPlaceSample()
                                 )
-                        ),
-
-                        new ParallelAction(
-                                grabSample6.build(),
-                                new SequentialAction(
-                                        armslidesclaw.resetSlides(),
-                                        armslidesclaw.resetArm(),
-                                        armslidesclaw.resetWristAfterPlaceSample()
-                                )
-                        )
-                )
-        );
-
-        // Vector2d grabSample6Pose = new Vector2d(-18, -15+armslidesclaw.realXtoMM());
-        double grabSample6Pose = -10+armslidesclaw.realXtoMM();
-
-        TrajectoryActionBuilder alignRobot1 = grabSample6.endTrajectory().fresh()
-                .setTangent(Math.toRadians(90))
-                .lineToY(grabSample6Pose);
-
-        Actions.runBlocking(
-                new ParallelAction(
-                        alignRobot1.build(),
-                        armslidesclaw.grabSampleSubmersible()
-                )
-        );
-
-        TrajectoryActionBuilder placeSample6 = alignRobot1.endTrajectory().fresh()
-                .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(-52.2, -43.2, Math.toRadians(48)), Math.toRadians(270), new TranslationalVelConstraint(150));
-
-        Actions.runBlocking(
-                new ParallelAction(
-                        placeSample6.build(),
-                        new SequentialAction(
-                                armslidesclaw.resetWristAfterSubmersible(),
-                                armslidesclaw.resetAfterSubmersible(),
-                                armslidesclaw.placeSampleSubmersible()
                         )
                 )
         );
     }
-
 }
