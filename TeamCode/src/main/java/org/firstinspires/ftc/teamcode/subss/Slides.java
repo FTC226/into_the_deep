@@ -66,8 +66,8 @@ public class Slides {
     }
 
     public void placeSample() {
-        leftSlide.setTargetPosition(2350);
-        rightSlide.setTargetPosition(2350);
+        leftSlide.setTargetPosition(2300);
+        rightSlide.setTargetPosition(2300);
         leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftSlide.setVelocity(velocity);
